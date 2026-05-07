@@ -42,7 +42,7 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
     const LIFF_ID = '2009988690-V5uuqIVX';
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVjJ6K49Vadd4iJGcKoTgXk5YpC8QsZjNRfrzh8iH6didFOeEqAjUgoSU8S568uxOo/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxTfXPIg2KQCvjaflRmVP2rYhqG-6PiBU85rqn15_MipBws1MLxx-cKziYkIq2aCoOP/exec';
 
     let fieldsData = [];
     let lineUserId = '';
@@ -54,6 +54,17 @@
       err.innerHTML = '❌ ' + msg;
     }
 
+    function loadJsonp(url) {
+      return new Promise((resolve, reject) => {
+        const cbName = 'cb_' + Date.now();
+        const script = document.createElement('script');
+        window[cbName] = (d) => { delete window[cbName]; script.remove(); resolve(d); };
+        script.onerror = () => { delete window[cbName]; script.remove(); reject(new Error('GAS 載入失敗')); };
+        script.src = url + '&callback=' + cbName;
+        document.head.appendChild(script);
+      });
+    }
+
     async function init() {
       try {
         document.getElementById('loading').innerHTML = '① liff.init 開始...';
@@ -61,7 +72,6 @@
 
         document.getElementById('loading').innerHTML = '② 檢查登入狀態...';
         if (!liff.isLoggedIn()) {
-          document.getElementById('loading').innerHTML = '③ 未登入，跳轉中...';
           liff.login();
           return;
         }
@@ -72,17 +82,7 @@
         document.getElementById('name').value = profile.displayName;
 
         document.getElementById('loading').innerHTML = '⑤ 呼叫 GAS 取資料...';
-const data = await new Promise((resolve, reject) => {
-  const cbName = 'cb_' + Date.now();
-  const script = document.createElement('script');
-  window[cbName] = (d) => { delete window[cbName]; script.remove(); resolve(d); };
-  script.onerror = () => reject(new Error('GAS 載入失敗'));
-  script.src = SCRIPT_URL + '?action=data&callback=' + cbName;
-  document.head.appendChild(script);
-});
-
-        document.getElementById('loading').innerHTML = '⑥ 解析資料...';
-        const data = await res.json();
+        const data = await loadJsonp(SCRIPT_URL + '?action=data');
 
         if (data.error) {
           showError('試算表讀取失敗：' + data.error);
@@ -90,9 +90,9 @@ const data = await new Promise((resolve, reject) => {
         }
 
         document.getElementById('title').innerText = data.settings['店鋪名稱'] || '訂購單';
-        if (data.settings['頂部圖片']) {
+        if (data.settings['頂部圖片網址']) {
           const b = document.getElementById('banner');
-          b.style.backgroundImage = `url(${data.settings['頂部圖片']})`;
+          b.style.backgroundImage = `url(${data.settings['頂部圖片網址']})`;
           b.style.display = 'block';
         }
 
@@ -119,7 +119,7 @@ const data = await new Promise((resolve, reject) => {
         document.getElementById('app').style.display = 'block';
 
       } catch (e) {
-        showError('錯誤發生在：' + document.getElementById('loading').innerHTML + '<br>訊息：' + e.message);
+        showError('錯誤：' + e.message);
       }
     }
 
@@ -147,8 +147,7 @@ const data = await new Promise((resolve, reject) => {
 
       const payload = {
         action: 'submitOrder',
-        name,
-        tel,
+        name, tel,
         pd: document.getElementById('pd').value,
         qty: document.getElementById('qty').value,
         note: document.getElementById('note').value,
