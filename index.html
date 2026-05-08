@@ -15,40 +15,32 @@
     .group { margin-bottom: 18px; }
     label { display: block; font-weight: bold; margin-bottom: 8px; color: #D32F2F; font-size: 1rem; }
     input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; font-family: inherit; }
-
-    /* 商品卡片 */
     .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
-    .product-card { border: 2px solid #eee; border-radius: 12px; overflow: hidden; cursor: pointer; transition: border-color 0.2s; }
+    .product-card { border: 2px solid #eee; border-radius: 12px; overflow: hidden; }
     .product-card.selected { border-color: #D32F2F; }
-    .product-card img { width: 100%; height: 120px; object-fit: cover; }
+    .product-card img { width: 100%; height: 120px; object-fit: cover; background: #eee; }
     .product-info { padding: 8px; }
     .product-name { font-size: 13px; font-weight: bold; color: #333; margin-bottom: 4px; }
     .product-price { font-size: 13px; color: #D32F2F; margin-bottom: 6px; }
     .qty-row { display: flex; align-items: center; gap: 6px; }
-    .qty-btn { width: 28px; height: 28px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .qty-btn { width: 28px; height: 28px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5; font-size: 16px; cursor: pointer; }
     .qty-input { width: 40px; text-align: center; padding: 4px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-
-    /* 小計 */
     .subtotal-box { background: #fff8f8; border-radius: 10px; padding: 12px; margin-bottom: 18px; font-size: 14px; }
     .subtotal-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
     .subtotal-total { font-weight: bold; font-size: 16px; color: #D32F2F; border-top: 1px solid #eee; padding-top: 6px; margin-top: 6px; }
-
     .opt-group { border: 1px solid #eee; padding: 10px; border-radius: 8px; }
-    .opt-item { display: flex; align-items: center; margin: 8px 0; }
-    input[type="radio"], input[type="checkbox"] { width: auto; margin-right: 10px; transform: scale(1.3); }
+    .opt-item { display: flex; align-items: center; margin: 8px 0; gap: 8px; }
+    input[type="radio"], input[type="checkbox"] { width: auto; transform: scale(1.3); }
     #addressGroup { display: none; }
     .btn { width: 100%; padding: 15px; background: #D32F2F; color: #fff; border: none; border-radius: 25px; font-weight: bold; font-size: 18px; margin-top: 10px; cursor: pointer; }
     .btn:disabled { background: #aaa; }
     .btn-outline { background: #fff; color: #D32F2F; border: 2px solid #D32F2F; }
-
-    /* 確認頁 */
     #confirmPage { display: none; background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 450px; margin: auto; }
     #confirmPage h3 { text-align: center; color: #D32F2F; }
-    .confirm-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
-    .confirm-label { color: #888; }
+    .confirm-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; gap: 10px; }
+    .confirm-label { color: #888; white-space: nowrap; }
     .btn-row { display: flex; gap: 10px; margin-top: 15px; }
     .btn-row .btn { margin-top: 0; }
-
     #loading { position: fixed; inset: 0; background: rgba(255,255,255,0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; color: #666; z-index: 99; }
     #errMsg { color: #D32F2F; text-align: center; padding: 20px; display: none; max-width: 450px; margin: auto; }
   </style>
@@ -57,44 +49,35 @@
   <div id="loading"><div>📡 系統連線中...</div><div style="font-size:12px;margin-top:8px;color:#999">請稍候</div></div>
   <div id="errMsg"></div>
 
-  <!-- 訂購頁 -->
   <div class="card" id="app">
     <div id="banner" class="hero" style="display:none"></div>
     <h2 id="title">訂購單</h2>
     <div id="marqueeWrap" class="marquee-wrap" style="display:none">
       <span class="marquee" id="marqueeText"></span>
     </div>
-
     <div class="group"><label>👤 姓名</label><input id="name" placeholder="請輸入姓名"></div>
     <div class="group"><label>📞 手機號碼</label><input id="tel" type="tel" inputmode="tel" placeholder="09xxxxxxxx"></div>
-
     <div class="group">
       <label>🛍 產品選擇</label>
       <div class="product-grid" id="productGrid"></div>
     </div>
-
     <div class="subtotal-box" id="subtotalBox" style="display:none">
       <div id="subtotalItems"></div>
       <div class="subtotal-row subtotal-total"><span>總金額</span><span id="totalAmt">0 元</span></div>
     </div>
-
     <div id="dynZone"></div>
-
     <div class="group" id="shippingGroup">
       <label>🚚 運送方式</label>
       <div class="opt-group" id="shippingOptions"></div>
     </div>
-
     <div class="group" id="addressGroup">
       <label>📍 收件地址</label>
       <input id="address" placeholder="請輸入完整地址">
     </div>
-
     <div class="group"><label>✍️ 備註</label><textarea id="note" rows="2" placeholder="如有特殊需求請填寫"></textarea></div>
     <button class="btn" onclick="showConfirm()">確認訂單</button>
   </div>
 
-  <!-- 確認頁 -->
   <div id="confirmPage">
     <h3>📋 訂單確認</h3>
     <div id="confirmContent"></div>
@@ -106,8 +89,8 @@
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    const LIFF_ID = '2009988690-V5uuqIVX';
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx7-xBl4dk6Gp-UoR9CTxAwne47z41EwWw-XD_v6F8pEDAZ5q4wpRu2SpyzgJoPNxCg/exec';
+    const LIFF_ID = 'https://liff.line.me/2009988690-V5uuqIVX';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxiiXD3lWXODycLtRmdxnsZSVXS82ss8UBX-XYDiJGeURYhbaXAk-Wk5b_TqvDytEsF/exec';
 
     let fieldsData = [], productsData = [], settingsData = {}, lineUserId = '';
 
@@ -144,11 +127,11 @@
         productsData = data.products;
         fieldsData = data.fields;
 
-        // 套用設定
         document.getElementById('title').innerText = settingsData['店鋪名稱'] || '訂購單';
-        if (settingsData['頂部圖片網址'] || settingsData['頂部圖片']) {
+        const imgUrl = settingsData['頂部圖片網址'] || settingsData['頂部圖片'];
+        if (imgUrl) {
           const b = document.getElementById('banner');
-          b.style.backgroundImage = `url(${settingsData['頂部圖片網址'] || settingsData['頂部圖片']})`;
+          b.style.backgroundImage = `url(${imgUrl})`;
           b.style.display = 'block';
         }
         if (settingsData['公告文字']) {
@@ -156,12 +139,11 @@
           document.getElementById('marqueeWrap').style.display = 'block';
         }
 
-        // 商品卡片
         const grid = document.getElementById('productGrid');
         productsData.forEach((p, i) => {
           grid.innerHTML += `
             <div class="product-card" id="card_${i}">
-              <img src="${p.image}" onerror="this.style.background='#eee';this.src=''">
+              <img src="${p.image}" onerror="this.style.display='none'">
               <div class="product-info">
                 <div class="product-name">${p.name}</div>
                 <div class="product-price">NT$ ${p.price}</div>
@@ -174,7 +156,6 @@
             </div>`;
         });
 
-        // 動態欄位
         const zone = document.getElementById('dynZone');
         fieldsData.forEach(f => {
           let html = `<div class="group"><label>${f.name}${f.req ? ' *' : ''}</label>`;
@@ -190,9 +171,7 @@
           zone.innerHTML += html + '</div>';
         });
 
-        // 運送方式（依商品聯集）
         updateShipping();
-
         document.getElementById('loading').style.display = 'none';
         document.getElementById('app').style.display = 'block';
       } catch (e) {
@@ -202,17 +181,14 @@
 
     function changeQty(i, delta) {
       const input = document.getElementById('qty_' + i);
-      const val = Math.max(0, parseInt(input.value || 0) + delta);
-      input.value = val;
-      document.getElementById('card_' + i).classList.toggle('selected', val > 0);
+      input.value = Math.max(0, parseInt(input.value || 0) + delta);
+      document.getElementById('card_' + i).classList.toggle('selected', parseInt(input.value) > 0);
       updateTotal();
       updateShipping();
     }
 
     function updateTotal() {
-      let total = 0;
-      let itemsHtml = '';
-      let hasItem = false;
+      let total = 0, itemsHtml = '', hasItem = false;
       productsData.forEach((p, i) => {
         const qty = parseInt(document.getElementById('qty_' + i).value || 0);
         if (qty > 0) {
@@ -228,28 +204,25 @@
     }
 
     function updateShipping() {
-      // 收集所選商品的運送方式聯集
       const methods = new Set();
       productsData.forEach((p, i) => {
-        const qty = parseInt(document.getElementById('qty_' + i).value || 0);
-        if (qty > 0) {
+        if (parseInt(document.getElementById('qty_' + i).value || 0) > 0) {
           p.shipping.split(',').forEach(m => methods.add(m.trim()));
         }
       });
-
-      const container = document.getElementById('shippingOptions');
-      container.innerHTML = '';
       if (methods.size === 0) {
-        // 沒選商品時顯示所有方式
         productsData.forEach(p => p.shipping.split(',').forEach(m => methods.add(m.trim())));
       }
-
-      methods.forEach((m, idx) => {
+      const container = document.getElementById('shippingOptions');
+      container.innerHTML = '';
+      let first = true;
+      methods.forEach(m => {
         container.innerHTML += `
           <div class="opt-item">
-            <input type="radio" name="shipping" value="${m}" id="ship_${m}" onchange="toggleAddress()" ${idx === 0 ? 'checked' : ''}>
+            <input type="radio" name="shipping" value="${m}" id="ship_${m}" onchange="toggleAddress()" ${first ? 'checked' : ''}>
             <label for="ship_${m}" style="color:#333;font-weight:normal;margin:0">${m}</label>
           </div>`;
+        first = false;
       });
       toggleAddress();
     }
@@ -262,8 +235,7 @@
 
     function getSelectedItems() {
       return productsData.map((p, i) => ({
-        name: p.name,
-        price: p.price,
+        name: p.name, price: p.price,
         qty: parseInt(document.getElementById('qty_' + i).value || 0)
       })).filter(i => i.qty > 0);
     }
@@ -275,12 +247,11 @@
       if (!/^09\d{8}$/.test(tel)) { alert('手機號碼格式不正確，請輸入09開頭的10位數字'); return; }
       const items = getSelectedItems();
       if (items.length === 0) { alert('請至少選擇一項商品'); return; }
-
       const shipping = document.querySelector('input[name="shipping"]:checked')?.value || '';
       const address = document.getElementById('address').value.trim();
       if ((shipping === '宅配' || shipping === '超商') && !address) { alert('請填寫收件地址'); return; }
-
       const total = items.reduce((s, i) => s + i.price * i.qty, 0);
+
       let html = `
         <div class="confirm-row"><span class="confirm-label">姓名</span><span>${name}</span></div>
         <div class="confirm-row"><span class="confirm-label">電話</span><span>${tel}</span></div>
@@ -307,12 +278,11 @@
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.textContent = '傳送中...';
-
       const items = getSelectedItems();
       const total = items.reduce((s, i) => s + i.price * i.qty, 0);
       let dynStr = '';
       fieldsData.forEach(f => {
-        let v = f.type === 'text'
+        const v = f.type === 'text'
           ? (document.getElementsByName(f.name)[0]?.value || '')
           : Array.from(document.querySelectorAll(`input[name="${f.name}"]:checked`)).map(el => el.value).join(', ');
         dynStr += `${f.name}: ${v}\n`;
