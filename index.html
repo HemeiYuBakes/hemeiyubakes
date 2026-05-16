@@ -33,6 +33,7 @@
     .opt-item { display: flex; align-items: center; margin: 8px 0; gap: 8px; }
     input[type="radio"], input[type="checkbox"] { width: auto; transform: scale(1.3); }
     #addressGroup { display: none; }
+    .hint { font-size: 13px; color: #D32F2F; margin-top: 6px; display: none; }
     .btn { width: 100%; padding: 15px; background: #D32F2F; color: #fff; border: none; border-radius: 25px; font-weight: bold; font-size: 18px; margin-top: 10px; cursor: pointer; }
     .btn:disabled { background: #aaa; }
     .btn-outline { background: #fff; color: #D32F2F; border: 2px solid #D32F2F; }
@@ -53,13 +54,11 @@
   <div id="loading"><div>📡 系統連線中...</div><div style="font-size:12px;margin-top:8px;color:#999">請稍候</div></div>
   <div id="errMsg"></div>
 
-  <!-- 維護模式頁面 -->
   <div id="maintPage">
     <img id="maintImg" src="" alt="維護中">
     <p>系統維護中，請稍後再試。</p>
   </div>
 
-  <!-- 訂購頁 -->
   <div class="card" id="app">
     <div id="banner" class="hero" style="display:none"></div>
     <h2 id="title">訂購單</h2>
@@ -77,6 +76,23 @@
       <div class="subtotal-row subtotal-total"><span>總金額</span><span id="totalAmt">0 元</span></div>
     </div>
     <div id="dynZone"></div>
+
+    <!-- 付款方式 -->
+    <div class="group" id="paymentGroup">
+      <label>💳 付款方式</label>
+      <div class="opt-group" id="paymentOptions">
+        <div class="opt-item" id="pay_cash_item">
+          <input type="radio" name="payment" value="現場付款" id="pay_cash" checked>
+          <label for="pay_cash" style="color:#333;font-weight:normal;margin:0">現場付款</label>
+        </div>
+        <div class="opt-item">
+          <input type="radio" name="payment" value="匯款" id="pay_transfer">
+          <label for="pay_transfer" style="color:#333;font-weight:normal;margin:0">匯款</label>
+        </div>
+      </div>
+      <div id="paymentHint" class="hint">⚠️ 訂單金額超過 NT$ <span id="thresholdAmt"></span> 元，需先完成匯款。</div>
+    </div>
+
     <div class="group" id="shippingGroup">
       <label>🚚 運送方式</label>
       <div class="opt-group" id="shippingOptions"></div>
@@ -89,7 +105,6 @@
     <button class="btn" onclick="showConfirm()">確認訂單</button>
   </div>
 
-  <!-- 確認頁 -->
   <div id="confirmPage">
     <h3>📋 訂單確認</h3>
     <div id="confirmContent"></div>
@@ -102,7 +117,7 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
     const LIFF_ID = '2009988690-V5uuqIVX';
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyYo6iWJU1JkrM8iJALj_EhaEDH91nQetMnQeVprKbntq87fI97QCVJbhBoO6n1ta0l/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwq7fuUpRkSw4Bsqqo0kTpDixSfsop5GzZ_ri1BGGDpRqFHZHSucAdnL_fH4CPHyHYR/exec';
 
     let fieldsData = [], productsData = [], settingsData = {}, lineUserId = '';
 
@@ -138,7 +153,7 @@
         productsData = data.products;
         fieldsData = data.fields;
 
-        // 維護模式判斷
+        // 維護模式
         if (settingsData['維護模式開關'] === true) {
           document.getElementById('loading').style.display = 'none';
           const maintImg = settingsData['維護模式'] || '';
@@ -161,6 +176,11 @@
           document.getElementById('marqueeWrap').style.display = 'block';
         }
 
+        // 強制匯款門檻顯示
+        const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
+        document.getElementById('thresholdAmt').innerText = threshold;
+
+        // 商品卡片
         const grid = document.getElementById('productGrid');
         productsData.forEach((p, i) => {
           const limitText = p.maxQty > 0 ? `<div class="product-limit">限購 ${p.maxQty} 個</div>` : '';
@@ -180,6 +200,7 @@
             </div>`;
         });
 
+        // 動態欄位
         const zone = document.getElementById('dynZone');
         fieldsData.forEach(f => {
           let html = `<div class="group"><label>${f.name}${f.req ? ' *' : ''}</label>`;
@@ -228,6 +249,23 @@
       document.getElementById('subtotalBox').style.display = hasItem ? 'block' : 'none';
       document.getElementById('subtotalItems').innerHTML = itemsHtml;
       document.getElementById('totalAmt').innerText = total + ' 元';
+
+      // 強制匯款判斷
+      const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
+      const cashItem = document.getElementById('pay_cash_item');
+      const paymentHint = document.getElementById('paymentHint');
+      const cashRadio = document.getElementById('pay_cash');
+      const transferRadio = document.getElementById('pay_transfer');
+
+      if (threshold > 0 && total >= threshold) {
+        cashItem.style.display = 'none';
+        transferRadio.checked = true;
+        paymentHint.style.display = 'block';
+      } else {
+        cashItem.style.display = 'flex';
+        if (!transferRadio.checked) cashRadio.checked = true;
+        paymentHint.style.display = 'none';
+      }
     }
 
     function updateShipping() {
@@ -275,6 +313,7 @@
       const items = getSelectedItems();
       if (items.length === 0) { alert('請至少選擇一項商品'); return; }
       const shipping = document.querySelector('input[name="shipping"]:checked')?.value || '';
+      const payment = document.querySelector('input[name="payment"]:checked')?.value || '';
       const address = document.getElementById('address').value.trim();
       if ((shipping === '宅配' || shipping === '超商') && !address) { alert('請填寫收件地址'); return; }
       const total = items.reduce((s, i) => s + i.price * i.qty, 0);
@@ -284,6 +323,7 @@
         <div class="confirm-row"><span class="confirm-label">電話</span><span>${tel}</span></div>
         <div class="confirm-row"><span class="confirm-label">商品</span><span>${items.map(i => i.name + ' x' + i.qty).join('<br>')}</span></div>
         <div class="confirm-row"><span class="confirm-label">總金額</span><span style="color:#D32F2F;font-weight:bold">${total} 元</span></div>
+        <div class="confirm-row"><span class="confirm-label">付款方式</span><span>${payment}</span></div>
         <div class="confirm-row"><span class="confirm-label">運送方式</span><span>${shipping}</span></div>`;
       if (address) html += `<div class="confirm-row"><span class="confirm-label">地址</span><span>${address}</span></div>`;
       const note = document.getElementById('note').value.trim();
@@ -320,6 +360,7 @@
         name: document.getElementById('name').value.trim(),
         tel: document.getElementById('tel').value.trim(),
         items, total,
+        payment: document.querySelector('input[name="payment"]:checked')?.value || '現場付款',
         shipping: document.querySelector('input[name="shipping"]:checked')?.value || '',
         address: document.getElementById('address').value.trim(),
         dyn: dynStr,
