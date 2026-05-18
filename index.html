@@ -117,9 +117,11 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
     const LIFF_ID = '2009988690-V5uuqIVX';
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBcSrMG_Zs7e2uEym-BlwFubYjbOaZPtRDGTfku45DtMy_iG7lITcmReie00ygfizJ/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxft12gAyfA8J7kAO3pW2MJ5FxyxLkq1zlunS3IlK-BA1LixFT1apKmul909Bu-L-ZD/exec';
 
     let fieldsData = [], productsData = [], settingsData = {}, lineUserId = '';
+    // 記錄上次是否處於「強制匯款」狀態，用於正確處理「降回門檻以下」的情境
+    let wasForcedTransfer = false;
 
     function showError(msg) {
       document.getElementById('loading').style.display = 'none';
@@ -153,7 +155,6 @@
         productsData = data.products;
         fieldsData = data.fields;
 
-        // 維護模式
         if (settingsData['維護模式開關'] === true) {
           document.getElementById('loading').style.display = 'none';
           const maintImg = settingsData['維護模式'] || '';
@@ -176,11 +177,9 @@
           document.getElementById('marqueeWrap').style.display = 'block';
         }
 
-        // 強制匯款門檻顯示
         const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
         document.getElementById('thresholdAmt').innerText = threshold;
 
-        // 商品卡片
         const grid = document.getElementById('productGrid');
         productsData.forEach((p, i) => {
           const limitText = p.maxQty > 0 ? `<div class="product-limit">限購 ${p.maxQty} 個</div>` : '';
@@ -200,7 +199,6 @@
             </div>`;
         });
 
-        // 動態欄位
         const zone = document.getElementById('dynZone');
         fieldsData.forEach(f => {
           let html = `<div class="group"><label>${f.name}${f.req ? ' *' : ''}</label>`;
@@ -250,21 +248,32 @@
       document.getElementById('subtotalItems').innerHTML = itemsHtml;
       document.getElementById('totalAmt').innerText = total + ' 元';
 
-      // 強制匯款判斷
+      // 強制匯款判斷（P1-3 修正版）
       const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
       const cashItem = document.getElementById('pay_cash_item');
       const paymentHint = document.getElementById('paymentHint');
       const cashRadio = document.getElementById('pay_cash');
       const transferRadio = document.getElementById('pay_transfer');
 
-      if (threshold > 0 && total >= threshold) {
+      const shouldForce = threshold > 0 && total >= threshold;
+
+      if (shouldForce) {
+        // 進入或維持強制匯款狀態
         cashItem.style.display = 'none';
         transferRadio.checked = true;
         paymentHint.style.display = 'block';
+        wasForcedTransfer = true;
       } else {
+        // 解除強制狀態
         cashItem.style.display = 'flex';
-        if (!transferRadio.checked) cashRadio.checked = true;
         paymentHint.style.display = 'none';
+        // 只在「剛從強制狀態解除」的那一刻，才把選項重置回現場付款
+        // 如果客人本來就是自願選匯款，不要動他的選擇
+        if (wasForcedTransfer) {
+          cashRadio.checked = true;
+          transferRadio.checked = false;
+          wasForcedTransfer = false;
+        }
       }
     }
 
@@ -376,13 +385,17 @@
         });
         const result = await res.json();
         if (result.status === 'OK') {
+          const orderIdLine = result.orderId
+            ? `<p style="color:#333;font-weight:bold;font-size:16px">訂單編號：${result.orderId}</p>`
+            : '';
           document.getElementById('confirmPage').innerHTML = `
             <div style="text-align:center;padding:40px 20px">
               <div style="font-size:48px">✅</div>
               <h3 style="color:#D32F2F">訂購成功！</h3>
+              ${orderIdLine}
               <p style="color:#666">訂單確認訊息將透過 LINE 傳送給您<br>我們將盡快與您聯絡</p>
             </div>`;
-          setTimeout(() => liff.closeWindow(), 3000);
+          setTimeout(() => liff.closeWindow(), 4000);
         } else {
           throw new Error(result.message || '未知錯誤');
         }
