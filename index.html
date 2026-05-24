@@ -82,11 +82,11 @@
       <label>💳 付款方式</label>
       <div class="opt-group" id="paymentOptions">
         <div class="opt-item" id="pay_cash_item">
-          <input type="radio" name="payment" value="現場付款" id="pay_cash" checked>
+          <input type="radio" name="payment" value="現場付款" id="pay_cash">
           <label for="pay_cash" style="color:#333;font-weight:normal;margin:0">現場付款</label>
         </div>
         <div class="opt-item">
-          <input type="radio" name="payment" value="匯款" id="pay_transfer">
+          <input type="radio" name="payment" value="匯款" id="pay_transfer" checked>
           <label for="pay_transfer" style="color:#333;font-weight:normal;margin:0">匯款</label>
         </div>
       </div>
@@ -114,25 +114,23 @@
     </div>
   </div>
 
-  <!-- 版本標籤（角落小字，方便除錯時看當前版本） -->
   <div class="version-tag" id="versionTag"></div>
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
     // ============================================================
     // ⚠️ 部署提醒：每次改完這個檔案，記得做兩件事：
-    //   1. 把下面的 APP_VERSION 改成新版本號（例如 1.0.0 → 1.0.1）
+    //   1. 把下面的 APP_VERSION 改成新版本號
     //   2. 同步把 Settings 工作表的「目前版本」改成相同版本號
     // ============================================================
-    const APP_VERSION = '1.1.0';
+    const APP_VERSION = '1.1.1';
 
     const LIFF_ID = '2009988690-V5uuqIVX';
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvr3VsqAjpgLEdi8-DScqBvWrG721bu4seKjq8QODUG0g-poQ4SDw60jYvk6QRh0-r/exec';
 
     let fieldsData = [], productsData = [], settingsData = {}, lineUserId = '';
     let wasForcedTransfer = false;
 
-    // 在角落顯示版本標籤（給你自己除錯用）
     document.getElementById('versionTag').innerText = 'v' + APP_VERSION;
 
     function showError(msg) {
@@ -148,38 +146,36 @@
         const s = document.createElement('script');
         window[cb] = d => { delete window[cb]; s.remove(); resolve(d); };
         s.onerror = () => { delete window[cb]; s.remove(); reject(new Error('載入失敗')); };
-        // 加上時間戳，避免 JSONP 被快取
         const sep = url.includes('?') ? '&' : '?';
         s.src = url + '&callback=' + cb + sep + '_t=' + Date.now();
         document.head.appendChild(s);
       });
     }
 
-    /**
-     * 版本號比對 + 強制重新載入
-     * 避免無限 reload：用 sessionStorage 記錄這次 session 是否已 reload 過
-     */
     function checkVersionAndReload(serverVersion) {
       if (!serverVersion || serverVersion === APP_VERSION) {
-        return false;  // 版本一致，不需 reload
+        return false;
       }
-
-      // 檢查是否已經 reload 過（避免無限 loop）
       const reloaded = sessionStorage.getItem('hm_reloaded');
       if (reloaded === '1') {
         console.warn('版本仍不一致但已 reload 過，跳過。本地：' + APP_VERSION + '、伺服器：' + serverVersion);
         return false;
       }
-
-      // 標記已 reload，然後強制重新載入
       sessionStorage.setItem('hm_reloaded', '1');
       console.log('版本不一致，重新載入。本地：' + APP_VERSION + '、伺服器：' + serverVersion);
-
-      // 用 URL 加時間戳的方式 reload，突破 GitHub Pages CDN 快取
       const url = new URL(window.location.href);
       url.searchParams.set('_v', Date.now());
       window.location.replace(url.toString());
       return true;
+    }
+
+    // 判斷現場付款選項是否要顯示
+    // Settings「LIFF顯示現場付款」= 「是」才顯示
+    function isCashOptionEnabled() {
+      var v = settingsData['LIFF顯示現場付款'];
+      if (v === undefined || v === null || v === '') return true; // 預設顯示（向後相容）
+      var s = v.toString().trim();
+      return s === '是' || s === 'true' || s === '1' || s === 'Y';
     }
 
     async function init() {
@@ -196,15 +192,11 @@
         productsData = data.products;
         fieldsData = data.fields;
 
-        // 版本號比對：如果有差就 reload，return 中斷 init
         if (checkVersionAndReload(settingsData['目前版本'])) {
           return;
         }
-
-        // reload 完成後清除標記（這次 session 才不會卡）
         sessionStorage.removeItem('hm_reloaded');
 
-        // 維護模式
         if (settingsData['維護模式開關'] === true) {
           document.getElementById('loading').style.display = 'none';
           const maintImg = settingsData['維護模式'] || '';
@@ -229,6 +221,9 @@
 
         const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
         document.getElementById('thresholdAmt').innerText = threshold;
+
+        // 初始化付款方式選項
+        initPaymentOptions();
 
         const grid = document.getElementById('productGrid');
         productsData.forEach((p, i) => {
@@ -272,6 +267,28 @@
       }
     }
 
+    /**
+     * 初始化付款方式選項
+     * 如果 Settings「LIFF顯示現場付款」= 否 → 永遠隱藏現場付款、預設選匯款
+     */
+    function initPaymentOptions() {
+      const cashItem = document.getElementById('pay_cash_item');
+      const cashRadio = document.getElementById('pay_cash');
+      const transferRadio = document.getElementById('pay_transfer');
+
+      if (!isCashOptionEnabled()) {
+        // 完全隱藏現場付款選項，固定匯款
+        cashItem.style.display = 'none';
+        transferRadio.checked = true;
+        cashRadio.checked = false;
+      } else {
+        // 顯示現場付款，預設選現場付款
+        cashItem.style.display = 'flex';
+        cashRadio.checked = true;
+        transferRadio.checked = false;
+      }
+    }
+
     function changeQty(i, delta) {
       const input = document.getElementById('qty_' + i);
       const max = productsData[i].maxQty;
@@ -298,12 +315,22 @@
       document.getElementById('subtotalItems').innerHTML = itemsHtml;
       document.getElementById('totalAmt').innerText = total + ' 元';
 
-      const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
-      const cashItem = document.getElementById('pay_cash_item');
       const paymentHint = document.getElementById('paymentHint');
+      const cashItem = document.getElementById('pay_cash_item');
       const cashRadio = document.getElementById('pay_cash');
       const transferRadio = document.getElementById('pay_transfer');
 
+      // 第一道：「LIFF顯示現場付款」總開關
+      // 設「否」→ 永遠不顯示現場付款、不顯示金額提示（沒必要、因為本來就鎖匯款）
+      if (!isCashOptionEnabled()) {
+        cashItem.style.display = 'none';
+        transferRadio.checked = true;
+        paymentHint.style.display = 'none';
+        return;
+      }
+
+      // 第二道：「強制匯款門檻」金額判斷（總開關為「是」時才作用）
+      const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
       const shouldForce = threshold > 0 && total >= threshold;
 
       if (shouldForce) {
@@ -416,7 +443,7 @@
         name: document.getElementById('name').value.trim(),
         tel: document.getElementById('tel').value.trim(),
         items, total,
-        payment: document.querySelector('input[name="payment"]:checked')?.value || '現場付款',
+        payment: document.querySelector('input[name="payment"]:checked')?.value || '匯款',
         shipping: document.querySelector('input[name="shipping"]:checked')?.value || '',
         address: document.getElementById('address').value.trim(),
         dyn: dynStr,
