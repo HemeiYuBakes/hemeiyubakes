@@ -26,8 +26,25 @@
     .qty-row { display: flex; align-items: center; gap: 6px; }
     .qty-btn { width: 28px; height: 28px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5; font-size: 16px; cursor: pointer; }
     .qty-input { width: 40px; text-align: center; padding: 4px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+
+    /* 加購區塊 */
+    .addon-section { background: #fff8f0; border-radius: 10px; padding: 14px; margin-bottom: 18px; border: 1px solid #ffe0c0; }
+    .addon-title { font-weight: bold; color: #D32F2F; margin-bottom: 10px; font-size: 1rem; }
+    .addon-item { margin-bottom: 12px; }
+    .addon-item:last-child { margin-bottom: 0; }
+    .addon-name { font-weight: bold; color: #333; font-size: 14px; margin-bottom: 4px; }
+    .addon-desc { font-size: 12px; color: #888; margin-bottom: 8px; }
+    .addon-auto-info { font-size: 13px; color: #4caf50; background: #f0f9f0; padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; }
+    .addon-selectable { background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #eee; }
+    .addon-selectable-prompt { font-size: 13px; color: #555; margin-bottom: 8px; }
+    .addon-selectable-row { display: flex; align-items: center; gap: 8px; }
+    .addon-selectable-row .qty-btn { width: 32px; height: 32px; }
+    .addon-selectable-row .qty-input { width: 50px; font-size: 16px; padding: 6px; }
+    .addon-limit-hint { font-size: 12px; color: #888; margin-left: 8px; }
+
     .subtotal-box { background: #fff8f8; border-radius: 10px; padding: 12px; margin-bottom: 18px; font-size: 14px; }
     .subtotal-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .subtotal-gift { color: #4caf50; font-size: 13px; }
     .subtotal-total { font-weight: bold; font-size: 16px; color: #D32F2F; border-top: 1px solid #eee; padding-top: 6px; margin-top: 6px; }
     .opt-group { border: 1px solid #eee; padding: 10px; border-radius: 8px; }
     .opt-item { display: flex; align-items: center; margin: 8px 0; gap: 8px; }
@@ -72,8 +89,16 @@
       <label>🛍 產品選擇</label>
       <div class="product-grid" id="productGrid"></div>
     </div>
+
+    <!-- 加購區塊：動態渲染 -->
+    <div class="addon-section" id="addonSection" style="display:none">
+      <div class="addon-title">🎁 紙袋</div>
+      <div id="addonItems"></div>
+    </div>
+
     <div class="subtotal-box" id="subtotalBox" style="display:none">
       <div id="subtotalItems"></div>
+      <div id="subtotalGifts"></div>
       <div class="subtotal-row subtotal-total"><span>總金額</span><span id="totalAmt">0 元</span></div>
     </div>
     <div id="dynZone"></div>
@@ -81,7 +106,7 @@
     <div class="group" id="paymentGroup">
       <label>💳 付款方式</label>
       <div class="opt-group" id="paymentOptions">
-        <div class="opt-item" id="pay_cash_item">
+        <div class="opt-item" id="pay_cash_item" style="display:none">
           <input type="radio" name="payment" value="現場付款" id="pay_cash">
           <label for="pay_cash" style="color:#333;font-weight:normal;margin:0">現場付款</label>
         </div>
@@ -123,12 +148,13 @@
     //   1. 把下面的 APP_VERSION 改成新版本號
     //   2. 同步把 Settings 工作表的「目前版本」改成相同版本號
     // ============================================================
-    const APP_VERSION = '1.1.1';
+    const APP_VERSION = '1.2.0';
 
     const LIFF_ID = '2009988690-V5uuqIVX';
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvr3VsqAjpgLEdi8-DScqBvWrG721bu4seKjq8QODUG0g-poQ4SDw60jYvk6QRh0-r/exec';
 
-    let fieldsData = [], productsData = [], settingsData = {}, lineUserId = '';
+    let fieldsData = [], productsData = [], settingsData = {}, addonsData = [], lineUserId = '';
+    let addonSelections = {}; // 客人選擇的加購數量 {addonName: qty}
     let wasForcedTransfer = false;
 
     document.getElementById('versionTag').innerText = 'v' + APP_VERSION;
@@ -153,27 +179,22 @@
     }
 
     function checkVersionAndReload(serverVersion) {
-      if (!serverVersion || serverVersion === APP_VERSION) {
-        return false;
-      }
+      if (!serverVersion || serverVersion === APP_VERSION) return false;
       const reloaded = sessionStorage.getItem('hm_reloaded');
       if (reloaded === '1') {
-        console.warn('版本仍不一致但已 reload 過，跳過。本地：' + APP_VERSION + '、伺服器：' + serverVersion);
+        console.warn('版本不一致但已 reload 過。本地：' + APP_VERSION + '、伺服器：' + serverVersion);
         return false;
       }
       sessionStorage.setItem('hm_reloaded', '1');
-      console.log('版本不一致，重新載入。本地：' + APP_VERSION + '、伺服器：' + serverVersion);
       const url = new URL(window.location.href);
       url.searchParams.set('_v', Date.now());
       window.location.replace(url.toString());
       return true;
     }
 
-    // 判斷現場付款選項是否要顯示
-    // Settings「LIFF顯示現場付款」= 「是」才顯示
     function isCashOptionEnabled() {
       var v = settingsData['LIFF顯示現場付款'];
-      if (v === undefined || v === null || v === '') return true; // 預設顯示（向後相容）
+      if (v === undefined || v === null || v === '') return true;
       var s = v.toString().trim();
       return s === '是' || s === 'true' || s === '1' || s === 'Y';
     }
@@ -191,10 +212,9 @@
         settingsData = data.settings;
         productsData = data.products;
         fieldsData = data.fields;
+        addonsData = data.addons || [];
 
-        if (checkVersionAndReload(settingsData['目前版本'])) {
-          return;
-        }
+        if (checkVersionAndReload(settingsData['目前版本'])) return;
         sessionStorage.removeItem('hm_reloaded');
 
         if (settingsData['維護模式開關'] === true) {
@@ -221,8 +241,6 @@
 
         const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
         document.getElementById('thresholdAmt').innerText = threshold;
-
-        // 初始化付款方式選項
         initPaymentOptions();
 
         const grid = document.getElementById('productGrid');
@@ -260,6 +278,7 @@
         });
 
         updateShipping();
+        renderAddons();
         document.getElementById('loading').style.display = 'none';
         document.getElementById('app').style.display = 'block';
       } catch (e) {
@@ -267,22 +286,16 @@
       }
     }
 
-    /**
-     * 初始化付款方式選項
-     * 如果 Settings「LIFF顯示現場付款」= 否 → 永遠隱藏現場付款、預設選匯款
-     */
     function initPaymentOptions() {
       const cashItem = document.getElementById('pay_cash_item');
       const cashRadio = document.getElementById('pay_cash');
       const transferRadio = document.getElementById('pay_transfer');
 
       if (!isCashOptionEnabled()) {
-        // 完全隱藏現場付款選項，固定匯款
         cashItem.style.display = 'none';
         transferRadio.checked = true;
         cashRadio.checked = false;
       } else {
-        // 顯示現場付款，預設選現場付款
         cashItem.style.display = 'flex';
         cashRadio.checked = true;
         transferRadio.checked = false;
@@ -298,21 +311,207 @@
       document.getElementById('card_' + i).classList.toggle('selected', val > 0);
       updateTotal();
       updateShipping();
+      renderAddons();
+    }
+
+    /**
+     * 解析贈送規則字串 "罐裝:auto:2,盒裝:選擇:1"
+     */
+    function parseGiftRules(rulesStr) {
+      if (!rulesStr) return [];
+      return rulesStr.split(',').map(r => {
+        const parts = r.split(':').map(s => s.trim());
+        if (parts.length < 3) return null;
+        return { type: parts[0], mode: parts[1], n: parseInt(parts[2]) || 1 };
+      }).filter(r => r);
+    }
+
+    /**
+     * 計算指定加購項目的：自動贈送、最大可選、當前選擇
+     * @returns {auto, maxSelectable, userSelected, totalGifted}
+     */
+    function calcAddonForProduct(addon) {
+      const rules = parseGiftRules(addon.giftRules);
+      let autoGifted = 0;
+      let maxSelectable = 0;
+      const autoTypes = []; // 來源類型紀錄，用於顯示「家庭號 4 罐贈送 2 個紙袋」
+      const selectTypes = [];
+
+      rules.forEach(rule => {
+        let matchingQty = 0;
+        let matchingNames = [];
+        productsData.forEach((p, i) => {
+          if (p.type === rule.type) {
+            const qty = parseInt(document.getElementById('qty_' + i)?.value || 0);
+            if (qty > 0) {
+              matchingQty += qty;
+              matchingNames.push(p.name + ' x' + qty);
+            }
+          }
+        });
+        if (rule.mode === 'auto') {
+          const gift = Math.floor(matchingQty / rule.n);
+          autoGifted += gift;
+          if (gift > 0) autoTypes.push({ type: rule.type, qty: matchingQty, gift: gift, n: rule.n });
+        } else if (rule.mode === '選擇') {
+          const maxSel = Math.floor(matchingQty / rule.n);
+          maxSelectable += maxSel;
+          if (maxSel > 0) selectTypes.push({ type: rule.type, qty: matchingQty, max: maxSel });
+        }
+      });
+
+      let userSelected = addonSelections[addon.name] || 0;
+      // 安全保護：客人選擇不能超過上限
+      userSelected = Math.max(0, Math.min(userSelected, maxSelectable));
+      // 全域上限保護
+      userSelected = Math.min(userSelected, addon.maxQty);
+      // 更新 addonSelections
+      addonSelections[addon.name] = userSelected;
+
+      return {
+        autoGifted: autoGifted,
+        maxSelectable: maxSelectable,
+        userSelected: userSelected,
+        totalGifted: autoGifted + userSelected,
+        autoTypes: autoTypes,
+        selectTypes: selectTypes
+      };
+    }
+
+    /**
+     * 渲染加購區塊
+     */
+    function renderAddons() {
+      const section = document.getElementById('addonSection');
+      const container = document.getElementById('addonItems');
+
+      // 沒選任何商品 → 不顯示加購區
+      const anySelected = productsData.some((p, i) =>
+        parseInt(document.getElementById('qty_' + i)?.value || 0) > 0
+      );
+      if (!anySelected || addonsData.length === 0) {
+        section.style.display = 'none';
+        return;
+      }
+
+      let anyAddonShown = false;
+      let html = '';
+
+      addonsData.forEach(addon => {
+        // 顯示條件判斷
+        if (!shouldShowAddon(addon)) return;
+
+        const calc = calcAddonForProduct(addon);
+        const hasAuto = calc.autoGifted > 0;
+        const hasSelectable = calc.maxSelectable > 0;
+
+        // 兩者都沒有 → 不顯示
+        if (!hasAuto && !hasSelectable) return;
+
+        anyAddonShown = true;
+        let addonHtml = '<div class="addon-item">';
+        addonHtml += `<div class="addon-name">📦 ${addon.name}</div>`;
+        if (addon.description) {
+          addonHtml += `<div class="addon-desc">${addon.description}</div>`;
+        }
+
+        // 自動贈送資訊
+        if (hasAuto) {
+          const autoDesc = calc.autoTypes.map(t =>
+            `${t.type} ${t.qty} 個贈 ${t.gift} 個`
+          ).join('、');
+          addonHtml += `<div class="addon-auto-info">✨ 自動贈送：${calc.autoGifted} 個（${autoDesc}）</div>`;
+        }
+
+        // 可選擇贈送
+        if (hasSelectable) {
+          const selectDesc = calc.selectTypes.map(t => t.type).join('、');
+          addonHtml += `
+            <div class="addon-selectable">
+              <div class="addon-selectable-prompt">有送禮需求嗎？選擇 ${selectDesc} 需要的紙袋數量</div>
+              <div class="addon-selectable-row">
+                <button class="qty-btn" onclick="changeAddonQty('${addon.name}', -1)">－</button>
+                <input class="qty-input" id="addon_${addon.name}" type="number" value="${calc.userSelected}" min="0" max="${calc.maxSelectable}" onchange="onAddonInputChange('${addon.name}')">
+                <button class="qty-btn" onclick="changeAddonQty('${addon.name}', 1)">＋</button>
+                <span class="addon-limit-hint">最多 ${calc.maxSelectable} 個</span>
+              </div>
+            </div>`;
+        }
+
+        addonHtml += '</div>';
+        html += addonHtml;
+      });
+
+      section.style.display = anyAddonShown ? 'block' : 'none';
+      container.innerHTML = html;
+    }
+
+    /**
+     * 判斷加購項目是否該顯示
+     */
+    function shouldShowAddon(addon) {
+      const cond = (addon.showCondition || 'always').trim();
+      if (cond === 'always') return true;
+
+      if (cond.startsWith('有')) {
+        const type = cond.substring(1); // 「有罐裝」→「罐裝」
+        return productsData.some((p, i) =>
+          p.type === type && parseInt(document.getElementById('qty_' + i)?.value || 0) > 0
+        );
+      }
+      return true;
+    }
+
+    function changeAddonQty(addonName, delta) {
+      const input = document.getElementById('addon_' + addonName);
+      if (!input) return;
+      const max = parseInt(input.max) || 0;
+      let val = Math.max(0, parseInt(input.value || 0) + delta);
+      val = Math.min(val, max);
+      addonSelections[addonName] = val;
+      renderAddons();
+      updateTotal();
+    }
+
+    function onAddonInputChange(addonName) {
+      const input = document.getElementById('addon_' + addonName);
+      if (!input) return;
+      const max = parseInt(input.max) || 0;
+      let val = Math.max(0, parseInt(input.value || 0));
+      val = Math.min(val, max);
+      addonSelections[addonName] = val;
+      renderAddons();
+      updateTotal();
     }
 
     function updateTotal() {
-      let total = 0, itemsHtml = '', hasItem = false;
+      let subtotal = 0, itemsHtml = '', hasItem = false;
       productsData.forEach((p, i) => {
-        const qty = parseInt(document.getElementById('qty_' + i).value || 0);
+        const qty = parseInt(document.getElementById('qty_' + i)?.value || 0);
         if (qty > 0) {
           hasItem = true;
           const sub = p.price * qty;
-          total += sub;
+          subtotal += sub;
           itemsHtml += `<div class="subtotal-row"><span>${p.name} x${qty}</span><span>${sub} 元</span></div>`;
         }
       });
+
+      // 計算加購贈送（這版沒有付費加購，所以加購金額永遠是 0）
+      let giftsHtml = '';
+      let totalGiftAmount = 0;
+      addonsData.forEach(addon => {
+        if (!shouldShowAddon(addon)) return;
+        const calc = calcAddonForProduct(addon);
+        if (calc.totalGifted > 0) {
+          giftsHtml += `<div class="subtotal-row subtotal-gift"><span>🎁 贈品：${addon.name} x${calc.totalGifted}</span><span>—</span></div>`;
+        }
+      });
+
+      const total = subtotal + totalGiftAmount;
+
       document.getElementById('subtotalBox').style.display = hasItem ? 'block' : 'none';
       document.getElementById('subtotalItems').innerHTML = itemsHtml;
+      document.getElementById('subtotalGifts').innerHTML = giftsHtml;
       document.getElementById('totalAmt').innerText = total + ' 元';
 
       const paymentHint = document.getElementById('paymentHint');
@@ -320,8 +519,6 @@
       const cashRadio = document.getElementById('pay_cash');
       const transferRadio = document.getElementById('pay_transfer');
 
-      // 第一道：「LIFF顯示現場付款」總開關
-      // 設「否」→ 永遠不顯示現場付款、不顯示金額提示（沒必要、因為本來就鎖匯款）
       if (!isCashOptionEnabled()) {
         cashItem.style.display = 'none';
         transferRadio.checked = true;
@@ -329,7 +526,6 @@
         return;
       }
 
-      // 第二道：「強制匯款門檻」金額判斷（總開關為「是」時才作用）
       const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
       const shouldForce = threshold > 0 && total >= threshold;
 
@@ -399,13 +595,30 @@
       const address = document.getElementById('address').value.trim();
       const needAddress = shipping && shipping !== '現場取貨';
       if (needAddress && !address) { alert('請填寫收件地址'); return; }
-      const total = items.reduce((s, i) => s + i.price * i.qty, 0);
+      const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+
+      // 整理贈品資訊
+      const giftLines = [];
+      addonsData.forEach(addon => {
+        if (!shouldShowAddon(addon)) return;
+        const calc = calcAddonForProduct(addon);
+        if (calc.totalGifted > 0) {
+          const breakdown = [];
+          if (calc.autoGifted > 0) breakdown.push('自動贈 ' + calc.autoGifted);
+          if (calc.userSelected > 0) breakdown.push('選擇贈 ' + calc.userSelected);
+          giftLines.push(`${addon.name} x${calc.totalGifted}（${breakdown.join('+')}）`);
+        }
+      });
 
       let html = `
         <div class="confirm-row"><span class="confirm-label">姓名</span><span>${name}</span></div>
         <div class="confirm-row"><span class="confirm-label">電話</span><span>${tel}</span></div>
-        <div class="confirm-row"><span class="confirm-label">商品</span><span>${items.map(i => i.name + ' x' + i.qty).join('<br>')}</span></div>
-        <div class="confirm-row"><span class="confirm-label">總金額</span><span style="color:#D32F2F;font-weight:bold">${total} 元</span></div>
+        <div class="confirm-row"><span class="confirm-label">商品</span><span>${items.map(i => i.name + ' x' + i.qty).join('<br>')}</span></div>`;
+      if (giftLines.length > 0) {
+        html += `<div class="confirm-row"><span class="confirm-label">🎁 贈品</span><span>${giftLines.join('<br>')}</span></div>`;
+      }
+      html += `
+        <div class="confirm-row"><span class="confirm-label">總金額</span><span style="color:#D32F2F;font-weight:bold">${subtotal} 元</span></div>
         <div class="confirm-row"><span class="confirm-label">付款方式</span><span>${payment}</span></div>
         <div class="confirm-row"><span class="confirm-label">運送方式</span><span>${shipping}</span></div>`;
       if (address) html += `<div class="confirm-row"><span class="confirm-label">地址</span><span>${address}</span></div>`;
@@ -429,7 +642,6 @@
       btn.disabled = true;
       btn.textContent = '傳送中...';
       const items = getSelectedItems();
-      const total = items.reduce((s, i) => s + i.price * i.qty, 0);
       let dynStr = '';
       fieldsData.forEach(f => {
         const v = f.type === 'text'
@@ -442,12 +654,13 @@
         action: 'submitOrder',
         name: document.getElementById('name').value.trim(),
         tel: document.getElementById('tel').value.trim(),
-        items, total,
+        items,
         payment: document.querySelector('input[name="payment"]:checked')?.value || '匯款',
         shipping: document.querySelector('input[name="shipping"]:checked')?.value || '',
         address: document.getElementById('address').value.trim(),
         dyn: dynStr,
         note: document.getElementById('note').value.trim(),
+        addonSelections: addonSelections,
         lineUserId,
         appVersion: APP_VERSION
       };
