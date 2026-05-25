@@ -196,6 +196,8 @@
 // 或者點開 LIFF 之後，記下你看到的 alert 訊息
 // ============================================================
 
+// 取代 index.html 裡 async function init() {...} 整段
+
 async function init() {
   try {
     await liff.init({ liffId: LIFF_ID });
@@ -211,19 +213,26 @@ async function init() {
     fieldsData = data.fields;
     addonsData = data.addons || [];
 
-    // ★★★ 除錯：用 alert 顯示 addons 內容 ★★★
-    alert('Addons 數量：' + addonsData.length + '\n第一筆：' + JSON.stringify(addonsData[0] || '無'));
-
-    if (checkVersionAndReload(settingsData['目前版本'])) return;
-    sessionStorage.removeItem('hm_reloaded');
-
-    if (settingsData['維護模式開關'] === true) {
-      document.getElementById('loading').style.display = 'none';
-      const maintImg = settingsData['維護模式'] || '';
-      if (maintImg) document.getElementById('maintImg').src = maintImg;
-      document.getElementById('maintPage').style.display = 'block';
-      return;
-    }
+    // 把 debug 訊息塞到 errMsg 區顯示，不用 alert
+    document.getElementById('loading').style.display = 'none';
+    const dbg = document.getElementById('errMsg');
+    dbg.style.display = 'block';
+    dbg.style.color = '#333';
+    dbg.style.textAlign = 'left';
+    dbg.innerHTML = 
+      '<b>DEBUG 資訊</b><br>' +
+      'Addons 數量：' + addonsData.length + '<br><br>' +
+      '<b>data 完整內容（前 500 字）：</b><br>' +
+      '<pre style="font-size:11px;white-space:pre-wrap;word-break:break-all">' +
+      JSON.stringify(data, null, 2).substring(0, 800) +
+      '</pre>';
+  } catch (e) {
+    document.getElementById('loading').style.display = 'none';
+    const dbg = document.getElementById('errMsg');
+    dbg.style.display = 'block';
+    dbg.innerHTML = '<b>錯誤</b>：' + e.message + '<br><pre>' + (e.stack || '') + '</pre>';
+  }
+}
 
     document.getElementById('name').value = profile.displayName;
     document.getElementById('title').innerText = settingsData['店鋪名稱'] || '訂購單';
