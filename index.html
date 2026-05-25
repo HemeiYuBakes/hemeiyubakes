@@ -189,31 +189,77 @@
       return s === '是' || s === 'true' || s === '1' || s === 'Y';
     }
 
-    async function init() {
-      try {
-        await liff.init({ liffId: LIFF_ID });
-        if (!liff.isLoggedIn()) { liff.login(); return; }
-        const profile = await liff.getProfile();
-        lineUserId = profile.userId;
+    // ============================================================
+// 除錯用 init：請取代 index.html 裡原本的 async function init() {...} 整段
+// 然後 commit 推上 GitHub Pages
+// 重開 LIFF，用 iPhone 上 Safari 連到 Mac Safari 的「開發」選單看 Console
+// 或者點開 LIFF 之後，記下你看到的 alert 訊息
+// ============================================================
 
-        const data = await loadJsonp(SCRIPT_URL + '?action=data');
-        if (data.error) { showError('讀取失敗：' + data.error); return; }
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    const profile = await liff.getProfile();
+    lineUserId = profile.userId;
 
-        settingsData = data.settings;
-        productsData = data.products;
-        fieldsData = data.fields;
-        addonsData = data.addons || [];
+    const data = await loadJsonp(SCRIPT_URL + '?action=data');
+    if (data.error) { showError('讀取失敗：' + data.error); return; }
 
-        if (checkVersionAndReload(settingsData['目前版本'])) return;
-        sessionStorage.removeItem('hm_reloaded');
+    settingsData = data.settings;
+    productsData = data.products;
+    fieldsData = data.fields;
+    addonsData = data.addons || [];
 
-        if (settingsData['維護模式開關'] === true) {
-          document.getElementById('loading').style.display = 'none';
-          const maintImg = settingsData['維護模式'] || '';
-          if (maintImg) document.getElementById('maintImg').src = maintImg;
-          document.getElementById('maintPage').style.display = 'block';
-          return;
-        }
+    // ★★★ 除錯：用 alert 顯示 addons 內容 ★★★
+    alert('Addons 數量：' + addonsData.length + '\n第一筆：' + JSON.stringify(addonsData[0] || '無'));
+
+    if (checkVersionAndReload(settingsData['目前版本'])) return;
+    sessionStorage.removeItem('hm_reloaded');
+
+    if (settingsData['維護模式開關'] === true) {
+      document.getElementById('loading').style.display = 'none';
+      const maintImg = settingsData['維護模式'] || '';
+      if (maintImg) document.getElementById('maintImg').src = maintImg;
+      document.getElementById('maintPage').style.display = 'block';
+      return;
+    }
+
+    document.getElementById('name').value = profile.displayName;
+    document.getElementById('title').innerText = settingsData['店鋪名稱'] || '訂購單';
+
+    const imgUrl = settingsData['頂部圖片網址'] || settingsData['頂部圖片'];
+    if (imgUrl) {
+      const b = document.getElementById('banner');
+      b.style.backgroundImage = `url(${imgUrl})`;
+      b.style.display = 'block';
+    }
+    if (settingsData['公告文字']) {
+      document.getElementById('marqueeText').innerText = settingsData['公告文字'];
+      document.getElementById('marqueeWrap').style.display = 'block';
+    }
+
+    const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
+    document.getElementById('thresholdAmt').innerText = threshold;
+
+    initPaymentOptions();
+    renderProducts();
+    renderDynFields();
+    renderAddons();
+    updateShipping();
+
+    // ★★★ 除錯：渲染後再 alert 一次，看加購區塊在 DOM 裡長怎樣 ★★★
+    const addonGroup = document.getElementById('addonsGroup');
+    const addonContainer = document.getElementById('addonsContainer');
+    alert('加購區塊 display：' + addonGroup.style.display + '\n容器內容長度：' + addonContainer.innerHTML.length);
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  } catch (e) {
+    alert('init 錯誤：' + e.message + '\n' + e.stack);
+    showError('錯誤：' + e.message);
+  }
+}
 
         document.getElementById('name').value = profile.displayName;
         document.getElementById('title').innerText = settingsData['店鋪名稱'] || '訂購單';
