@@ -50,13 +50,15 @@
     #maintPage img { width: 100%; border-radius: 12px; margin-bottom: 20px; }
     #maintPage p { color: #666; font-size: 15px; }
     .version-tag { position: fixed; bottom: 5px; right: 8px; font-size: 10px; color: #ccc; z-index: 1; }
-    /* 加購區塊樣式 */
     .addon-card { border: 1px solid #eee; border-radius: 10px; padding: 12px; margin-bottom: 10px; background: #fafafa; }
     .addon-name { font-weight: bold; color: #333; font-size: 14px; margin-bottom: 4px; }
     .addon-desc { font-size: 12px; color: #888; margin-bottom: 8px; }
     .addon-gift-info { font-size: 13px; color: #4CAF50; margin-bottom: 8px; }
     .addon-select-row { display: flex; align-items: center; gap: 8px; }
     .addon-select-label { font-size: 13px; color: #555; flex: 1; }
+    /* DEBUG 區塊：顯示在頁面最下方，不卡載入 */
+    #debugBox { max-width: 450px; margin: 15px auto; padding: 12px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; font-size: 11px; color: #333; word-break: break-all; }
+    #debugBox pre { white-space: pre-wrap; word-break: break-all; margin: 5px 0; font-size: 10px; }
   </style>
 </head>
 <body>
@@ -81,7 +83,6 @@
       <div class="product-grid" id="productGrid"></div>
     </div>
 
-    <!-- 加購區塊（動態渲染）-->
     <div class="group" id="addonsGroup" style="display:none">
       <label>🎁 加購選項</label>
       <div id="addonsContainer"></div>
@@ -129,25 +130,27 @@
     </div>
   </div>
 
+  <!-- DEBUG 區塊：永遠顯示在最下方，不卡載入 -->
+  <div id="debugBox">DEBUG 待載入...</div>
+
   <div class="version-tag" id="versionTag"></div>
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    // ============================================================
-    // ⚠️ 部署提醒：每次改完這個檔案，記得做兩件事：
-    //   1. 把下面的 APP_VERSION 改成新版本號
-    //   2. 同步把 Settings 工作表的「目前版本」改成相同版本號
-    // ============================================================
     const APP_VERSION = '1.2.0';
-
     const LIFF_ID = '2009988690-V5uuqIVX';
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvr3VsqAjpgLEdi8-DScqBvWrG721bu4seKjq8QODUG0g-poQ4SDw60jYvk6QRh0-r/exec';
 
     let fieldsData = [], productsData = [], settingsData = {}, addonsData = [], lineUserId = '';
     let wasForcedTransfer = false;
-    let addonSelections = {}; // 客人對每個加購品的選擇數量
+    let addonSelections = {};
 
     document.getElementById('versionTag').innerText = 'v' + APP_VERSION;
+
+    function dbg(msg) {
+      const box = document.getElementById('debugBox');
+      box.innerHTML += '<br>' + msg;
+    }
 
     function showError(msg) {
       document.getElementById('loading').style.display = 'none';
@@ -171,10 +174,7 @@
     function checkVersionAndReload(serverVersion) {
       if (!serverVersion || serverVersion === APP_VERSION) return false;
       const reloaded = sessionStorage.getItem('hm_reloaded');
-      if (reloaded === '1') {
-        console.warn('版本仍不一致但已 reload 過。本地：' + APP_VERSION + '、伺服器：' + serverVersion);
-        return false;
-      }
+      if (reloaded === '1') return false;
       sessionStorage.setItem('hm_reloaded', '1');
       const url = new URL(window.location.href);
       url.searchParams.set('_v', Date.now());
@@ -189,86 +189,44 @@
       return s === '是' || s === 'true' || s === '1' || s === 'Y';
     }
 
-    // ============================================================
-// 除錯用 init：請取代 index.html 裡原本的 async function init() {...} 整段
-// 然後 commit 推上 GitHub Pages
-// 重開 LIFF，用 iPhone 上 Safari 連到 Mac Safari 的「開發」選單看 Console
-// 或者點開 LIFF 之後，記下你看到的 alert 訊息
-// ============================================================
+    async function init() {
+      try {
+        document.getElementById('debugBox').innerHTML = 'DEBUG：開始 init';
+        await liff.init({ liffId: LIFF_ID });
+        dbg('LIFF init OK');
+        if (!liff.isLoggedIn()) { liff.login(); return; }
+        const profile = await liff.getProfile();
+        lineUserId = profile.userId;
+        dbg('Profile OK');
 
-// 取代 index.html 裡 async function init() {...} 整段
+        const data = await loadJsonp(SCRIPT_URL + '?action=data');
+        dbg('API 回傳 OK');
+        if (data.error) { showError('讀取失敗：' + data.error); return; }
 
-async function init() {
-  try {
-    await liff.init({ liffId: LIFF_ID });
-    if (!liff.isLoggedIn()) { liff.login(); return; }
-    const profile = await liff.getProfile();
-    lineUserId = profile.userId;
+        settingsData = data.settings;
+        productsData = data.products;
+        fieldsData = data.fields;
+        addonsData = data.addons || [];
 
-    const data = await loadJsonp(SCRIPT_URL + '?action=data');
-    if (data.error) { showError('讀取失敗：' + data.error); return; }
+        dbg('--- DATA 內容 ---');
+        dbg('settings keys: ' + Object.keys(settingsData).join(','));
+        dbg('products 數量: ' + productsData.length);
+        dbg('addons 數量: ' + addonsData.length);
+        dbg('addons[0] type: ' + (typeof data.addons));
+        dbg('addons[0] 內容: <pre>' + JSON.stringify(addonsData[0] || '無資料', null, 2) + '</pre>');
+        dbg('products[0] type: ' + (productsData[0] && productsData[0].type));
+        dbg('products[1] type: ' + (productsData[1] && productsData[1].type));
 
-    settingsData = data.settings;
-    productsData = data.products;
-    fieldsData = data.fields;
-    addonsData = data.addons || [];
+        if (checkVersionAndReload(settingsData['目前版本'])) return;
+        sessionStorage.removeItem('hm_reloaded');
 
-    // 把 debug 訊息塞到 errMsg 區顯示，不用 alert
-    document.getElementById('loading').style.display = 'none';
-    const dbg = document.getElementById('errMsg');
-    dbg.style.display = 'block';
-    dbg.style.color = '#333';
-    dbg.style.textAlign = 'left';
-    dbg.innerHTML = 
-      '<b>DEBUG 資訊</b><br>' +
-      'Addons 數量：' + addonsData.length + '<br><br>' +
-      '<b>data 完整內容（前 500 字）：</b><br>' +
-      '<pre style="font-size:11px;white-space:pre-wrap;word-break:break-all">' +
-      JSON.stringify(data, null, 2).substring(0, 800) +
-      '</pre>';
-  } catch (e) {
-    document.getElementById('loading').style.display = 'none';
-    const dbg = document.getElementById('errMsg');
-    dbg.style.display = 'block';
-    dbg.innerHTML = '<b>錯誤</b>：' + e.message + '<br><pre>' + (e.stack || '') + '</pre>';
-  }
-}
-
-    document.getElementById('name').value = profile.displayName;
-    document.getElementById('title').innerText = settingsData['店鋪名稱'] || '訂購單';
-
-    const imgUrl = settingsData['頂部圖片網址'] || settingsData['頂部圖片'];
-    if (imgUrl) {
-      const b = document.getElementById('banner');
-      b.style.backgroundImage = `url(${imgUrl})`;
-      b.style.display = 'block';
-    }
-    if (settingsData['公告文字']) {
-      document.getElementById('marqueeText').innerText = settingsData['公告文字'];
-      document.getElementById('marqueeWrap').style.display = 'block';
-    }
-
-    const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
-    document.getElementById('thresholdAmt').innerText = threshold;
-
-    initPaymentOptions();
-    renderProducts();
-    renderDynFields();
-    renderAddons();
-    updateShipping();
-
-    // ★★★ 除錯：渲染後再 alert 一次，看加購區塊在 DOM 裡長怎樣 ★★★
-    const addonGroup = document.getElementById('addonsGroup');
-    const addonContainer = document.getElementById('addonsContainer');
-    alert('加購區塊 display：' + addonGroup.style.display + '\n容器內容長度：' + addonContainer.innerHTML.length);
-
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-  } catch (e) {
-    alert('init 錯誤：' + e.message + '\n' + e.stack);
-    showError('錯誤：' + e.message);
-  }
-}
+        if (settingsData['維護模式開關'] === true) {
+          document.getElementById('loading').style.display = 'none';
+          const maintImg = settingsData['維護模式'] || '';
+          if (maintImg) document.getElementById('maintImg').src = maintImg;
+          document.getElementById('maintPage').style.display = 'block';
+          return;
+        }
 
         document.getElementById('name').value = profile.displayName;
         document.getElementById('title').innerText = settingsData['店鋪名稱'] || '訂購單';
@@ -293,9 +251,15 @@ async function init() {
         renderAddons();
         updateShipping();
 
+        const addonGroup = document.getElementById('addonsGroup');
+        dbg('--- 渲染後 ---');
+        dbg('加購區塊 display: ' + addonGroup.style.display);
+        dbg('容器內容長度: ' + document.getElementById('addonsContainer').innerHTML.length);
+
         document.getElementById('loading').style.display = 'none';
         document.getElementById('app').style.display = 'block';
       } catch (e) {
+        dbg('!!! ERROR: ' + e.message);
         showError('錯誤：' + e.message);
       }
     }
@@ -353,14 +317,6 @@ async function init() {
       });
     }
 
-    // ============================================================
-    // 加購系統
-    // ============================================================
-
-    /**
-     * 解析贈送規則字串，例如 "罐裝:auto:2,盒裝:選擇:1"
-     * 回傳：[{type, mode, n}, ...]
-     */
     function parseGiftRules(rulesStr) {
       if (!rulesStr) return [];
       return rulesStr.split(',').map(r => {
@@ -370,9 +326,6 @@ async function init() {
       }).filter(r => r);
     }
 
-    /**
-     * 根據目前商品數量、加購選擇，計算每個加購項目的狀態
-     */
     function calculateAddons() {
       const result = {};
       const itemsWithType = productsData.map((p, i) => ({
@@ -402,7 +355,7 @@ async function init() {
         userSelected = Math.max(0, Math.min(userSelected, maxUserSelectable));
         addonSelections[addon.name] = userSelected;
 
-        const paidQty = 0; // 預留：未來付費加購
+        const paidQty = 0;
         const paidAmount = paidQty * addon.price;
 
         result[addon.name] = {
@@ -415,24 +368,15 @@ async function init() {
       return result;
     }
 
-    /**
-     * 檢查加購的顯示條件
-     */
     function shouldShowAddon(addon, itemsWithType) {
       const cond = (addon.showCondition || 'always').trim();
       if (cond === 'always') return true;
-
       const hasType = (typeName) => itemsWithType.some(it => it.type === typeName && it.qty > 0);
-
       if (cond === '有罐裝') return hasType('罐裝');
       if (cond === '有盒裝') return hasType('盒裝');
-      // 未來可擴充其他條件
       return true;
     }
 
-    /**
-     * 渲染加購區塊
-     */
     function renderAddons() {
       const container = document.getElementById('addonsContainer');
       const group = document.getElementById('addonsGroup');
@@ -450,8 +394,6 @@ async function init() {
         if (!shouldShowAddon(addon, itemsWithType)) return;
         const r = calc[addon.name];
         if (!r) return;
-
-        // 如果都沒贈送、也不能選 → 不顯示這個加購（避免空區塊）
         if (r.autoGifted === 0 && r.maxUserSelectable === 0) return;
 
         anyVisible = true;
@@ -461,12 +403,10 @@ async function init() {
           html += `<div class="addon-desc">${addon.description}</div>`;
         }
 
-        // 自動贈送部分
         if (r.autoGifted > 0) {
           html += `<div class="addon-gift-info">✨ 自動贈送 ${r.autoGifted} 個</div>`;
         }
 
-        // 可選擇部分
         if (r.maxUserSelectable > 0) {
           html += `<div class="addon-select-row">`;
           html += `<span class="addon-select-label">要送禮嗎？選擇紙袋數量（最多 ${r.maxUserSelectable} 個）</span>`;
@@ -486,8 +426,6 @@ async function init() {
     }
 
     function changeAddonQty(addonName, delta) {
-      const addon = addonsData.find(a => a.name === addonName);
-      if (!addon) return;
       const calc = calculateAddons();
       const r = calc[addonName];
       const current = addonSelections[addonName] || 0;
@@ -504,10 +442,6 @@ async function init() {
       updateAll();
     }
 
-    // ============================================================
-    // 商品數量變動的統一處理
-    // ============================================================
-
     function changeQty(i, delta) {
       const input = document.getElementById('qty_' + i);
       const max = productsData[i].maxQty;
@@ -518,9 +452,6 @@ async function init() {
       updateAll();
     }
 
-    /**
-     * 商品或加購數量變動時的統一更新入口
-     */
     function updateAll() {
       renderAddons();
       updateTotal();
@@ -539,7 +470,6 @@ async function init() {
         }
       });
 
-      // 加購結果
       const calc = calculateAddons();
       let addonPaidTotal = 0;
       const giftLines = [];
@@ -563,7 +493,6 @@ async function init() {
       document.getElementById('subtotalItems').innerHTML = itemsHtml;
       document.getElementById('totalAmt').innerText = total + ' 元';
 
-      // 付款方式邏輯
       const paymentHint = document.getElementById('paymentHint');
       const cashItem = document.getElementById('pay_cash_item');
       const cashRadio = document.getElementById('pay_cash');
@@ -714,7 +643,7 @@ async function init() {
         dyn: dynStr,
         note: document.getElementById('note').value.trim(),
         lineUserId,
-        addonSelections, // 把加購選擇傳給後端
+        addonSelections,
         appVersion: APP_VERSION
       };
 
