@@ -27,6 +27,15 @@
     .qty-btn { width: 28px; height: 28px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5; font-size: 16px; cursor: pointer; }
     .qty-input { width: 40px; text-align: center; padding: 4px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
 
+    /* Debug 框框 */
+    .debug-box {
+      background: #fff3cd; border: 2px dashed #ff9800; padding: 12px;
+      margin-bottom: 15px; border-radius: 8px;
+      font-family: monospace; font-size: 11px; line-height: 1.6;
+      word-break: break-all; color: #333; max-width: 450px; margin-left: auto; margin-right: auto;
+    }
+    .debug-box .debug-title { font-weight: bold; color: #e65100; margin-bottom: 6px; }
+
     /* 加購區塊 */
     .addon-section { background: #fff8f0; border-radius: 10px; padding: 14px; margin-bottom: 18px; border: 1px solid #ffe0c0; }
     .addon-title { font-weight: bold; color: #D32F2F; margin-bottom: 10px; font-size: 1rem; }
@@ -72,6 +81,12 @@
   <div id="loading"><div>📡 系統連線中...</div><div style="font-size:12px;margin-top:8px;color:#999">請稍候</div></div>
   <div id="errMsg"></div>
 
+  <!-- DEBUG 框框：跟系統一起載入，永遠顯示 -->
+  <div class="debug-box" id="debugBox">
+    <div class="debug-title">🔍 DEBUG INFO</div>
+    <div id="debugContent">等待初始化...</div>
+  </div>
+
   <div id="maintPage">
     <img id="maintImg" src="" alt="維護中">
     <p>系統維護中，請稍後再試。</p>
@@ -90,7 +105,7 @@
       <div class="product-grid" id="productGrid"></div>
     </div>
 
-    <!-- 加購區塊：動態渲染 -->
+    <!-- 加購區塊 -->
     <div class="addon-section" id="addonSection" style="display:none">
       <div class="addon-title">🎁 紙袋</div>
       <div id="addonItems"></div>
@@ -143,21 +158,25 @@
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    // ============================================================
-    // ⚠️ 部署提醒：每次改完這個檔案，記得做兩件事：
-    //   1. 把下面的 APP_VERSION 改成新版本號
-    //   2. 同步把 Settings 工作表的「目前版本」改成相同版本號
-    // ============================================================
-    const APP_VERSION = '1.2.0';
-
+    const APP_VERSION = '1.2.0-debug';
     const LIFF_ID = '2009988690-V5uuqIVX';
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvr3VsqAjpgLEdi8-DScqBvWrG721bu4seKjq8QODUG0g-poQ4SDw60jYvk6QRh0-r/exec';
 
     let fieldsData = [], productsData = [], settingsData = {}, addonsData = [], lineUserId = '';
-    let addonSelections = {}; // 客人選擇的加購數量 {addonName: qty}
+    let addonSelections = {};
     let wasForcedTransfer = false;
 
     document.getElementById('versionTag').innerText = 'v' + APP_VERSION;
+
+    // ============================================================
+    // DEBUG 函式：把訊息寫到頁面上
+    // ============================================================
+    function debugLog(msg) {
+      const div = document.getElementById('debugContent');
+      if (div) {
+        div.innerHTML = msg;
+      }
+    }
 
     function showError(msg) {
       document.getElementById('loading').style.display = 'none';
@@ -181,10 +200,7 @@
     function checkVersionAndReload(serverVersion) {
       if (!serverVersion || serverVersion === APP_VERSION) return false;
       const reloaded = sessionStorage.getItem('hm_reloaded');
-      if (reloaded === '1') {
-        console.warn('版本不一致但已 reload 過。本地：' + APP_VERSION + '、伺服器：' + serverVersion);
-        return false;
-      }
+      if (reloaded === '1') return false;
       sessionStorage.setItem('hm_reloaded', '1');
       const url = new URL(window.location.href);
       url.searchParams.set('_v', Date.now());
@@ -201,11 +217,13 @@
 
     async function init() {
       try {
+        debugLog('1. LIFF 初始化中...');
         await liff.init({ liffId: LIFF_ID });
         if (!liff.isLoggedIn()) { liff.login(); return; }
         const profile = await liff.getProfile();
         lineUserId = profile.userId;
 
+        debugLog('2. 載入後端資料中...');
         const data = await loadJsonp(SCRIPT_URL + '?action=data');
         if (data.error) { showError('讀取失敗：' + data.error); return; }
 
@@ -214,7 +232,15 @@
         fieldsData = data.fields;
         addonsData = data.addons || [];
 
-        if (checkVersionAndReload(settingsData['目前版本'])) return;
+        debugLog(
+          '3. 資料載入完成<br>' +
+          'addonsData 長度: ' + addonsData.length + '<br>' +
+          'addonsData: ' + JSON.stringify(addonsData).substring(0, 300) + '<br>' +
+          'products: ' + productsData.map(p => p.name + '(' + p.type + ')').join(', ')
+        );
+
+        // 版本號比對（debug 版本永遠不會跟伺服器一致，所以這裡跳過）
+        // if (checkVersionAndReload(settingsData['目前版本'])) return;
         sessionStorage.removeItem('hm_reloaded');
 
         if (settingsData['維護模式開關'] === true) {
@@ -283,6 +309,7 @@
         document.getElementById('app').style.display = 'block';
       } catch (e) {
         showError('錯誤：' + e.message);
+        debugLog('錯誤：' + e.message + '<br>Stack: ' + (e.stack || ''));
       }
     }
 
@@ -314,9 +341,6 @@
       renderAddons();
     }
 
-    /**
-     * 解析贈送規則字串 "罐裝:auto:2,盒裝:選擇:1"
-     */
     function parseGiftRules(rulesStr) {
       if (!rulesStr) return [];
       return rulesStr.split(',').map(r => {
@@ -326,27 +350,19 @@
       }).filter(r => r);
     }
 
-    /**
-     * 計算指定加購項目的：自動贈送、最大可選、當前選擇
-     * @returns {auto, maxSelectable, userSelected, totalGifted}
-     */
     function calcAddonForProduct(addon) {
       const rules = parseGiftRules(addon.giftRules);
       let autoGifted = 0;
       let maxSelectable = 0;
-      const autoTypes = []; // 來源類型紀錄，用於顯示「家庭號 4 罐贈送 2 個紙袋」
+      const autoTypes = [];
       const selectTypes = [];
 
       rules.forEach(rule => {
         let matchingQty = 0;
-        let matchingNames = [];
         productsData.forEach((p, i) => {
           if (p.type === rule.type) {
             const qty = parseInt(document.getElementById('qty_' + i)?.value || 0);
-            if (qty > 0) {
-              matchingQty += qty;
-              matchingNames.push(p.name + ' x' + qty);
-            }
+            if (qty > 0) matchingQty += qty;
           }
         });
         if (rule.mode === 'auto') {
@@ -361,35 +377,35 @@
       });
 
       let userSelected = addonSelections[addon.name] || 0;
-      // 安全保護：客人選擇不能超過上限
       userSelected = Math.max(0, Math.min(userSelected, maxSelectable));
-      // 全域上限保護
       userSelected = Math.min(userSelected, addon.maxQty);
-      // 更新 addonSelections
       addonSelections[addon.name] = userSelected;
 
       return {
-        autoGifted: autoGifted,
-        maxSelectable: maxSelectable,
-        userSelected: userSelected,
+        autoGifted, maxSelectable, userSelected,
         totalGifted: autoGifted + userSelected,
-        autoTypes: autoTypes,
-        selectTypes: selectTypes
+        autoTypes, selectTypes
       };
     }
 
-    /**
-     * 渲染加購區塊
-     */
     function renderAddons() {
+      // DEBUG：每次呼叫都更新 debug 訊息
+      const debugMsg = [];
+      debugMsg.push('renderAddons() 被呼叫');
+      debugMsg.push('addonsData 長度: ' + addonsData.length);
+      
       const section = document.getElementById('addonSection');
       const container = document.getElementById('addonItems');
 
-      // 沒選任何商品 → 不顯示加購區
       const anySelected = productsData.some((p, i) =>
         parseInt(document.getElementById('qty_' + i)?.value || 0) > 0
       );
+      
+      debugMsg.push('有選商品: ' + anySelected);
+
       if (!anySelected || addonsData.length === 0) {
+        debugMsg.push('→ 隱藏加購區（沒選商品或沒 addons）');
+        debugLog(debugMsg.join('<br>'));
         section.style.display = 'none';
         return;
       }
@@ -398,15 +414,25 @@
       let html = '';
 
       addonsData.forEach(addon => {
-        // 顯示條件判斷
-        if (!shouldShowAddon(addon)) return;
+        const shouldShow = shouldShowAddon(addon);
+        debugMsg.push('--- ' + addon.name + ' ---');
+        debugMsg.push('  顯示條件: ' + addon.showCondition);
+        debugMsg.push('  shouldShow: ' + shouldShow);
+        
+        if (!shouldShow) return;
 
         const calc = calcAddonForProduct(addon);
+        debugMsg.push('  贈送規則: ' + addon.giftRules);
+        debugMsg.push('  autoGifted: ' + calc.autoGifted);
+        debugMsg.push('  maxSelectable: ' + calc.maxSelectable);
+        
         const hasAuto = calc.autoGifted > 0;
         const hasSelectable = calc.maxSelectable > 0;
 
-        // 兩者都沒有 → 不顯示
-        if (!hasAuto && !hasSelectable) return;
+        if (!hasAuto && !hasSelectable) {
+          debugMsg.push('  → 跳過（沒贈送也沒可選）');
+          return;
+        }
 
         anyAddonShown = true;
         let addonHtml = '<div class="addon-item">';
@@ -415,15 +441,11 @@
           addonHtml += `<div class="addon-desc">${addon.description}</div>`;
         }
 
-        // 自動贈送資訊
         if (hasAuto) {
-          const autoDesc = calc.autoTypes.map(t =>
-            `${t.type} ${t.qty} 個贈 ${t.gift} 個`
-          ).join('、');
+          const autoDesc = calc.autoTypes.map(t => `${t.type} ${t.qty} 個贈 ${t.gift} 個`).join('、');
           addonHtml += `<div class="addon-auto-info">✨ 自動贈送：${calc.autoGifted} 個（${autoDesc}）</div>`;
         }
 
-        // 可選擇贈送
         if (hasSelectable) {
           const selectDesc = calc.selectTypes.map(t => t.type).join('、');
           addonHtml += `
@@ -442,19 +464,18 @@
         html += addonHtml;
       });
 
+      debugMsg.push('anyAddonShown: ' + anyAddonShown);
+      debugLog(debugMsg.join('<br>'));
+
       section.style.display = anyAddonShown ? 'block' : 'none';
       container.innerHTML = html;
     }
 
-    /**
-     * 判斷加購項目是否該顯示
-     */
     function shouldShowAddon(addon) {
       const cond = (addon.showCondition || 'always').trim();
       if (cond === 'always') return true;
-
       if (cond.startsWith('有')) {
-        const type = cond.substring(1); // 「有罐裝」→「罐裝」
+        const type = cond.substring(1);
         return productsData.some((p, i) =>
           p.type === type && parseInt(document.getElementById('qty_' + i)?.value || 0) > 0
         );
@@ -496,9 +517,7 @@
         }
       });
 
-      // 計算加購贈送（這版沒有付費加購，所以加購金額永遠是 0）
       let giftsHtml = '';
-      let totalGiftAmount = 0;
       addonsData.forEach(addon => {
         if (!shouldShowAddon(addon)) return;
         const calc = calcAddonForProduct(addon);
@@ -507,7 +526,7 @@
         }
       });
 
-      const total = subtotal + totalGiftAmount;
+      const total = subtotal;
 
       document.getElementById('subtotalBox').style.display = hasItem ? 'block' : 'none';
       document.getElementById('subtotalItems').innerHTML = itemsHtml;
@@ -597,7 +616,6 @@
       if (needAddress && !address) { alert('請填寫收件地址'); return; }
       const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
 
-      // 整理贈品資訊
       const giftLines = [];
       addonsData.forEach(addon => {
         if (!shouldShowAddon(addon)) return;
@@ -638,60 +656,9 @@
     }
 
     async function submitOrder() {
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-      btn.textContent = '傳送中...';
-      const items = getSelectedItems();
-      let dynStr = '';
-      fieldsData.forEach(f => {
-        const v = f.type === 'text'
-          ? (document.getElementsByName(f.name)[0]?.value || '')
-          : Array.from(document.querySelectorAll(`input[name="${f.name}"]:checked`)).map(el => el.value).join(', ');
-        dynStr += `${f.name}: ${v}\n`;
-      });
-
-      const payload = {
-        action: 'submitOrder',
-        name: document.getElementById('name').value.trim(),
-        tel: document.getElementById('tel').value.trim(),
-        items,
-        payment: document.querySelector('input[name="payment"]:checked')?.value || '匯款',
-        shipping: document.querySelector('input[name="shipping"]:checked')?.value || '',
-        address: document.getElementById('address').value.trim(),
-        dyn: dynStr,
-        note: document.getElementById('note').value.trim(),
-        addonSelections: addonSelections,
-        lineUserId,
-        appVersion: APP_VERSION
-      };
-
-      try {
-        const res = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify(payload)
-        });
-        const result = await res.json();
-        if (result.status === 'OK') {
-          const orderIdLine = result.orderId
-            ? `<p style="color:#333;font-weight:bold;font-size:16px">訂單編號：${result.orderId}</p>`
-            : '';
-          document.getElementById('confirmPage').innerHTML = `
-            <div style="text-align:center;padding:40px 20px">
-              <div style="font-size:48px">✅</div>
-              <h3 style="color:#D32F2F">訂購成功！</h3>
-              ${orderIdLine}
-              <p style="color:#666">訂單確認訊息將透過 LINE 傳送給您<br>我們將盡快與您聯絡</p>
-            </div>`;
-          setTimeout(() => liff.closeWindow(), 4000);
-        } else {
-          throw new Error(result.message || '未知錯誤');
-        }
-      } catch (e) {
-        alert('送出失敗：' + e.message);
-        btn.disabled = false;
-        btn.textContent = '確認並送出';
-      }
+      // debug 版不允許實際送單
+      alert('Debug 版：請不要送單，等問題修復後再用正式版');
+      return;
     }
 
     window.onload = init;
