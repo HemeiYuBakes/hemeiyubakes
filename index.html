@@ -56,9 +56,6 @@
     .addon-gift-info { font-size: 13px; color: #4CAF50; margin-bottom: 8px; }
     .addon-select-row { display: flex; align-items: center; gap: 8px; }
     .addon-select-label { font-size: 13px; color: #555; flex: 1; }
-    /* DEBUG 區塊：顯示在頁面最下方，不卡載入 */
-    #debugBox { max-width: 450px; margin: 15px auto; padding: 12px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; font-size: 11px; color: #333; word-break: break-all; }
-    #debugBox pre { white-space: pre-wrap; word-break: break-all; margin: 5px 0; font-size: 10px; }
   </style>
 </head>
 <body>
@@ -130,13 +127,15 @@
     </div>
   </div>
 
-  <!-- DEBUG 區塊：永遠顯示在最下方，不卡載入 -->
-  <div id="debugBox">DEBUG 待載入...</div>
-
   <div class="version-tag" id="versionTag"></div>
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
+    // ============================================================
+    // ⚠️ 部署提醒：每次改完這個檔案，記得做兩件事：
+    //   1. 把下面的 APP_VERSION 改成新版本號
+    //   2. 同步把 Settings 工作表的「目前版本」改成相同版本號
+    // ============================================================
     const APP_VERSION = '1.2.0';
     const LIFF_ID = '2009988690-V5uuqIVX';
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
@@ -146,11 +145,6 @@
     let addonSelections = {};
 
     document.getElementById('versionTag').innerText = 'v' + APP_VERSION;
-
-    function dbg(msg) {
-      const box = document.getElementById('debugBox');
-      box.innerHTML += '<br>' + msg;
-    }
 
     function showError(msg) {
       document.getElementById('loading').style.display = 'none';
@@ -191,31 +185,18 @@
 
     async function init() {
       try {
-        document.getElementById('debugBox').innerHTML = 'DEBUG：開始 init';
         await liff.init({ liffId: LIFF_ID });
-        dbg('LIFF init OK');
         if (!liff.isLoggedIn()) { liff.login(); return; }
         const profile = await liff.getProfile();
         lineUserId = profile.userId;
-        dbg('Profile OK');
 
         const data = await loadJsonp(SCRIPT_URL + '?action=data');
-        dbg('API 回傳 OK');
         if (data.error) { showError('讀取失敗：' + data.error); return; }
 
         settingsData = data.settings;
         productsData = data.products;
         fieldsData = data.fields;
         addonsData = data.addons || [];
-
-        dbg('--- DATA 內容 ---');
-        dbg('settings keys: ' + Object.keys(settingsData).join(','));
-        dbg('products 數量: ' + productsData.length);
-        dbg('addons 數量: ' + addonsData.length);
-        dbg('addons[0] type: ' + (typeof data.addons));
-        dbg('addons[0] 內容: <pre>' + JSON.stringify(addonsData[0] || '無資料', null, 2) + '</pre>');
-        dbg('products[0] type: ' + (productsData[0] && productsData[0].type));
-        dbg('products[1] type: ' + (productsData[1] && productsData[1].type));
 
         if (checkVersionAndReload(settingsData['目前版本'])) return;
         sessionStorage.removeItem('hm_reloaded');
@@ -251,15 +232,9 @@
         renderAddons();
         updateShipping();
 
-        const addonGroup = document.getElementById('addonsGroup');
-        dbg('--- 渲染後 ---');
-        dbg('加購區塊 display: ' + addonGroup.style.display);
-        dbg('容器內容長度: ' + document.getElementById('addonsContainer').innerHTML.length);
-
         document.getElementById('loading').style.display = 'none';
         document.getElementById('app').style.display = 'block';
       } catch (e) {
-        dbg('!!! ERROR: ' + e.message);
         showError('錯誤：' + e.message);
       }
     }
