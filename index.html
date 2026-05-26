@@ -26,10 +26,42 @@
     .qty-row { display: flex; align-items: center; gap: 6px; }
     .qty-btn { width: 28px; height: 28px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5; font-size: 16px; cursor: pointer; }
     .qty-input { width: 40px; text-align: center; padding: 4px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+
+    /* 優惠進度區塊 */
+    .promo-section { background: #fffae6; border-radius: 10px; padding: 14px; margin-bottom: 18px; border: 1px solid #ffe082; }
+    .promo-title { font-weight: bold; color: #f57c00; margin-bottom: 10px; font-size: 1rem; }
+    .promo-item { background: #fff; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; line-height: 1.5; }
+    .promo-item:last-child { margin-bottom: 0; }
+    .promo-progress { color: #f57c00; }
+    .promo-achieved { color: #d32f2f; font-weight: bold; }
+    .promo-achieved-name { color: #f57c00; font-size: 12px; margin-top: 4px; }
+
+    /* 加購區塊 */
+    .addon-section { background: #fff8f0; border-radius: 10px; padding: 14px; margin-bottom: 18px; border: 1px solid #ffe0c0; }
+    .addon-title { font-weight: bold; color: #D32F2F; margin-bottom: 10px; font-size: 1rem; }
+    .addon-item { margin-bottom: 12px; }
+    .addon-item:last-child { margin-bottom: 0; }
+    .addon-name { font-weight: bold; color: #333; font-size: 14px; margin-bottom: 4px; }
+    .addon-desc { font-size: 12px; color: #888; margin-bottom: 8px; }
+    .addon-auto-info { font-size: 13px; color: #4caf50; background: #f0f9f0; padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; }
+    .addon-selectable { background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #eee; }
+    .addon-selectable-prompt { font-size: 13px; color: #555; margin-bottom: 8px; }
+    .addon-selectable-row { display: flex; align-items: center; gap: 8px; }
+    .addon-selectable-row .qty-btn { width: 32px; height: 32px; }
+    .addon-selectable-row .qty-input { width: 50px; font-size: 16px; padding: 6px; }
+    .addon-limit-hint { font-size: 12px; color: #888; margin-left: 8px; }
+
+    /* 贈品區塊 */
+    .gift-section { background: #fff5f5; border-radius: 10px; padding: 14px; margin-bottom: 18px; border: 1px solid #ffcdd2; }
+    .gift-title { font-weight: bold; color: #d32f2f; margin-bottom: 10px; font-size: 1rem; }
+    .gift-item { background: #fff; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+    .gift-item:last-child { margin-bottom: 0; }
+    .gift-name { color: #333; font-weight: bold; }
+    .gift-source { color: #888; font-size: 12px; }
+
     .subtotal-box { background: #fff8f8; border-radius: 10px; padding: 12px; margin-bottom: 18px; font-size: 14px; }
     .subtotal-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
     .subtotal-total { font-weight: bold; font-size: 16px; color: #D32F2F; border-top: 1px solid #eee; padding-top: 6px; margin-top: 6px; }
-    .gift-text { color: #4CAF50; font-size: 13px; }
     .opt-group { border: 1px solid #eee; padding: 10px; border-radius: 8px; }
     .opt-item { display: flex; align-items: center; margin: 8px 0; gap: 8px; }
     input[type="radio"], input[type="checkbox"] { width: auto; transform: scale(1.3); }
@@ -50,12 +82,6 @@
     #maintPage img { width: 100%; border-radius: 12px; margin-bottom: 20px; }
     #maintPage p { color: #666; font-size: 15px; }
     .version-tag { position: fixed; bottom: 5px; right: 8px; font-size: 10px; color: #ccc; z-index: 1; }
-    .addon-card { border: 1px solid #eee; border-radius: 10px; padding: 12px; margin-bottom: 10px; background: #fafafa; }
-    .addon-name { font-weight: bold; color: #333; font-size: 14px; margin-bottom: 4px; }
-    .addon-desc { font-size: 12px; color: #888; margin-bottom: 8px; }
-    .addon-gift-info { font-size: 13px; color: #4CAF50; margin-bottom: 8px; }
-    .addon-select-row { display: flex; align-items: center; gap: 8px; }
-    .addon-select-label { font-size: 13px; color: #555; flex: 1; }
   </style>
 </head>
 <body>
@@ -80,9 +106,22 @@
       <div class="product-grid" id="productGrid"></div>
     </div>
 
-    <div class="group" id="addonsGroup" style="display:none">
-      <label>🎁 加購選項</label>
-      <div id="addonsContainer"></div>
+    <!-- 優惠進度區塊 -->
+    <div class="promo-section" id="promoSection" style="display:none">
+      <div class="promo-title">🎉 優惠進度</div>
+      <div id="promoItems"></div>
+    </div>
+
+    <!-- 加購區塊 -->
+    <div class="addon-section" id="addonSection" style="display:none">
+      <div class="addon-title">🎁 紙袋</div>
+      <div id="addonItems"></div>
+    </div>
+
+    <!-- 贈品區塊（加購自動贈 + 優惠贈品） -->
+    <div class="gift-section" id="giftSection" style="display:none">
+      <div class="gift-title">🎁 贈品</div>
+      <div id="giftItems"></div>
     </div>
 
     <div class="subtotal-box" id="subtotalBox" style="display:none">
@@ -132,17 +171,18 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
     // ============================================================
-    // ⚠️ 部署提醒：每次改完這個檔案，記得做兩件事：
-    //   1. 把下面的 APP_VERSION 改成新版本號
+    // ⚠️ 部署提醒：每次改完這個檔案：
+    //   1. APP_VERSION 改成新版本號
     //   2. 同步把 Settings 工作表的「目前版本」改成相同版本號
     // ============================================================
-    const APP_VERSION = '1.2.0';
-    const LIFF_ID = '2009988690-V5uuqIVX';
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
+    const APP_VERSION = '1.3.0';
 
-    let fieldsData = [], productsData = [], settingsData = {}, addonsData = [], lineUserId = '';
-    let wasForcedTransfer = false;
+    const LIFF_ID = '2009988690-V5uuqIVX';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvr3VsqAjpgLEdi8-DScqBvWrG721bu4seKjq8QODUG0g-poQ4SDw60jYvk6QRh0-r/exec';
+
+    let fieldsData = [], productsData = [], settingsData = {}, addonsData = [], promotionsData = [], lineUserId = '';
     let addonSelections = {};
+    let wasForcedTransfer = false;
 
     document.getElementById('versionTag').innerText = 'v' + APP_VERSION;
 
@@ -197,6 +237,7 @@
         productsData = data.products;
         fieldsData = data.fields;
         addonsData = data.addons || [];
+        promotionsData = data.promotions || [];
 
         if (checkVersionAndReload(settingsData['目前版本'])) return;
         sessionStorage.removeItem('hm_reloaded');
@@ -225,13 +266,46 @@
 
         const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
         document.getElementById('thresholdAmt').innerText = threshold;
-
         initPaymentOptions();
-        renderProducts();
-        renderDynFields();
-        renderAddons();
-        updateShipping();
 
+        const grid = document.getElementById('productGrid');
+        productsData.forEach((p, i) => {
+          const limitText = p.maxQty > 0 ? `<div class="product-limit">限購 ${p.maxQty} 個</div>` : '';
+          grid.innerHTML += `
+            <div class="product-card" id="card_${i}">
+              <img src="${p.image}" onerror="this.style.display='none'">
+              <div class="product-info">
+                <div class="product-name">${p.name}</div>
+                <div class="product-price">NT$ ${p.price}</div>
+                ${limitText}
+                <div class="qty-row">
+                  <button class="qty-btn" onclick="changeQty(${i},-1)">－</button>
+                  <input class="qty-input" id="qty_${i}" type="number" value="0" min="0" ${p.maxQty > 0 ? 'max="' + p.maxQty + '"' : ''} onchange="updateTotal()">
+                  <button class="qty-btn" onclick="changeQty(${i},1)">＋</button>
+                </div>
+              </div>
+            </div>`;
+        });
+
+        const zone = document.getElementById('dynZone');
+        fieldsData.forEach(f => {
+          let html = `<div class="group"><label>${f.name}${f.req ? ' *' : ''}</label>`;
+          if (f.type === 'text') {
+            html += `<input name="${f.name}" ${f.req ? 'required' : ''}>`;
+          } else {
+            html += '<div class="opt-group">';
+            f.options.forEach(o => {
+              html += `<div class="opt-item"><input type="${f.type}" name="${f.name}" value="${o}"> ${o}</div>`;
+            });
+            html += '</div>';
+          }
+          zone.innerHTML += html + '</div>';
+        });
+
+        updateShipping();
+        renderAddons();
+        renderPromotions();
+        renderGifts();
         document.getElementById('loading').style.display = 'none';
         document.getElementById('app').style.display = 'block';
       } catch (e) {
@@ -254,43 +328,21 @@
       }
     }
 
-    function renderProducts() {
-      const grid = document.getElementById('productGrid');
-      productsData.forEach((p, i) => {
-        const limitText = p.maxQty > 0 ? `<div class="product-limit">限購 ${p.maxQty} 個</div>` : '';
-        grid.innerHTML += `
-          <div class="product-card" id="card_${i}">
-            <img src="${p.image}" onerror="this.style.display='none'">
-            <div class="product-info">
-              <div class="product-name">${p.name}</div>
-              <div class="product-price">NT$ ${p.price}</div>
-              ${limitText}
-              <div class="qty-row">
-                <button class="qty-btn" onclick="changeQty(${i},-1)">－</button>
-                <input class="qty-input" id="qty_${i}" type="number" value="0" min="0" ${p.maxQty > 0 ? 'max="' + p.maxQty + '"' : ''} onchange="updateAll()">
-                <button class="qty-btn" onclick="changeQty(${i},1)">＋</button>
-              </div>
-            </div>
-          </div>`;
-      });
+    function changeQty(i, delta) {
+      const input = document.getElementById('qty_' + i);
+      const max = productsData[i].maxQty;
+      let val = Math.max(0, parseInt(input.value || 0) + delta);
+      if (max > 0) val = Math.min(val, max);
+      input.value = val;
+      document.getElementById('card_' + i).classList.toggle('selected', val > 0);
+      updateTotal();
+      updateShipping();
+      renderAddons();
+      renderPromotions();
+      renderGifts();
     }
 
-    function renderDynFields() {
-      const zone = document.getElementById('dynZone');
-      fieldsData.forEach(f => {
-        let html = `<div class="group"><label>${f.name}${f.req ? ' *' : ''}</label>`;
-        if (f.type === 'text') {
-          html += `<input name="${f.name}" ${f.req ? 'required' : ''}>`;
-        } else {
-          html += '<div class="opt-group">';
-          f.options.forEach(o => {
-            html += `<div class="opt-item"><input type="${f.type}" name="${f.name}" value="${o}"> ${o}</div>`;
-          });
-          html += '</div>';
-        }
-        zone.innerHTML += html + '</div>';
-      });
-    }
+    // ========== 加購邏輯 ==========
 
     function parseGiftRules(rulesStr) {
       if (!rulesStr) return [];
@@ -301,142 +353,286 @@
       }).filter(r => r);
     }
 
-    function calculateAddons() {
-      const result = {};
-      const itemsWithType = productsData.map((p, i) => ({
-        name: p.name,
-        type: p.type,
-        qty: parseInt(document.getElementById('qty_' + i)?.value || 0)
-      }));
+    function calcAddonForProduct(addon) {
+      const rules = parseGiftRules(addon.giftRules);
+      let autoGifted = 0;
+      let maxSelectable = 0;
+      const autoTypes = [];
+      const selectTypes = [];
 
-      addonsData.forEach(addon => {
-        const rules = parseGiftRules(addon.giftRules);
-        let autoGifted = 0;
-        let maxUserSelectable = 0;
-
-        rules.forEach(rule => {
-          let matchingQty = 0;
-          itemsWithType.forEach(item => {
-            if (item.type === rule.type) matchingQty += item.qty;
-          });
-          if (rule.mode === 'auto') {
-            autoGifted += Math.floor(matchingQty / rule.n);
-          } else if (rule.mode === '選擇') {
-            maxUserSelectable += Math.floor(matchingQty / rule.n);
+      rules.forEach(rule => {
+        let matchingQty = 0;
+        productsData.forEach((p, i) => {
+          if (p.type === rule.type) {
+            const qty = parseInt(document.getElementById('qty_' + i)?.value || 0);
+            if (qty > 0) matchingQty += qty;
           }
         });
-
-        let userSelected = addonSelections[addon.name] || 0;
-        userSelected = Math.max(0, Math.min(userSelected, maxUserSelectable));
-        addonSelections[addon.name] = userSelected;
-
-        const paidQty = 0;
-        const paidAmount = paidQty * addon.price;
-
-        result[addon.name] = {
-          addon, autoGifted, userSelected, maxUserSelectable,
-          paidQty, paidAmount,
-          totalQty: autoGifted + userSelected + paidQty
-        };
+        if (rule.mode === 'auto') {
+          const gift = Math.floor(matchingQty / rule.n);
+          autoGifted += gift;
+          if (gift > 0) autoTypes.push({ type: rule.type, qty: matchingQty, gift: gift, n: rule.n });
+        } else if (rule.mode === '選擇') {
+          const maxSel = Math.floor(matchingQty / rule.n);
+          maxSelectable += maxSel;
+          if (maxSel > 0) selectTypes.push({ type: rule.type, qty: matchingQty, max: maxSel });
+        }
       });
 
-      return result;
-    }
+      let userSelected = addonSelections[addon.name] || 0;
+      userSelected = Math.max(0, Math.min(userSelected, maxSelectable));
+      userSelected = Math.min(userSelected, addon.maxQty);
+      addonSelections[addon.name] = userSelected;
 
-    function shouldShowAddon(addon, itemsWithType) {
-      const cond = (addon.showCondition || 'always').trim();
-      if (cond === 'always') return true;
-      const hasType = (typeName) => itemsWithType.some(it => it.type === typeName && it.qty > 0);
-      if (cond === '有罐裝') return hasType('罐裝');
-      if (cond === '有盒裝') return hasType('盒裝');
-      return true;
+      return {
+        autoGifted, maxSelectable, userSelected,
+        totalGifted: autoGifted + userSelected,
+        autoTypes, selectTypes
+      };
     }
 
     function renderAddons() {
-      const container = document.getElementById('addonsContainer');
-      const group = document.getElementById('addonsGroup');
+      const section = document.getElementById('addonSection');
+      const container = document.getElementById('addonItems');
 
-      const itemsWithType = productsData.map((p, i) => ({
-        name: p.name, type: p.type,
-        qty: parseInt(document.getElementById('qty_' + i)?.value || 0)
-      }));
+      const anySelected = productsData.some((p, i) =>
+        parseInt(document.getElementById('qty_' + i)?.value || 0) > 0
+      );
+      if (!anySelected || addonsData.length === 0) {
+        section.style.display = 'none';
+        return;
+      }
 
-      const calc = calculateAddons();
+      let anyAddonShown = false;
       let html = '';
-      let anyVisible = false;
 
       addonsData.forEach(addon => {
-        if (!shouldShowAddon(addon, itemsWithType)) return;
-        const r = calc[addon.name];
-        if (!r) return;
-        if (r.autoGifted === 0 && r.maxUserSelectable === 0) return;
+        if (!shouldShowAddon(addon)) return;
+        const calc = calcAddonForProduct(addon);
+        const hasAuto = calc.autoGifted > 0;
+        const hasSelectable = calc.maxSelectable > 0;
+        if (!hasAuto && !hasSelectable) return;
 
-        anyVisible = true;
-        html += `<div class="addon-card">`;
-        html += `<div class="addon-name">📦 ${addon.name}</div>`;
+        anyAddonShown = true;
+        let addonHtml = '<div class="addon-item">';
+        addonHtml += `<div class="addon-name">📦 ${addon.name}</div>`;
         if (addon.description) {
-          html += `<div class="addon-desc">${addon.description}</div>`;
+          addonHtml += `<div class="addon-desc">${addon.description}</div>`;
         }
 
-        if (r.autoGifted > 0) {
-          html += `<div class="addon-gift-info">✨ 自動贈送 ${r.autoGifted} 個</div>`;
+        if (hasAuto) {
+          const autoDesc = calc.autoTypes.map(t => `${t.type} ${t.qty} 個贈 ${t.gift} 個`).join('、');
+          addonHtml += `<div class="addon-auto-info">✨ 自動贈送：${calc.autoGifted} 個（${autoDesc}）</div>`;
         }
 
-        if (r.maxUserSelectable > 0) {
-          html += `<div class="addon-select-row">`;
-          html += `<span class="addon-select-label">要送禮嗎？選擇紙袋數量（最多 ${r.maxUserSelectable} 個）</span>`;
-          html += `</div>`;
-          html += `<div class="qty-row" style="margin-top:6px">`;
-          html += `<button class="qty-btn" onclick="changeAddonQty('${addon.name}', -1)">－</button>`;
-          html += `<input class="qty-input" type="number" id="addon_${addon.name}" value="${r.userSelected}" min="0" max="${r.maxUserSelectable}" onchange="onAddonQtyChange('${addon.name}', this.value)">`;
-          html += `<button class="qty-btn" onclick="changeAddonQty('${addon.name}', 1)">＋</button>`;
-          html += `</div>`;
+        if (hasSelectable) {
+          const selectDesc = calc.selectTypes.map(t => t.type).join('、');
+          addonHtml += `
+            <div class="addon-selectable">
+              <div class="addon-selectable-prompt">有送禮需求嗎？選擇 ${selectDesc} 需要的紙袋數量</div>
+              <div class="addon-selectable-row">
+                <button class="qty-btn" onclick="changeAddonQty('${addon.name}', -1)">－</button>
+                <input class="qty-input" id="addon_${addon.name}" type="number" value="${calc.userSelected}" min="0" max="${calc.maxSelectable}" onchange="onAddonInputChange('${addon.name}')">
+                <button class="qty-btn" onclick="changeAddonQty('${addon.name}', 1)">＋</button>
+                <span class="addon-limit-hint">最多 ${calc.maxSelectable} 個</span>
+              </div>
+            </div>`;
         }
 
-        html += `</div>`;
+        addonHtml += '</div>';
+        html += addonHtml;
       });
 
+      section.style.display = anyAddonShown ? 'block' : 'none';
       container.innerHTML = html;
-      group.style.display = anyVisible ? 'block' : 'none';
+    }
+
+    function shouldShowAddon(addon) {
+      const cond = (addon.showCondition || 'always').trim();
+      if (cond === 'always') return true;
+      if (cond.startsWith('有')) {
+        const type = cond.substring(1);
+        return productsData.some((p, i) =>
+          p.type === type && parseInt(document.getElementById('qty_' + i)?.value || 0) > 0
+        );
+      }
+      return true;
     }
 
     function changeAddonQty(addonName, delta) {
-      const calc = calculateAddons();
-      const r = calc[addonName];
-      const current = addonSelections[addonName] || 0;
-      const newVal = Math.max(0, Math.min(current + delta, r.maxUserSelectable));
-      addonSelections[addonName] = newVal;
-      updateAll();
-    }
-
-    function onAddonQtyChange(addonName, value) {
-      const calc = calculateAddons();
-      const r = calc[addonName];
-      const newVal = Math.max(0, Math.min(parseInt(value) || 0, r.maxUserSelectable));
-      addonSelections[addonName] = newVal;
-      updateAll();
-    }
-
-    function changeQty(i, delta) {
-      const input = document.getElementById('qty_' + i);
-      const max = productsData[i].maxQty;
+      const input = document.getElementById('addon_' + addonName);
+      if (!input) return;
+      const max = parseInt(input.max) || 0;
       let val = Math.max(0, parseInt(input.value || 0) + delta);
-      if (max > 0) val = Math.min(val, max);
-      input.value = val;
-      document.getElementById('card_' + i).classList.toggle('selected', val > 0);
-      updateAll();
+      val = Math.min(val, max);
+      addonSelections[addonName] = val;
+      renderAddons();
+      renderGifts();
+      updateTotal();
     }
 
-    function updateAll() {
+    function onAddonInputChange(addonName) {
+      const input = document.getElementById('addon_' + addonName);
+      if (!input) return;
+      const max = parseInt(input.max) || 0;
+      let val = Math.max(0, parseInt(input.value || 0));
+      val = Math.min(val, max);
+      addonSelections[addonName] = val;
       renderAddons();
+      renderGifts();
       updateTotal();
-      updateShipping();
+    }
+
+    // ========== 優惠邏輯 ==========
+
+    /**
+     * 計算每筆優惠的觸發狀態
+     * @return [{promo, qualifyQty/qualifyAmount, giftQty, triggered, remaining}]
+     */
+    function calcPromotions() {
+      const items = getSelectedItems();
+      const results = [];
+
+      promotionsData.forEach(promo => {
+        let qualifyQty = 0, qualifyAmount = 0, giftQty = 0, triggered = false;
+        let remaining = 0;  // 還差多少達標
+
+        if (promo.conditionType === '滿件') {
+          const conditionProducts = promo.conditionProduct
+            ? promo.conditionProduct.split(',').map(s => s.trim())
+            : [];
+          let matched = 0;
+          items.forEach(item => {
+            if (conditionProducts.length === 0 || conditionProducts.indexOf(item.name) >= 0) {
+              matched += item.qty;
+            }
+          });
+          qualifyQty = matched;
+          if (matched >= promo.conditionQty && promo.conditionQty > 0) {
+            triggered = true;
+            giftQty = promo.multipleTrigger
+              ? Math.floor(matched / promo.conditionQty) * promo.giftQty
+              : promo.giftQty;
+          } else {
+            remaining = promo.conditionQty - matched;
+          }
+        } else if (promo.conditionType === '滿額') {
+          const conditionProducts = promo.conditionProduct
+            ? promo.conditionProduct.split(',').map(s => s.trim())
+            : [];
+          let matched = 0;
+          items.forEach(item => {
+            if (conditionProducts.length === 0 || conditionProducts.indexOf(item.name) >= 0) {
+              matched += (item.price || 0) * item.qty;
+            }
+          });
+          qualifyAmount = matched;
+          if (matched >= promo.conditionAmount && promo.conditionAmount > 0) {
+            triggered = true;
+            giftQty = promo.multipleTrigger
+              ? Math.floor(matched / promo.conditionAmount) * promo.giftQty
+              : promo.giftQty;
+          } else {
+            remaining = promo.conditionAmount - matched;
+          }
+        }
+
+        results.push({ promo, qualifyQty, qualifyAmount, giftQty, triggered, remaining });
+      });
+
+      return results;
+    }
+
+    /**
+     * 渲染優惠進度區塊
+     * 邏輯：
+     *   - 達標 → 顯示「🎊 已達 OO → 贈送 X」
+     *   - 未達標但在門檻內 → 顯示「✨ 再買 X 就達標」
+     *   - 未達標且超出門檻 → 不顯示
+     */
+    function renderPromotions() {
+      const section = document.getElementById('promoSection');
+      const container = document.getElementById('promoItems');
+
+      const results = calcPromotions();
+      let html = '';
+      let anyShown = false;
+
+      results.forEach(r => {
+        if (r.triggered) {
+          // 達標
+          html += `
+            <div class="promo-item">
+              <div class="promo-achieved">🎊 已達「${r.promo.name}」</div>
+              <div class="promo-achieved-name">贈送 ${r.promo.giftName} x${r.giftQty}</div>
+            </div>`;
+          anyShown = true;
+        } else {
+          // 未達標，看是否在門檻範圍內
+          const threshold = r.promo.progressThreshold || 0;
+          if (threshold > 0 && r.remaining > 0 && r.remaining <= threshold) {
+            const unit = r.promo.conditionType === '滿額' ? '元' : '個';
+            html += `
+              <div class="promo-item promo-progress">
+                ✨ 再買 ${r.remaining} ${unit}就達「${r.promo.name}」
+              </div>`;
+            anyShown = true;
+          }
+        }
+      });
+
+      section.style.display = anyShown ? 'block' : 'none';
+      container.innerHTML = html;
+    }
+
+    // ========== 贈品區塊（合併加購贈品 + 優惠贈品） ==========
+
+    function renderGifts() {
+      const section = document.getElementById('giftSection');
+      const container = document.getElementById('giftItems');
+
+      let html = '';
+      let anyGift = false;
+
+      // 加購自動贈 + 客人選擇贈
+      addonsData.forEach(addon => {
+        if (!shouldShowAddon(addon)) return;
+        const calc = calcAddonForProduct(addon);
+        if (calc.totalGifted > 0) {
+          anyGift = true;
+          html += `
+            <div class="gift-item">
+              <div>
+                <span class="gift-name">${addon.name} x${calc.totalGifted}</span>
+                <span class="gift-source">（贈品）</span>
+              </div>
+            </div>`;
+        }
+      });
+
+      // 優惠贈品
+      const promoResults = calcPromotions();
+      promoResults.forEach(r => {
+        if (r.triggered && r.giftQty > 0) {
+          anyGift = true;
+          html += `
+            <div class="gift-item">
+              <div>
+                <span class="gift-name">${r.promo.giftName} x${r.giftQty}</span>
+                <span class="gift-source">（${r.promo.name}）</span>
+              </div>
+            </div>`;
+        }
+      });
+
+      section.style.display = anyGift ? 'block' : 'none';
+      container.innerHTML = html;
     }
 
     function updateTotal() {
       let subtotal = 0, itemsHtml = '', hasItem = false;
       productsData.forEach((p, i) => {
-        const qty = parseInt(document.getElementById('qty_' + i).value || 0);
+        const qty = parseInt(document.getElementById('qty_' + i)?.value || 0);
         if (qty > 0) {
           hasItem = true;
           const sub = p.price * qty;
@@ -445,26 +641,9 @@
         }
       });
 
-      const calc = calculateAddons();
-      let addonPaidTotal = 0;
-      const giftLines = [];
-      Object.keys(calc).forEach(name => {
-        const r = calc[name];
-        if (r.totalQty > 0) {
-          const breakdown = [];
-          if (r.autoGifted > 0) breakdown.push(`自動贈 ${r.autoGifted}`);
-          if (r.userSelected > 0) breakdown.push(`贈送 ${r.userSelected}`);
-          if (r.paidQty > 0) breakdown.push(`加購 ${r.paidQty}`);
-          giftLines.push(`<div class="subtotal-row gift-text"><span>${name} x${r.totalQty}（${breakdown.join('+')}）</span><span>${r.paidAmount > 0 ? r.paidAmount + ' 元' : '免費'}</span></div>`);
-          addonPaidTotal += r.paidAmount;
-        }
-      });
-      if (giftLines.length > 0) {
-        itemsHtml += giftLines.join('');
-      }
+      const total = subtotal;
 
-      const total = subtotal + addonPaidTotal;
-      document.getElementById('subtotalBox').style.display = (hasItem || giftLines.length > 0) ? 'block' : 'none';
+      document.getElementById('subtotalBox').style.display = hasItem ? 'block' : 'none';
       document.getElementById('subtotalItems').innerHTML = itemsHtml;
       document.getElementById('totalAmt').innerText = total + ' 元';
 
@@ -482,6 +661,7 @@
 
       const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
       const shouldForce = threshold > 0 && total >= threshold;
+
       if (shouldForce) {
         cashItem.style.display = 'none';
         transferRadio.checked = true;
@@ -531,7 +711,7 @@
 
     function getSelectedItems() {
       return productsData.map((p, i) => ({
-        name: p.name, price: p.price,
+        name: p.name, price: p.price, type: p.type,
         qty: parseInt(document.getElementById('qty_' + i).value || 0)
       })).filter(i => i.qty > 0);
     }
@@ -540,7 +720,7 @@
       const name = document.getElementById('name').value.trim();
       const tel = document.getElementById('tel').value.trim();
       if (!name) { alert('請填寫姓名'); return; }
-      if (!/^09\d{8}$/.test(tel)) { alert('手機號碼格式不正確'); return; }
+      if (!/^09\d{8}$/.test(tel)) { alert('手機號碼格式不正確，請輸入09開頭的10位數字'); return; }
       const items = getSelectedItems();
       if (items.length === 0) { alert('請至少選擇一項商品'); return; }
       const shipping = document.querySelector('input[name="shipping"]:checked')?.value || '';
@@ -548,32 +728,32 @@
       const address = document.getElementById('address').value.trim();
       const needAddress = shipping && shipping !== '現場取貨';
       if (needAddress && !address) { alert('請填寫收件地址'); return; }
-
       const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-      const calc = calculateAddons();
-      let addonPaidTotal = 0;
+
+      // 整理贈品（加購 + 優惠）
       const giftLines = [];
-      Object.keys(calc).forEach(name => {
-        const r = calc[name];
-        if (r.totalQty > 0) {
-          const breakdown = [];
-          if (r.autoGifted > 0) breakdown.push(`自動贈 ${r.autoGifted}`);
-          if (r.userSelected > 0) breakdown.push(`贈送 ${r.userSelected}`);
-          if (r.paidQty > 0) breakdown.push(`加購 ${r.paidQty}`);
-          giftLines.push(`${name} x${r.totalQty}（${breakdown.join('+')}）${r.paidAmount > 0 ? '：' + r.paidAmount + ' 元' : ''}`);
-          addonPaidTotal += r.paidAmount;
+      addonsData.forEach(addon => {
+        if (!shouldShowAddon(addon)) return;
+        const calc = calcAddonForProduct(addon);
+        if (calc.totalGifted > 0) {
+          giftLines.push(`${addon.name} x${calc.totalGifted}（贈品）`);
         }
       });
-      const total = subtotal + addonPaidTotal;
+      calcPromotions().forEach(r => {
+        if (r.triggered && r.giftQty > 0) {
+          giftLines.push(`${r.promo.giftName} x${r.giftQty}（${r.promo.name}）`);
+        }
+      });
 
       let html = `
         <div class="confirm-row"><span class="confirm-label">姓名</span><span>${name}</span></div>
         <div class="confirm-row"><span class="confirm-label">電話</span><span>${tel}</span></div>
         <div class="confirm-row"><span class="confirm-label">商品</span><span>${items.map(i => i.name + ' x' + i.qty).join('<br>')}</span></div>`;
       if (giftLines.length > 0) {
-        html += `<div class="confirm-row"><span class="confirm-label">贈品/加購</span><span>${giftLines.join('<br>')}</span></div>`;
+        html += `<div class="confirm-row"><span class="confirm-label">🎁 贈品</span><span>${giftLines.join('<br>')}</span></div>`;
       }
-      html += `<div class="confirm-row"><span class="confirm-label">總金額</span><span style="color:#D32F2F;font-weight:bold">${total} 元</span></div>
+      html += `
+        <div class="confirm-row"><span class="confirm-label">總金額</span><span style="color:#D32F2F;font-weight:bold">${subtotal} 元</span></div>
         <div class="confirm-row"><span class="confirm-label">付款方式</span><span>${payment}</span></div>
         <div class="confirm-row"><span class="confirm-label">運送方式</span><span>${shipping}</span></div>`;
       if (address) html += `<div class="confirm-row"><span class="confirm-label">地址</span><span>${address}</span></div>`;
@@ -597,8 +777,6 @@
       btn.disabled = true;
       btn.textContent = '傳送中...';
       const items = getSelectedItems();
-      const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-
       let dynStr = '';
       fieldsData.forEach(f => {
         const v = f.type === 'text'
@@ -611,14 +789,14 @@
         action: 'submitOrder',
         name: document.getElementById('name').value.trim(),
         tel: document.getElementById('tel').value.trim(),
-        items, total: subtotal,
+        items,
         payment: document.querySelector('input[name="payment"]:checked')?.value || '匯款',
         shipping: document.querySelector('input[name="shipping"]:checked')?.value || '',
         address: document.getElementById('address').value.trim(),
         dyn: dynStr,
         note: document.getElementById('note').value.trim(),
+        addonSelections: addonSelections,
         lineUserId,
-        addonSelections,
         appVersion: APP_VERSION
       };
 
