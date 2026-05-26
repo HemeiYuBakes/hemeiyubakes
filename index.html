@@ -269,7 +269,7 @@
                 ${limitText}
                 <div class="qty-row">
                   <button class="qty-btn" onclick="changeQty(${i},-1)">－</button>
-                  <input class="qty-input" id="qty_${i}" type="number" value="0" min="0" ${p.maxQty > 0 ? 'max="' + p.maxQty + '"' : ''} onchange="onProductQtyChange(${i})" oninput="onProductQtyChange(${i})">
+                  <input class="qty-input" id="qty_${i}" type="number" value="0" min="0" ${p.maxQty > 0 ? 'max="' + p.maxQty + '"' : ''} onchange="onProductQtyChange(${i})" oninput="onProductQtyChange(${i})" onblur="onProductQtyBlur(${i})">
                   <button class="qty-btn" onclick="changeQty(${i},1)">＋</button>
                 </div>
               </div>
@@ -344,15 +344,27 @@
      * 加上 oninput 支援即時更新（onchange 要按 Tab/失焦才觸發）
      */
     function onProductQtyChange(i) {
-      const input = document.getElementById('qty_' + i);
-      const max = productsData[i].maxQty;
-      let val = Math.max(0, parseInt(input.value || 0));
-      if (max > 0) val = Math.min(val, max);
-      if (isNaN(val)) val = 0;
-      input.value = val;
-      document.getElementById('card_' + i).classList.toggle('selected', val > 0);
-      refreshAll();
-    }
+  const input = document.getElementById('qty_' + i);
+  const max = productsData[i].maxQty;
+  let val = parseInt(input.value);
+  if (isNaN(val) || val < 0) val = 0;
+  if (max > 0 && val > max) val = max;
+  // 注意：這裡不要設定 input.value = val
+  // 只在失焦時（onBlur）才修正
+  document.getElementById('card_' + i).classList.toggle('selected', val > 0);
+  refreshAll();
+}
+
+function onProductQtyBlur(i) {
+  const input = document.getElementById('qty_' + i);
+  const max = productsData[i].maxQty;
+  let val = parseInt(input.value);
+  if (isNaN(val) || val < 0) val = 0;
+  if (max > 0 && val > max) val = max;
+  input.value = val;  // 失焦才強制修正
+  document.getElementById('card_' + i).classList.toggle('selected', val > 0);
+  refreshAll();
+}
 
     // ========== 加購邏輯 ==========
 
