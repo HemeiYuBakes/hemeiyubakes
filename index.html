@@ -27,14 +27,11 @@
     .qty-btn { width: 28px; height: 28px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5; font-size: 16px; cursor: pointer; }
     .qty-input { width: 40px; text-align: center; padding: 4px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
 
-    /* 優惠進度區塊 */
     .promo-section { background: #fffae6; border-radius: 10px; padding: 14px; margin-bottom: 18px; border: 1px solid #ffe082; }
     .promo-title { font-weight: bold; color: #f57c00; margin-bottom: 10px; font-size: 1rem; }
-    .promo-item { background: #fff; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; line-height: 1.5; }
+    .promo-item { background: #fff; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; line-height: 1.5; color: #f57c00; }
     .promo-item:last-child { margin-bottom: 0; }
-    .promo-progress { color: #f57c00; }
 
-    /* 加購區塊 */
     .addon-section { background: #fff8f0; border-radius: 10px; padding: 14px; margin-bottom: 18px; border: 1px solid #ffe0c0; }
     .addon-title { font-weight: bold; color: #D32F2F; margin-bottom: 10px; font-size: 1rem; }
     .addon-item { margin-bottom: 12px; }
@@ -50,9 +47,9 @@
     .addon-limit-hint { font-size: 12px; color: #888; margin-left: 8px; }
 
     .subtotal-box { background: #fff8f8; border-radius: 10px; padding: 12px; margin-bottom: 18px; font-size: 14px; }
-    .subtotal-row { display: flex; justify-content: space-between; margin-bottom: 4px; padding: 6px 8px; border-radius: 6px; }
+    .subtotal-row { display: flex; justify-content: space-between; margin-bottom: 4px; padding: 4px 8px; border-radius: 6px; }
     .subtotal-row.gift-row { background: #fff5f5; color: #d32f2f; }
-    .gift-icon { color: #d32f2f; font-weight: bold; margin-right: 4px; }
+    .gift-icon { margin-right: 4px; }
     .gift-source { color: #888; font-size: 12px; font-weight: normal; }
     .subtotal-total { font-weight: bold; font-size: 16px; color: #D32F2F; border-top: 1px solid #eee; padding-top: 6px; margin-top: 6px; }
     .opt-group { border: 1px solid #eee; padding: 10px; border-radius: 8px; }
@@ -99,19 +96,16 @@
       <div class="product-grid" id="productGrid"></div>
     </div>
 
-    <!-- 優惠進度區塊（只在「未達標但在門檻內」時顯示）-->
     <div class="promo-section" id="promoSection" style="display:none">
       <div class="promo-title">🎉 優惠進度</div>
       <div id="promoItems"></div>
     </div>
 
-    <!-- 加購區塊 -->
     <div class="addon-section" id="addonSection" style="display:none">
       <div class="addon-title">🎁 紙袋</div>
       <div id="addonItems"></div>
     </div>
 
-    <!-- 訂單明細 + 贈品（合併在一起）-->
     <div class="subtotal-box" id="subtotalBox" style="display:none">
       <div id="subtotalItems"></div>
       <div id="subtotalGifts"></div>
@@ -164,7 +158,7 @@
     //   1. APP_VERSION 改成新版本號
     //   2. 同步把 Settings 工作表的「目前版本」改成相同版本號
     // ============================================================
-    const APP_VERSION = '1.3.1';
+    const APP_VERSION = '1.3.2';
 
     const LIFF_ID = '2009988690-V5uuqIVX';
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvr3VsqAjpgLEdi8-DScqBvWrG721bu4seKjq8QODUG0g-poQ4SDw60jYvk6QRh0-r/exec';
@@ -269,7 +263,7 @@
                 ${limitText}
                 <div class="qty-row">
                   <button class="qty-btn" onclick="changeQty(${i},-1)">－</button>
-                  <input class="qty-input" id="qty_${i}" type="number" value="0" min="0" ${p.maxQty > 0 ? 'max="' + p.maxQty + '"' : ''} onchange="onProductQtyChange(${i})" oninput="onProductQtyChange(${i})" onblur="onProductQtyBlur(${i})">
+                  <input class="qty-input" id="qty_${i}" type="number" value="0" min="0" ${p.maxQty > 0 ? 'max="' + p.maxQty + '"' : ''} onchange="onProductQtyChange(${i})">
                   <button class="qty-btn" onclick="changeQty(${i},1)">＋</button>
                 </div>
               </div>
@@ -316,19 +310,16 @@
     }
 
     /**
-     * 統一的「全部重新渲染」函式
-     * 任何商品數量、加購數量變化，都呼叫這個函式
+     * 統一的全部重新渲染入口
+     * 順序：先 updateShipping → renderAddons → renderPromotions → updateTotal
      */
     function refreshAll() {
-      updateTotal();
       updateShipping();
       renderAddons();
       renderPromotions();
+      updateTotal();
     }
 
-    /**
-     * 商品數量按 +/- 觸發
-     */
     function changeQty(i, delta) {
       const input = document.getElementById('qty_' + i);
       const max = productsData[i].maxQty;
@@ -339,34 +330,16 @@
       refreshAll();
     }
 
-    /**
-     * 商品數量被直接輸入時觸發（修 bug：之前只呼叫 updateTotal、漏了贈品/優惠）
-     * 加上 oninput 支援即時更新（onchange 要按 Tab/失焦才觸發）
-     */
     function onProductQtyChange(i) {
-  const input = document.getElementById('qty_' + i);
-  const max = productsData[i].maxQty;
-  let val = parseInt(input.value);
-  if (isNaN(val) || val < 0) val = 0;
-  if (max > 0 && val > max) val = max;
-  // 注意：這裡不要設定 input.value = val
-  // 只在失焦時（onBlur）才修正
-  document.getElementById('card_' + i).classList.toggle('selected', val > 0);
-  refreshAll();
-}
-
-function onProductQtyBlur(i) {
-  const input = document.getElementById('qty_' + i);
-  const max = productsData[i].maxQty;
-  let val = parseInt(input.value);
-  if (isNaN(val) || val < 0) val = 0;
-  if (max > 0 && val > max) val = max;
-  input.value = val;  // 失焦才強制修正
-  document.getElementById('card_' + i).classList.toggle('selected', val > 0);
-  refreshAll();
-}
-
-    // ========== 加購邏輯 ==========
+      const input = document.getElementById('qty_' + i);
+      const max = productsData[i].maxQty;
+      let val = parseInt(input.value);
+      if (isNaN(val) || val < 0) val = 0;
+      if (max > 0 && val > max) val = max;
+      input.value = val;
+      document.getElementById('card_' + i).classList.toggle('selected', val > 0);
+      refreshAll();
+    }
 
     function parseGiftRules(rulesStr) {
       if (!rulesStr) return [];
@@ -456,7 +429,7 @@ function onProductQtyBlur(i) {
               <div class="addon-selectable-prompt">有送禮需求嗎？選擇 ${selectDesc} 需要的紙袋數量</div>
               <div class="addon-selectable-row">
                 <button class="qty-btn" onclick="changeAddonQty('${addon.name}', -1)">－</button>
-                <input class="qty-input" id="addon_${addon.name}" type="number" value="${calc.userSelected}" min="0" max="${calc.maxSelectable}" onchange="onAddonInputChange('${addon.name}')" oninput="onAddonInputChange('${addon.name}')">
+                <input class="qty-input" id="addon_${addon.name}" type="number" value="${calc.userSelected}" min="0" max="${calc.maxSelectable}" onchange="onAddonInputChange('${addon.name}')">
                 <button class="qty-btn" onclick="changeAddonQty('${addon.name}', 1)">＋</button>
                 <span class="addon-limit-hint">最多 ${calc.maxSelectable} 個</span>
               </div>
@@ -497,14 +470,12 @@ function onProductQtyBlur(i) {
       const input = document.getElementById('addon_' + addonName);
       if (!input) return;
       const max = parseInt(input.max) || 0;
-      let val = Math.max(0, parseInt(input.value || 0));
-      if (isNaN(val)) val = 0;
+      let val = parseInt(input.value);
+      if (isNaN(val) || val < 0) val = 0;
       val = Math.min(val, max);
       addonSelections[addonName] = val;
       refreshAll();
     }
-
-    // ========== 優惠邏輯 ==========
 
     function calcPromotions() {
       const items = getSelectedItems();
@@ -562,10 +533,8 @@ function onProductQtyBlur(i) {
 
     /**
      * 渲染優惠進度區塊
-     * 新版邏輯：
-     *   - 達標 → 不顯示（資訊已在訂單明細的贈品列）
-     *   - 未達標但在門檻內 → 顯示「再買 X 就達標」
-     *   - 未達標且超出門檻 → 不顯示
+     * 只在「未達標但接近門檻」時顯示
+     * 達標後此區塊隱藏（贈品資訊改顯示在訂單明細的贈品列）
      */
     function renderPromotions() {
       const section = document.getElementById('promoSection');
@@ -576,14 +545,11 @@ function onProductQtyBlur(i) {
       let anyShown = false;
 
       results.forEach(r => {
-        if (r.triggered) return;  // 達標不顯示
+        if (r.triggered) return;
         const threshold = r.promo.progressThreshold || 0;
         if (threshold > 0 && r.remaining > 0 && r.remaining <= threshold) {
           const unit = r.promo.conditionType === '滿額' ? '元' : '個';
-          html += `
-            <div class="promo-item promo-progress">
-              ✨ 再買 ${r.remaining} ${unit}就達「${r.promo.name}」
-            </div>`;
+          html += `<div class="promo-item">✨ 再買 ${r.remaining} ${unit}就達「${r.promo.name}」</div>`;
           anyShown = true;
         }
       });
@@ -593,13 +559,12 @@ function onProductQtyBlur(i) {
     }
 
     /**
-     * 取得所有要顯示在明細的「贈品列」HTML
-     * 合併：加購自動贈 + 客人選擇贈 + 優惠贈品
+     * 組合「贈品列」HTML 加到訂單明細
+     * 包括：加購自動贈、加購選擇贈、優惠贈品
      */
     function buildGiftRowsHtml() {
       let html = '';
 
-      // 加購贈品（紙袋）
       addonsData.forEach(addon => {
         if (!shouldShowAddon(addon)) return;
         const calc = calcAddonForProduct(addon);
@@ -612,7 +577,6 @@ function onProductQtyBlur(i) {
         }
       });
 
-      // 優惠贈品
       const promoResults = calcPromotions();
       promoResults.forEach(r => {
         if (r.triggered && r.giftQty > 0) {
@@ -680,7 +644,7 @@ function onProductQtyBlur(i) {
     function updateShipping() {
       const methods = new Set();
       productsData.forEach((p, i) => {
-        if (parseInt(document.getElementById('qty_' + i).value || 0) > 0) {
+        if (parseInt(document.getElementById('qty_' + i)?.value || 0) > 0) {
           p.shipping.split(',').forEach(m => methods.add(m.trim()));
         }
       });
@@ -688,16 +652,23 @@ function onProductQtyBlur(i) {
         productsData.forEach(p => p.shipping.split(',').forEach(m => methods.add(m.trim())));
       }
       const container = document.getElementById('shippingOptions');
+      const prevValue = document.querySelector('input[name="shipping"]:checked')?.value || '';
       container.innerHTML = '';
-      let first = true;
+      let foundPrev = false;
       methods.forEach(m => {
+        const checked = m === prevValue ? 'checked' : '';
+        if (checked) foundPrev = true;
         container.innerHTML += `
           <div class="opt-item">
-            <input type="radio" name="shipping" value="${m}" id="ship_${m}" onchange="toggleAddress()" ${first ? 'checked' : ''}>
+            <input type="radio" name="shipping" value="${m}" id="ship_${m}" onchange="toggleAddress()" ${checked}>
             <label for="ship_${m}" style="color:#333;font-weight:normal;margin:0">${m}</label>
           </div>`;
-        first = false;
       });
+      // 如果之前選的方式不在新清單中，預設選第一個
+      if (!foundPrev) {
+        const first = container.querySelector('input[name="shipping"]');
+        if (first) first.checked = true;
+      }
       toggleAddress();
     }
 
@@ -711,7 +682,7 @@ function onProductQtyBlur(i) {
     function getSelectedItems() {
       return productsData.map((p, i) => ({
         name: p.name, price: p.price, type: p.type,
-        qty: parseInt(document.getElementById('qty_' + i).value || 0)
+        qty: parseInt(document.getElementById('qty_' + i)?.value || 0)
       })).filter(i => i.qty > 0);
     }
 
@@ -729,7 +700,6 @@ function onProductQtyBlur(i) {
       if (needAddress && !address) { alert('請填寫收件地址'); return; }
       const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
 
-      // 整理贈品列（不分加購/優惠來源，統一顯示）
       const giftLines = [];
       addonsData.forEach(addon => {
         if (!shouldShowAddon(addon)) return;
@@ -744,7 +714,6 @@ function onProductQtyBlur(i) {
         }
       });
 
-      // 商品列加上贈品列
       const itemsDisplay = items.map(i => i.name + ' x' + i.qty).join('<br>');
       const giftsDisplay = giftLines.length > 0
         ? '<br><span style="color:#d32f2f">🎁 ' + giftLines.join('<br>🎁 ') + '</span>'
