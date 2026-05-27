@@ -160,7 +160,7 @@
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvr3VsqAjpgLEdi8-DScqBvWrG721bu4seKjq8QODUG0g-poQ4SDw60jYvk6QRh0-r/exec';
 
 let PASSWORD = '';
 let PRODUCTS = [];
@@ -416,11 +416,13 @@ async function callServer(action, params) {
     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
   });
   const text = await res.text();
-  let data;
-  try { data = JSON.parse(text); }
-  catch (e) { throw new Error('回應格式錯誤：' + text.slice(0, 200)); }
-  if (data.status === 'ERROR') throw new Error(data.message);
-  return data.result !== undefined ? data.result : data;
+  try {
+    const data = JSON.parse(text);
+    if (data.error) throw new Error(data.error);
+    return data.result !== undefined ? data.result : data;
+  } catch (e) {
+    throw new Error(text.slice(0, 200));
+  }
 }
 </script>
 
