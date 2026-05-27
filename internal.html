@@ -8,57 +8,97 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
-    background: #f5f5f0;
-    color: #333;
-    padding: 16px;
-    max-width: 720px;
-    margin: 0 auto;
+    background: #f4f4f4; color: #333; padding: 15px;
+    max-width: 480px; margin: 0 auto;
   }
-  h1 { font-size: 20px; margin-bottom: 12px; color: #6b4423; }
-  h2 { font-size: 16px; margin: 16px 0 8px; color: #6b4423; border-bottom: 2px solid #d4a574; padding-bottom: 4px; }
-  .card { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-  label { display: block; font-size: 14px; margin-bottom: 4px; color: #555; }
+  h1 { font-size: 20px; margin-bottom: 12px; color: #D32F2F; text-align: center; }
+  h2 { font-size: 16px; margin: 0 0 10px; color: #D32F2F; }
+  .card { background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 12px; }
+  label { display: block; font-weight: bold; margin-bottom: 6px; color: #D32F2F; font-size: 14px; }
   input, select, textarea {
-    width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px;
-    font-size: 15px; font-family: inherit;
+    width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;
+    font-size: 16px; font-family: inherit;
   }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: #d4a574; }
-  .row { margin-bottom: 10px; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #D32F2F; }
+  .row { margin-bottom: 12px; }
   .row-flex { display: flex; gap: 8px; }
-  .row-flex > * { flex: 1; }
   button {
-    background: #d4a574; color: #fff; border: none; padding: 10px 16px;
-    border-radius: 4px; font-size: 15px; cursor: pointer; font-family: inherit;
+    background: #D32F2F; color: #fff; border: none; padding: 10px 16px;
+    border-radius: 8px; font-size: 15px; cursor: pointer; font-family: inherit;
   }
-  button:hover { background: #b8895d; }
-  button.secondary { background: #888; }
-  button.small { padding: 6px 10px; font-size: 13px; }
+  button.small { padding: 6px 12px; font-size: 13px; }
   .hint { font-size: 12px; color: #888; margin-top: 4px; }
   .customer-info {
-    background: #faf6ef; border-left: 3px solid #d4a574;
-    padding: 8px 12px; margin-top: 8px; font-size: 13px;
+    background: #fff8f8; border-left: 3px solid #D32F2F;
+    padding: 8px 12px; margin-top: 8px; font-size: 13px; border-radius: 4px;
   }
-  .item-row, .addon-row {
-    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
-    padding: 6px; background: #faf8f3; border-radius: 4px;
+
+  /* 商品卡 */
+  .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .product-card { border: 2px solid #eee; border-radius: 10px; overflow: hidden; }
+  .product-card.selected { border-color: #D32F2F; }
+  .product-card img { width: 100%; height: 100px; object-fit: cover; background: #eee; display: block; }
+  .product-info { padding: 8px; }
+  .product-name { font-size: 13px; font-weight: bold; color: #333; margin-bottom: 4px; }
+  .product-price { font-size: 13px; color: #D32F2F; margin-bottom: 6px; }
+  .product-limit { font-size: 11px; color: #888; margin-bottom: 6px; }
+  .qty-row { display: flex; align-items: center; gap: 6px; }
+  .qty-btn {
+    width: 28px; height: 28px; border: 1px solid #ddd; border-radius: 6px;
+    background: #f5f5f5; font-size: 16px; cursor: pointer; color: #333; padding: 0;
   }
-  .item-row .name { flex: 1; font-size: 14px; }
-  .item-row .price { color: #888; font-size: 13px; }
-  .qty-control { display: flex; align-items: center; gap: 4px; }
-  .qty-control button {
-    width: 28px; height: 28px; padding: 0; font-size: 16px; line-height: 1;
+  .qty-input {
+    width: 40px; text-align: center; padding: 4px; border: 1px solid #ddd;
+    border-radius: 6px; font-size: 14px;
   }
-  .qty-control span { min-width: 24px; text-align: center; }
-  .total-box { background: #fff8e7; padding: 12px; border-radius: 6px; }
-  .total-line { display: flex; justify-content: space-between; padding: 3px 0; font-size: 14px; }
-  .total-line.grand { font-size: 18px; font-weight: bold; color: #6b4423; border-top: 1px dashed #d4a574; margin-top: 6px; padding-top: 8px; }
-  .promo-banner {
-    background: #fff8e7; border: 1px dashed #d4a574; padding: 8px;
-    border-radius: 4px; margin-top: 6px; font-size: 13px; color: #6b4423;
+
+  /* 優惠進度 */
+  .promo-section {
+    background: #fffae6; border-radius: 10px; padding: 14px;
+    border: 1px solid #ffe082;
   }
+  .promo-title { font-weight: bold; color: #f57c00; margin-bottom: 10px; font-size: 14px; }
+  .promo-item {
+    background: #fff; padding: 8px 10px; border-radius: 6px;
+    margin-bottom: 6px; font-size: 13px; color: #f57c00;
+  }
+
+  /* 加購 */
+  .addon-section {
+    background: #fff8f0; border-radius: 10px; padding: 14px;
+    border: 1px solid #ffe0c0;
+  }
+  .addon-title { font-weight: bold; color: #D32F2F; margin-bottom: 10px; font-size: 14px; }
+  .addon-item { margin-bottom: 12px; }
+  .addon-item:last-child { margin-bottom: 0; }
+  .addon-name { font-weight: bold; color: #333; font-size: 14px; margin-bottom: 4px; }
+  .addon-desc { font-size: 12px; color: #888; margin-bottom: 6px; }
+  .addon-auto-info {
+    font-size: 13px; color: #4caf50; background: #f0f9f0;
+    padding: 6px 10px; border-radius: 6px; margin-bottom: 6px;
+  }
+  .addon-selectable { background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #eee; }
+  .addon-selectable-prompt { font-size: 13px; color: #555; margin-bottom: 6px; }
+  .addon-selectable-row { display: flex; align-items: center; gap: 8px; }
+  .addon-limit-hint { font-size: 12px; color: #888; }
+
+  /* 金額 */
+  .subtotal-box { background: #fff8f8; border-radius: 10px; padding: 12px; font-size: 14px; }
+  .subtotal-row {
+    display: flex; justify-content: space-between;
+    padding: 4px 8px; border-radius: 4px;
+  }
+  .subtotal-row.gift-row { background: #fff5f5; color: #D32F2F; }
+  .gift-source { color: #888; font-size: 12px; font-weight: normal; }
+  .subtotal-total {
+    font-weight: bold; font-size: 16px; color: #D32F2F;
+    border-top: 1px solid #eee; padding-top: 6px; margin-top: 6px;
+  }
+
   #loginScreen, #mainForm { display: none; }
-  .error { color: #c33; font-size: 13px; margin-top: 4px; }
-  .success { color: #2a7; font-size: 13px; margin-top: 4px; }
+  .error { color: #c33; font-size: 13px; margin-top: 6px; }
+  .success { color: #2a7; font-size: 13px; margin-top: 6px; }
+  .btn-submit { width: 100%; padding: 14px; font-size: 16px; border-radius: 25px; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -75,26 +115,26 @@
   <div id="loginMsg" class="error"></div>
 </div>
 
-<!-- 主要填單畫面 -->
+<!-- 主要填單 -->
 <div id="mainForm">
 
   <!-- 客戶資料 -->
   <div class="card">
     <h2>客戶資料</h2>
     <div class="row">
-      <label>電話 <span style="color:#c33">*</span></label>
+      <label>📞 電話 <span style="color:#c33">*</span></label>
       <div class="row-flex">
-        <input type="tel" id="phone" placeholder="0912-345-678">
+        <input type="tel" id="phone" placeholder="0912-345-678" style="flex:1">
         <button class="small" onclick="lookupCustomer()" style="flex:0 0 auto">查歷史</button>
       </div>
       <div id="customerInfo"></div>
     </div>
     <div class="row">
-      <label>姓名 <span style="color:#c33">*</span></label>
+      <label>👤 姓名 <span style="color:#c33">*</span></label>
       <input type="text" id="name">
     </div>
     <div class="row">
-      <label>地址</label>
+      <label>📍 地址</label>
       <input type="text" id="address">
     </div>
     <div class="row">
@@ -102,7 +142,7 @@
       <input type="text" id="lineUserId" placeholder="U xxxxxxxxxxxx...">
     </div>
     <div class="row">
-      <label>訂單來源 <span style="color:#c33">*</span></label>
+      <label>📌 訂單來源 <span style="color:#c33">*</span></label>
       <select id="orderSource">
         <option value="">請選擇</option>
         <option value="電話訂購">電話訂購</option>
@@ -118,61 +158,83 @@
 
   <!-- 商品 -->
   <div class="card">
-    <h2>商品</h2>
-    <div id="productList">載入中...</div>
+    <h2>🛍 商品</h2>
+    <div class="product-grid" id="productGrid">載入中...</div>
+  </div>
+
+  <!-- 優惠進度 -->
+  <div class="card" id="promoSection" style="display:none">
+    <div class="promo-section">
+      <div class="promo-title">🎉 優惠進度</div>
+      <div id="promoItems"></div>
+    </div>
   </div>
 
   <!-- 加購 -->
-  <div class="card">
-    <h2>加購</h2>
-    <div id="addonList">載入中...</div>
+  <div class="card" id="addonSection" style="display:none">
+    <div class="addon-section">
+      <div class="addon-title">🎁 贈品</div>
+      <div id="addonItems"></div>
+    </div>
   </div>
 
-  <!-- 優惠 -->
-  <div class="card" id="promoCard" style="display:none">
-    <h2>優惠</h2>
-    <div id="promoList"></div>
+  <!-- 金額 -->
+  <div class="card" id="subtotalBox" style="display:none">
+    <h2>💰 訂單明細</h2>
+    <div class="subtotal-box">
+      <div id="subtotalItems"></div>
+      <div id="subtotalGifts"></div>
+      <div class="subtotal-row subtotal-total">
+        <span>總金額</span><span id="totalAmt">0 元</span>
+      </div>
+    </div>
+    <div class="hint">⚠️ 最終金額以後端寫入 Orders 表為準</div>
+  </div>
+
+  <!-- 運送/付款 -->
+  <div class="card">
+    <h2>🚚 運送與付款</h2>
+    <div class="row">
+      <label>運送方式</label>
+      <select id="shippingSelect">
+        <option value="現場取貨">現場取貨</option>
+        <option value="黑貓宅配">黑貓宅配</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>付款方式</label>
+      <select id="paymentSelect">
+        <option value="現場付款">現場付款</option>
+        <option value="匯款">匯款</option>
+      </select>
+    </div>
   </div>
 
   <!-- 備註 -->
   <div class="card">
-    <h2>備註</h2>
+    <h2>✍️ 備註</h2>
     <textarea id="note" rows="2" placeholder="（選填）"></textarea>
-  </div>
-
-  <!-- 金額 -->
-  <div class="card">
-    <h2>金額</h2>
-    <div class="total-box">
-      <div class="total-line"><span>商品小計</span><span id="sumSubtotal">$0</span></div>
-      <div class="total-line"><span>優惠折抵</span><span id="sumDiscount">-$0</span></div>
-      <div class="total-line"><span>加購</span><span id="sumAddon">$0</span></div>
-      <div class="total-line grand"><span>總計</span><span id="sumTotal">$0</span></div>
-    </div>
   </div>
 
   <!-- 送出 -->
   <div class="card">
-    <button onclick="submitOrder()" style="width:100%; padding:14px; font-size:16px">送出訂單</button>
+    <button class="btn-submit" onclick="submitOrder()">送出訂單</button>
     <div id="submitMsg" class="error"></div>
   </div>
 
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvr3VsqAjpgLEdi8-DScqBvWrG721bu4seKjq8QODUG0g-poQ4SDw60jYvk6QRh0-r/exec';
 
 let PASSWORD = '';
-let PRODUCTS = [];
-let ADDONS = [];
-let PROMOTIONS = [];
-let cart = {};      // { productName: qty }
-let addonCart = {}; // { addonName: qty }
-let appliedPromos = [];
+let productsData = [];
+let addonsData = [];
+let promotionsData = [];
+let addonSelections = {};
 
 // ---------- 啟動 ----------
 document.getElementById('loginScreen').style.display = 'block';
-
 document.getElementById('pwInput').addEventListener('keypress', e => {
   if (e.key === 'Enter') doLogin();
 });
@@ -181,10 +243,8 @@ document.getElementById('pwInput').addEventListener('keypress', e => {
 async function doLogin() {
   const pw = document.getElementById('pwInput').value.trim();
   if (!pw) return;
-
   const msg = document.getElementById('loginMsg');
   msg.textContent = '驗證中...';
-
   try {
     const res = await callServer('verifyInternalPassword', { password: pw });
     if (res === true) {
@@ -200,109 +260,323 @@ async function doLogin() {
   }
 }
 
-// ---------- 載入商品/加購/優惠 ----------
+// ---------- 載入資料 ----------
 async function loadData() {
   try {
     const data = await callServer('getInitData', {});
-    PRODUCTS = data.products || [];
-    ADDONS = data.addons || [];
-    PROMOTIONS = data.promotions || [];
+    console.log('getInitData:', data);
+    productsData = data.products || [];
+    addonsData = data.addons || [];
+    promotionsData = data.promotions || [];
     renderProducts();
-    renderAddons();
+    refreshAll();
   } catch (e) {
     alert('載入失敗：' + e.message);
   }
 }
 
+// ---------- 渲染商品 ----------
 function renderProducts() {
-  const box = document.getElementById('productList');
-  if (PRODUCTS.length === 0) { box.textContent = '無商品'; return; }
-
-  box.innerHTML = PRODUCTS.map(p => `
-    <div class="item-row">
-      <div class="name">${p.name}<br><span class="price">$${p.price}</span></div>
-      <div class="qty-control">
-        <button onclick="changeQty('${p.name}', -1)">−</button>
-        <span id="qty-${p.name}">0</span>
-        <button onclick="changeQty('${p.name}', 1)">+</button>
-      </div>
-    </div>
-  `).join('');
+  const grid = document.getElementById('productGrid');
+  if (productsData.length === 0) { grid.innerHTML = '無商品'; return; }
+  grid.innerHTML = '';
+  productsData.forEach((p, i) => {
+    const limitText = p.maxQty > 0 ? `<div class="product-limit">限購 ${p.maxQty} 個</div>` : '';
+    const maxAttr = p.maxQty > 0 ? `max="${p.maxQty}"` : '';
+    grid.innerHTML += `
+      <div class="product-card" id="card_${i}">
+        <img src="${p.image || ''}" onerror="this.style.display='none'">
+        <div class="product-info">
+          <div class="product-name">${p.name}</div>
+          <div class="product-price">NT$ ${p.price}</div>
+          ${limitText}
+          <div class="qty-row">
+            <button class="qty-btn" onclick="changeQty(${i},-1)">－</button>
+            <input class="qty-input" id="qty_${i}" type="number" value="0" min="0" ${maxAttr} onchange="onQtyChange(${i})">
+            <button class="qty-btn" onclick="changeQty(${i},1)">＋</button>
+          </div>
+        </div>
+      </div>`;
+  });
 }
 
-function renderAddons() {
-  const box = document.getElementById('addonList');
-  if (ADDONS.length === 0) { box.textContent = '無加購'; return; }
-
-  box.innerHTML = ADDONS.map(a => `
-    <div class="addon-row">
-      <div class="name">${a.name}<br><span class="price">$${a.price}</span></div>
-      <div class="qty-control">
-        <button onclick="changeAddon('${a.name}', -1)">−</button>
-        <span id="addon-${a.name}">0</span>
-        <button onclick="changeAddon('${a.name}', 1)">+</button>
-      </div>
-    </div>
-  `).join('');
+function changeQty(i, delta) {
+  const input = document.getElementById('qty_' + i);
+  const max = productsData[i].maxQty;
+  let val = Math.max(0, parseInt(input.value || 0) + delta);
+  if (max > 0) val = Math.min(val, max);
+  input.value = val;
+  document.getElementById('card_' + i).classList.toggle('selected', val > 0);
+  refreshAll();
 }
 
-// ---------- 數量變更 ----------
-function changeQty(name, delta) {
-  cart[name] = Math.max(0, (cart[name] || 0) + delta);
-  document.getElementById('qty-' + name).textContent = cart[name];
-  recalculate();
+function onQtyChange(i) {
+  const input = document.getElementById('qty_' + i);
+  const max = productsData[i].maxQty;
+  let val = parseInt(input.value);
+  if (isNaN(val) || val < 0) val = 0;
+  if (max > 0 && val > max) val = max;
+  input.value = val;
+  document.getElementById('card_' + i).classList.toggle('selected', val > 0);
+  refreshAll();
 }
 
-function changeAddon(name, delta) {
-  addonCart[name] = Math.max(0, (addonCart[name] || 0) + delta);
-  document.getElementById('addon-' + name).textContent = addonCart[name];
-  recalculate();
+// ---------- 統一重新渲染 ----------
+function refreshAll() {
+  renderAddons();
+  renderPromotions();
+  updateTotal();
 }
 
-// ---------- 計算（含優惠：買 N 送 1 等） ----------
-function recalculate() {
-  let subtotal = 0;
-  for (const name in cart) {
-    const p = PRODUCTS.find(x => x.name === name);
-    if (p) subtotal += p.price * cart[name];
-  }
+// ---------- 加購邏輯（從 LIFF 移植）----------
+function parseGiftRules(rulesStr) {
+  if (!rulesStr) return [];
+  return rulesStr.split(',').map(r => {
+    const parts = r.split(':').map(s => s.trim());
+    if (parts.length < 3) return null;
+    return { type: parts[0], mode: parts[1], n: parseInt(parts[2]) || 1 };
+  }).filter(r => r);
+}
 
-  let addonTotal = 0;
-  for (const name in addonCart) {
-    const a = ADDONS.find(x => x.name === name);
-    if (a) addonTotal += a.price * addonCart[name];
-  }
+function calcAddonForProduct(addon) {
+  const rules = parseGiftRules(addon.giftRules);
+  let autoGifted = 0;
+  let maxSelectable = 0;
+  const autoTypes = [];
+  const selectTypes = [];
 
-  // 套用優惠（簡易版：依數量門檻）
-  appliedPromos = [];
-  let discount = 0;
-  PROMOTIONS.forEach(promo => {
-    if (!promo.enabled) return;
-    const target = cart[promo.targetProduct] || 0;
-    if (promo.threshold && target >= promo.threshold) {
-      const giftValue = (PRODUCTS.find(x => x.name === promo.giftProduct) || {}).price || 0;
-      discount += giftValue;
-      appliedPromos.push({ name: promo.name + '（贈 ' + promo.giftProduct + '）' });
+  rules.forEach(rule => {
+    let matchingQty = 0;
+    productsData.forEach((p, i) => {
+      if (p.type === rule.type) {
+        const qty = parseInt(document.getElementById('qty_' + i)?.value || 0);
+        if (qty > 0) matchingQty += qty;
+      }
+    });
+    if (rule.mode === 'auto') {
+      const gift = Math.floor(matchingQty / rule.n);
+      autoGifted += gift;
+      if (gift > 0) autoTypes.push({ type: rule.type, qty: matchingQty, gift, n: rule.n });
+    } else if (rule.mode === '選擇') {
+      const maxSel = Math.floor(matchingQty / rule.n);
+      maxSelectable += maxSel;
+      if (maxSel > 0) selectTypes.push({ type: rule.type, qty: matchingQty, max: maxSel });
     }
   });
 
-  // 渲染優惠卡
-  const pc = document.getElementById('promoCard');
-  if (appliedPromos.length > 0) {
-    pc.style.display = 'block';
-    document.getElementById('promoList').innerHTML =
-      appliedPromos.map(p => `<div class="promo-banner">🎁 ${p.name}</div>`).join('');
-  } else {
-    pc.style.display = 'none';
+  let userSelected = addonSelections[addon.name] || 0;
+  userSelected = Math.max(0, Math.min(userSelected, maxSelectable));
+  if (addon.maxQty) userSelected = Math.min(userSelected, addon.maxQty);
+  addonSelections[addon.name] = userSelected;
+
+  return { autoGifted, maxSelectable, userSelected, totalGifted: autoGifted + userSelected, autoTypes, selectTypes };
+}
+
+function shouldShowAddon(addon) {
+  const cond = (addon.showCondition || 'always').trim();
+  if (cond === 'always') return true;
+  if (cond.startsWith('有')) {
+    const type = cond.substring(1);
+    return productsData.some((p, i) =>
+      p.type === type && parseInt(document.getElementById('qty_' + i)?.value || 0) > 0
+    );
+  }
+  return true;
+}
+
+function renderAddons() {
+  const section = document.getElementById('addonSection');
+  const container = document.getElementById('addonItems');
+
+  const anySelected = productsData.some((p, i) =>
+    parseInt(document.getElementById('qty_' + i)?.value || 0) > 0
+  );
+  if (!anySelected || addonsData.length === 0) {
+    section.style.display = 'none';
+    return;
   }
 
-  const total = subtotal - discount + addonTotal;
-  document.getElementById('sumSubtotal').textContent = '$' + subtotal;
-  document.getElementById('sumDiscount').textContent = '-$' + discount;
-  document.getElementById('sumAddon').textContent = '$' + addonTotal;
-  document.getElementById('sumTotal').textContent = '$' + total;
+  let anyAddonShown = false;
+  let html = '';
 
-  return { subtotal, discount, addonTotal, total };
+  addonsData.forEach(addon => {
+    if (!shouldShowAddon(addon)) return;
+    const calc = calcAddonForProduct(addon);
+    const hasAuto = calc.autoGifted > 0;
+    const hasSelectable = calc.maxSelectable > 0;
+    if (!hasAuto && !hasSelectable) return;
+
+    anyAddonShown = true;
+    let h = '<div class="addon-item">';
+    h += `<div class="addon-name">📦 ${addon.name}</div>`;
+    if (addon.description) h += `<div class="addon-desc">${addon.description}</div>`;
+    if (hasAuto) {
+      const autoDesc = calc.autoTypes.map(t => `${t.type} ${t.qty} 個贈 ${t.gift} 個`).join('、');
+      h += `<div class="addon-auto-info">✨ 自動贈送：${calc.autoGifted} 個（${autoDesc}）</div>`;
+    }
+    if (hasSelectable) {
+      const selectDesc = calc.selectTypes.map(t => t.type).join('、');
+      h += `
+        <div class="addon-selectable">
+          <div class="addon-selectable-prompt">有送禮需求嗎？選擇 ${selectDesc} 需要的紙袋數量</div>
+          <div class="addon-selectable-row">
+            <button class="qty-btn" onclick="changeAddonQty('${addon.name}', -1)">－</button>
+            <input class="qty-input" id="addon_${addon.name}" type="number" value="${calc.userSelected}" min="0" max="${calc.maxSelectable}" onchange="onAddonInputChange('${addon.name}')">
+            <button class="qty-btn" onclick="changeAddonQty('${addon.name}', 1)">＋</button>
+            <span class="addon-limit-hint">最多 ${calc.maxSelectable} 個</span>
+          </div>
+        </div>`;
+    }
+    h += '</div>';
+    html += h;
+  });
+
+  section.style.display = anyAddonShown ? 'block' : 'none';
+  container.innerHTML = html;
+}
+
+function changeAddonQty(addonName, delta) {
+  const input = document.getElementById('addon_' + addonName);
+  if (!input) return;
+  const max = parseInt(input.max) || 0;
+  let val = Math.max(0, parseInt(input.value || 0) + delta);
+  val = Math.min(val, max);
+  addonSelections[addonName] = val;
+  refreshAll();
+}
+
+function onAddonInputChange(addonName) {
+  const input = document.getElementById('addon_' + addonName);
+  if (!input) return;
+  const max = parseInt(input.max) || 0;
+  let val = parseInt(input.value);
+  if (isNaN(val) || val < 0) val = 0;
+  val = Math.min(val, max);
+  addonSelections[addonName] = val;
+  refreshAll();
+}
+
+// ---------- 優惠邏輯（從 LIFF 移植）----------
+function calcPromotions() {
+  const items = getSelectedItems();
+  const results = [];
+
+  promotionsData.forEach(promo => {
+    let qualifyQty = 0, qualifyAmount = 0, giftQty = 0, triggered = false, remaining = 0;
+
+    if (promo.conditionType === '滿件') {
+      const conditionProducts = promo.conditionProduct
+        ? promo.conditionProduct.split(',').map(s => s.trim())
+        : [];
+      let matched = 0;
+      items.forEach(item => {
+        if (conditionProducts.length === 0 || conditionProducts.indexOf(item.name) >= 0) {
+          matched += item.qty;
+        }
+      });
+      qualifyQty = matched;
+      if (matched >= promo.conditionQty && promo.conditionQty > 0) {
+        triggered = true;
+        giftQty = promo.multipleTrigger
+          ? Math.floor(matched / promo.conditionQty) * promo.giftQty
+          : promo.giftQty;
+      } else {
+        remaining = promo.conditionQty - matched;
+      }
+    } else if (promo.conditionType === '滿額') {
+      const conditionProducts = promo.conditionProduct
+        ? promo.conditionProduct.split(',').map(s => s.trim())
+        : [];
+      let matched = 0;
+      items.forEach(item => {
+        if (conditionProducts.length === 0 || conditionProducts.indexOf(item.name) >= 0) {
+          matched += (item.price || 0) * item.qty;
+        }
+      });
+      qualifyAmount = matched;
+      if (matched >= promo.conditionAmount && promo.conditionAmount > 0) {
+        triggered = true;
+        giftQty = promo.multipleTrigger
+          ? Math.floor(matched / promo.conditionAmount) * promo.giftQty
+          : promo.giftQty;
+      } else {
+        remaining = promo.conditionAmount - matched;
+      }
+    }
+    results.push({ promo, qualifyQty, qualifyAmount, giftQty, triggered, remaining });
+  });
+
+  return results;
+}
+
+function renderPromotions() {
+  const section = document.getElementById('promoSection');
+  const container = document.getElementById('promoItems');
+  const results = calcPromotions();
+  let html = '';
+  let anyShown = false;
+
+  results.forEach(r => {
+    if (r.triggered) return;
+    const threshold = r.promo.progressThreshold || 0;
+    if (threshold > 0 && r.remaining > 0 && r.remaining <= threshold) {
+      const unit = r.promo.conditionType === '滿額' ? '元' : '個';
+      html += `<div class="promo-item">✨ 再買 ${r.remaining} ${unit}就達「${r.promo.name}」</div>`;
+      anyShown = true;
+    }
+  });
+
+  section.style.display = anyShown ? 'block' : 'none';
+  container.innerHTML = html;
+}
+
+function buildGiftRowsHtml() {
+  let html = '';
+  addonsData.forEach(addon => {
+    if (!shouldShowAddon(addon)) return;
+    const calc = calcAddonForProduct(addon);
+    if (calc.totalGifted > 0) {
+      html += `
+        <div class="subtotal-row gift-row">
+          <span>🎁 ${addon.name} x${calc.totalGifted}<span class="gift-source">（贈品）</span></span>
+          <span>—</span>
+        </div>`;
+    }
+  });
+  calcPromotions().forEach(r => {
+    if (r.triggered && r.giftQty > 0) {
+      html += `
+        <div class="subtotal-row gift-row">
+          <span>🎁 ${r.promo.giftName} x${r.giftQty}<span class="gift-source">（${r.promo.name}）</span></span>
+          <span>—</span>
+        </div>`;
+    }
+  });
+  return html;
+}
+
+function getSelectedItems() {
+  return productsData.map((p, i) => ({
+    name: p.name, price: p.price, type: p.type,
+    qty: parseInt(document.getElementById('qty_' + i)?.value || 0)
+  })).filter(it => it.qty > 0);
+}
+
+function updateTotal() {
+  let subtotal = 0, itemsHtml = '', hasItem = false;
+  productsData.forEach((p, i) => {
+    const qty = parseInt(document.getElementById('qty_' + i)?.value || 0);
+    if (qty > 0) {
+      hasItem = true;
+      const sub = p.price * qty;
+      subtotal += sub;
+      itemsHtml += `<div class="subtotal-row"><span>${p.name} x${qty}</span><span>${sub} 元</span></div>`;
+    }
+  });
+  document.getElementById('subtotalBox').style.display = hasItem ? 'block' : 'none';
+  document.getElementById('subtotalItems').innerHTML = itemsHtml;
+  document.getElementById('subtotalGifts').innerHTML = buildGiftRowsHtml();
+  document.getElementById('totalAmt').innerText = subtotal + ' 元';
 }
 
 // ---------- 查歷史客戶 ----------
@@ -310,23 +584,13 @@ async function lookupCustomer() {
   const phone = document.getElementById('phone').value.trim();
   const box = document.getElementById('customerInfo');
   if (!phone) { box.innerHTML = ''; return; }
-
   box.innerHTML = '<div class="hint">查詢中...</div>';
   try {
     const res = await callServer('lookupCustomer', { phone });
     if (res && res.found) {
-      // 自動帶入（可覆蓋）
-      if (!document.getElementById('name').value) {
-        document.getElementById('name').value = res.name;
-      }
-      if (!document.getElementById('address').value) {
-        document.getElementById('address').value = res.address;
-      }
-      box.innerHTML = `
-        <div class="customer-info">
-          ✅ 老客戶｜上次：${res.lastOrderDate}｜累計 ${res.orderCount} 筆
-        </div>
-      `;
+      if (!document.getElementById('name').value) document.getElementById('name').value = res.name;
+      if (!document.getElementById('address').value) document.getElementById('address').value = res.address;
+      box.innerHTML = `<div class="customer-info">✅ 老客戶｜上次：${res.lastOrderDate}｜累計 ${res.orderCount} 筆</div>`;
     } else {
       box.innerHTML = '<div class="customer-info">🆕 新客戶</div>';
     }
@@ -345,34 +609,29 @@ async function submitOrder() {
   const address = document.getElementById('address').value.trim();
   const lineUserId = document.getElementById('lineUserId').value.trim();
   const orderSource = document.getElementById('orderSource').value;
+  const shipping = document.getElementById('shippingSelect').value;
+  const payment = document.getElementById('paymentSelect').value;
   const note = document.getElementById('note').value.trim();
 
   if (!name || !phone) { msg.textContent = '姓名與電話為必填'; return; }
   if (!orderSource) { msg.textContent = '請選擇訂單來源'; return; }
+  if (shipping !== '現場取貨' && !address) { msg.textContent = '宅配需要填寫地址'; return; }
 
-  const items = Object.keys(cart).filter(k => cart[k] > 0).map(name => {
-    const p = PRODUCTS.find(x => x.name === name);
-    return { name, qty: cart[name], price: p ? p.price : 0 };
-  });
+  const items = getSelectedItems();
   if (items.length === 0) { msg.textContent = '請至少選擇一項商品'; return; }
-
-  const addons = Object.keys(addonCart).filter(k => addonCart[k] > 0).map(name => {
-    const a = ADDONS.find(x => x.name === name);
-    return { name, qty: addonCart[name], price: a ? a.price : 0 };
-  });
-
-  const totals = recalculate();
 
   const payload = {
     password: PASSWORD,
-    name, phone, address, lineUserId,
-    items, addons,
-    promotions: appliedPromos,
-    orderSource, note,
-    subtotal: totals.subtotal,
-    discount: totals.discount,
-    addonTotal: totals.addonTotal,
-    total: totals.total
+    name,
+    tel: phone,
+    address,
+    lineUserId,
+    items,
+    addonSelections,
+    shipping,
+    payment,
+    orderSource,
+    note
   };
 
   msg.textContent = '送出中...';
@@ -381,7 +640,6 @@ async function submitOrder() {
     if (res && res.success) {
       msg.className = 'success';
       msg.textContent = '✅ 訂單已建立：' + res.orderId;
-      // 清空表單（但保留密碼狀態）
       setTimeout(() => {
         if (confirm('訂單 ' + res.orderId + ' 已建立，要繼續填下一筆嗎？')) {
           resetForm();
@@ -399,15 +657,22 @@ function resetForm() {
   ['name','phone','address','lineUserId','note'].forEach(id =>
     document.getElementById(id).value = '');
   document.getElementById('orderSource').value = '';
+  document.getElementById('shippingSelect').value = '現場取貨';
+  document.getElementById('paymentSelect').value = '現場付款';
   document.getElementById('customerInfo').innerHTML = '';
-  cart = {}; addonCart = {}; appliedPromos = [];
-  renderProducts(); renderAddons();
-  recalculate();
+  addonSelections = {};
+  productsData.forEach((p, i) => {
+    const input = document.getElementById('qty_' + i);
+    if (input) input.value = 0;
+    const card = document.getElementById('card_' + i);
+    if (card) card.classList.remove('selected');
+  });
+  refreshAll();
   document.getElementById('submitMsg').textContent = '';
   window.scrollTo(0, 0);
 }
 
-// ---------- 與後端通訊（doGet/doPost 路由） ----------
+// ---------- 後端通訊 ----------
 async function callServer(action, params) {
   const url = SCRIPT_URL + '?action=' + encodeURIComponent(action);
   const res = await fetch(url, {
@@ -416,13 +681,11 @@ async function callServer(action, params) {
     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
   });
   const text = await res.text();
-  try {
-    const data = JSON.parse(text);
-    if (data.error) throw new Error(data.error);
-    return data.result !== undefined ? data.result : data;
-  } catch (e) {
-    throw new Error(text.slice(0, 200));
-  }
+  let data;
+  try { data = JSON.parse(text); }
+  catch (e) { throw new Error('回應格式錯誤：' + text.slice(0, 200)); }
+  if (data.status === 'ERROR') throw new Error(data.message);
+  return data.result !== undefined ? data.result : data;
 }
 </script>
 
