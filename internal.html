@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>和美小玉家｜內部填單</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: #f5f5f0;
+    color: #333;
+    padding: 16px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 20px; margin-bottom: 12px; color: #6b4423; }
+  h2 { font-size: 16px; margin: 16px 0 8px; color: #6b4423; border-bottom: 2px solid #d4a574; padding-bottom: 4px; }
+  .card { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  label { display: block; font-size: 14px; margin-bottom: 4px; color: #555; }
+  input, select, textarea {
+    width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px;
+    font-size: 15px; font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #d4a574; }
+  .row { margin-bottom: 10px; }
+  .row-flex { display: flex; gap: 8px; }
+  .row-flex > * { flex: 1; }
+  button {
+    background: #d4a574; color: #fff; border: none; padding: 10px 16px;
+    border-radius: 4px; font-size: 15px; cursor: pointer; font-family: inherit;
+  }
+  button:hover { background: #b8895d; }
+  button.secondary { background: #888; }
+  button.small { padding: 6px 10px; font-size: 13px; }
+  .hint { font-size: 12px; color: #888; margin-top: 4px; }
+  .customer-info {
+    background: #faf6ef; border-left: 3px solid #d4a574;
+    padding: 8px 12px; margin-top: 8px; font-size: 13px;
+  }
+  .item-row, .addon-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+    padding: 6px; background: #faf8f3; border-radius: 4px;
+  }
+  .item-row .name { flex: 1; font-size: 14px; }
+  .item-row .price { color: #888; font-size: 13px; }
+  .qty-control { display: flex; align-items: center; gap: 4px; }
+  .qty-control button {
+    width: 28px; height: 28px; padding: 0; font-size: 16px; line-height: 1;
+  }
+  .qty-control span { min-width: 24px; text-align: center; }
+  .total-box { background: #fff8e7; padding: 12px; border-radius: 6px; }
+  .total-line { display: flex; justify-content: space-between; padding: 3px 0; font-size: 14px; }
+  .total-line.grand { font-size: 18px; font-weight: bold; color: #6b4423; border-top: 1px dashed #d4a574; margin-top: 6px; padding-top: 8px; }
+  .promo-banner {
+    background: #fff8e7; border: 1px dashed #d4a574; padding: 8px;
+    border-radius: 4px; margin-top: 6px; font-size: 13px; color: #6b4423;
+  }
+  #loginScreen, #mainForm { display: none; }
+  .error { color: #c33; font-size: 13px; margin-top: 4px; }
+  .success { color: #2a7; font-size: 13px; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<h1>🍪 和美小玉家｜內部填單</h1>
+
+<!-- 登入畫面 -->
+<div id="loginScreen" class="card">
+  <h2>請輸入密碼</h2>
+  <div class="row">
+    <input type="password" id="pwInput" placeholder="內部填單密碼" autocomplete="off">
+  </div>
+  <button onclick="doLogin()">進入</button>
+  <div id="loginMsg" class="error"></div>
+</div>
+
+<!-- 主要填單畫面 -->
+<div id="mainForm">
+
+  <!-- 客戶資料 -->
+  <div class="card">
+    <h2>客戶資料</h2>
+    <div class="row">
+      <label>電話 <span style="color:#c33">*</span></label>
+      <div class="row-flex">
+        <input type="tel" id="phone" placeholder="0912-345-678">
+        <button class="small" onclick="lookupCustomer()" style="flex:0 0 auto">查歷史</button>
+      </div>
+      <div id="customerInfo"></div>
+    </div>
+    <div class="row">
+      <label>姓名 <span style="color:#c33">*</span></label>
+      <input type="text" id="name">
+    </div>
+    <div class="row">
+      <label>地址</label>
+      <input type="text" id="address">
+    </div>
+    <div class="row">
+      <label>LINE User ID（選填，填了才發通知）</label>
+      <input type="text" id="lineUserId" placeholder="U xxxxxxxxxxxx...">
+    </div>
+    <div class="row">
+      <label>訂單來源 <span style="color:#c33">*</span></label>
+      <select id="orderSource">
+        <option value="">請選擇</option>
+        <option value="電話訂購">電話訂購</option>
+        <option value="現場下單">現場下單</option>
+        <option value="LINE 私訊">LINE 私訊</option>
+        <option value="FB 私訊">FB 私訊</option>
+        <option value="親友介紹">親友介紹</option>
+        <option value="市集現場">市集現場</option>
+        <option value="其他">其他</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 商品 -->
+  <div class="card">
+    <h2>商品</h2>
+    <div id="productList">載入中...</div>
+  </div>
+
+  <!-- 加購 -->
+  <div class="card">
+    <h2>加購</h2>
+    <div id="addonList">載入中...</div>
+  </div>
+
+  <!-- 優惠 -->
+  <div class="card" id="promoCard" style="display:none">
+    <h2>優惠</h2>
+    <div id="promoList"></div>
+  </div>
+
+  <!-- 備註 -->
+  <div class="card">
+    <h2>備註</h2>
+    <textarea id="note" rows="2" placeholder="（選填）"></textarea>
+  </div>
+
+  <!-- 金額 -->
+  <div class="card">
+    <h2>金額</h2>
+    <div class="total-box">
+      <div class="total-line"><span>商品小計</span><span id="sumSubtotal">$0</span></div>
+      <div class="total-line"><span>優惠折抵</span><span id="sumDiscount">-$0</span></div>
+      <div class="total-line"><span>加購</span><span id="sumAddon">$0</span></div>
+      <div class="total-line grand"><span>總計</span><span id="sumTotal">$0</span></div>
+    </div>
+  </div>
+
+  <!-- 送出 -->
+  <div class="card">
+    <button onclick="submitOrder()" style="width:100%; padding:14px; font-size:16px">送出訂單</button>
+    <div id="submitMsg" class="error"></div>
+  </div>
+
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvr3VsqAjpgLEdi8-DScqBvWrG721bu4seKjq8QODUG0g-poQ4SDw60jYvk6QRh0-r/exec';
+
+let PASSWORD = '';
+let PRODUCTS = [];
+let ADDONS = [];
+let PROMOTIONS = [];
+let cart = {};      // { productName: qty }
+let addonCart = {}; // { addonName: qty }
+let appliedPromos = [];
+
+// ---------- 啟動 ----------
+document.getElementById('loginScreen').style.display = 'block';
+
+document.getElementById('pwInput').addEventListener('keypress', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ---------- 登入 ----------
+async function doLogin() {
+  const pw = document.getElementById('pwInput').value.trim();
+  if (!pw) return;
+
+  const msg = document.getElementById('loginMsg');
+  msg.textContent = '驗證中...';
+
+  try {
+    const res = await callServer('verifyInternalPassword', { password: pw });
+    if (res === true) {
+      PASSWORD = pw;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainForm').style.display = 'block';
+      await loadData();
+    } else {
+      msg.textContent = '密碼錯誤';
+    }
+  } catch (e) {
+    msg.textContent = '連線失敗：' + e.message;
+  }
+}
+
+// ---------- 載入商品/加購/優惠 ----------
+async function loadData() {
+  try {
+    const data = await callServer('getInitData', {});
+    PRODUCTS = data.products || [];
+    ADDONS = data.addons || [];
+    PROMOTIONS = data.promotions || [];
+    renderProducts();
+    renderAddons();
+  } catch (e) {
+    alert('載入失敗：' + e.message);
+  }
+}
+
+function renderProducts() {
+  const box = document.getElementById('productList');
+  if (PRODUCTS.length === 0) { box.textContent = '無商品'; return; }
+
+  box.innerHTML = PRODUCTS.map(p => `
+    <div class="item-row">
+      <div class="name">${p.name}<br><span class="price">$${p.price}</span></div>
+      <div class="qty-control">
+        <button onclick="changeQty('${p.name}', -1)">−</button>
+        <span id="qty-${p.name}">0</span>
+        <button onclick="changeQty('${p.name}', 1)">+</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderAddons() {
+  const box = document.getElementById('addonList');
+  if (ADDONS.length === 0) { box.textContent = '無加購'; return; }
+
+  box.innerHTML = ADDONS.map(a => `
+    <div class="addon-row">
+      <div class="name">${a.name}<br><span class="price">$${a.price}</span></div>
+      <div class="qty-control">
+        <button onclick="changeAddon('${a.name}', -1)">−</button>
+        <span id="addon-${a.name}">0</span>
+        <button onclick="changeAddon('${a.name}', 1)">+</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ---------- 數量變更 ----------
+function changeQty(name, delta) {
+  cart[name] = Math.max(0, (cart[name] || 0) + delta);
+  document.getElementById('qty-' + name).textContent = cart[name];
+  recalculate();
+}
+
+function changeAddon(name, delta) {
+  addonCart[name] = Math.max(0, (addonCart[name] || 0) + delta);
+  document.getElementById('addon-' + name).textContent = addonCart[name];
+  recalculate();
+}
+
+// ---------- 計算（含優惠：買 N 送 1 等） ----------
+function recalculate() {
+  let subtotal = 0;
+  for (const name in cart) {
+    const p = PRODUCTS.find(x => x.name === name);
+    if (p) subtotal += p.price * cart[name];
+  }
+
+  let addonTotal = 0;
+  for (const name in addonCart) {
+    const a = ADDONS.find(x => x.name === name);
+    if (a) addonTotal += a.price * addonCart[name];
+  }
+
+  // 套用優惠（簡易版：依數量門檻）
+  appliedPromos = [];
+  let discount = 0;
+  PROMOTIONS.forEach(promo => {
+    if (!promo.enabled) return;
+    const target = cart[promo.targetProduct] || 0;
+    if (promo.threshold && target >= promo.threshold) {
+      const giftValue = (PRODUCTS.find(x => x.name === promo.giftProduct) || {}).price || 0;
+      discount += giftValue;
+      appliedPromos.push({ name: promo.name + '（贈 ' + promo.giftProduct + '）' });
+    }
+  });
+
+  // 渲染優惠卡
+  const pc = document.getElementById('promoCard');
+  if (appliedPromos.length > 0) {
+    pc.style.display = 'block';
+    document.getElementById('promoList').innerHTML =
+      appliedPromos.map(p => `<div class="promo-banner">🎁 ${p.name}</div>`).join('');
+  } else {
+    pc.style.display = 'none';
+  }
+
+  const total = subtotal - discount + addonTotal;
+  document.getElementById('sumSubtotal').textContent = '$' + subtotal;
+  document.getElementById('sumDiscount').textContent = '-$' + discount;
+  document.getElementById('sumAddon').textContent = '$' + addonTotal;
+  document.getElementById('sumTotal').textContent = '$' + total;
+
+  return { subtotal, discount, addonTotal, total };
+}
+
+// ---------- 查歷史客戶 ----------
+async function lookupCustomer() {
+  const phone = document.getElementById('phone').value.trim();
+  const box = document.getElementById('customerInfo');
+  if (!phone) { box.innerHTML = ''; return; }
+
+  box.innerHTML = '<div class="hint">查詢中...</div>';
+  try {
+    const res = await callServer('lookupCustomer', { phone });
+    if (res && res.found) {
+      // 自動帶入（可覆蓋）
+      if (!document.getElementById('name').value) {
+        document.getElementById('name').value = res.name;
+      }
+      if (!document.getElementById('address').value) {
+        document.getElementById('address').value = res.address;
+      }
+      box.innerHTML = `
+        <div class="customer-info">
+          ✅ 老客戶｜上次：${res.lastOrderDate}｜累計 ${res.orderCount} 筆
+        </div>
+      `;
+    } else {
+      box.innerHTML = '<div class="customer-info">🆕 新客戶</div>';
+    }
+  } catch (e) {
+    box.innerHTML = '<div class="error">查詢失敗：' + e.message + '</div>';
+  }
+}
+
+// ---------- 送出 ----------
+async function submitOrder() {
+  const msg = document.getElementById('submitMsg');
+  msg.className = 'error'; msg.textContent = '';
+
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const address = document.getElementById('address').value.trim();
+  const lineUserId = document.getElementById('lineUserId').value.trim();
+  const orderSource = document.getElementById('orderSource').value;
+  const note = document.getElementById('note').value.trim();
+
+  if (!name || !phone) { msg.textContent = '姓名與電話為必填'; return; }
+  if (!orderSource) { msg.textContent = '請選擇訂單來源'; return; }
+
+  const items = Object.keys(cart).filter(k => cart[k] > 0).map(name => {
+    const p = PRODUCTS.find(x => x.name === name);
+    return { name, qty: cart[name], price: p ? p.price : 0 };
+  });
+  if (items.length === 0) { msg.textContent = '請至少選擇一項商品'; return; }
+
+  const addons = Object.keys(addonCart).filter(k => addonCart[k] > 0).map(name => {
+    const a = ADDONS.find(x => x.name === name);
+    return { name, qty: addonCart[name], price: a ? a.price : 0 };
+  });
+
+  const totals = recalculate();
+
+  const payload = {
+    password: PASSWORD,
+    name, phone, address, lineUserId,
+    items, addons,
+    promotions: appliedPromos,
+    orderSource, note,
+    subtotal: totals.subtotal,
+    discount: totals.discount,
+    addonTotal: totals.addonTotal,
+    total: totals.total
+  };
+
+  msg.textContent = '送出中...';
+  try {
+    const res = await callServer('submitInternalOrder', payload);
+    if (res && res.success) {
+      msg.className = 'success';
+      msg.textContent = '✅ 訂單已建立：' + res.orderId;
+      // 清空表單（但保留密碼狀態）
+      setTimeout(() => {
+        if (confirm('訂單 ' + res.orderId + ' 已建立，要繼續填下一筆嗎？')) {
+          resetForm();
+        }
+      }, 300);
+    } else {
+      msg.textContent = '失敗：' + (res.error || '未知錯誤');
+    }
+  } catch (e) {
+    msg.textContent = '送出失敗：' + e.message;
+  }
+}
+
+function resetForm() {
+  ['name','phone','address','lineUserId','note'].forEach(id =>
+    document.getElementById(id).value = '');
+  document.getElementById('orderSource').value = '';
+  document.getElementById('customerInfo').innerHTML = '';
+  cart = {}; addonCart = {}; appliedPromos = [];
+  renderProducts(); renderAddons();
+  recalculate();
+  document.getElementById('submitMsg').textContent = '';
+  window.scrollTo(0, 0);
+}
+
+// ---------- 與後端通訊（doGet/doPost 路由） ----------
+async function callServer(action, params) {
+  const url = SCRIPT_URL + '?action=' + encodeURIComponent(action);
+  const res = await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify(params || {}),
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+  });
+  const text = await res.text();
+  try {
+    const data = JSON.parse(text);
+    if (data.error) throw new Error(data.error);
+    return data.result !== undefined ? data.result : data;
+  } catch (e) {
+    throw new Error(text.slice(0, 200));
+  }
+}
+</script>
+
+</body>
+</html>
