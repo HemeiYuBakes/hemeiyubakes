@@ -743,7 +743,6 @@ html[data-fs="large"]  .hero { background-size: auto 160%; }
   setFontSize(saved);
 })();
 
-// ↓↓↓ 貼在這裡 ↓↓↓
 function openProductInfo(i) {
   const p = productsData[i];
   if (!p) return;
@@ -845,9 +844,9 @@ function closeProductInfo(event) {
           const limitText = p.maxQty > 0 ? `<div class="product-limit">限購 ${p.maxQty} 個</div>` : '';
           grid.innerHTML += `
             <div class="product-card" id="card_${i}">
-              <img src="${p.image}" onerror="this.style.display='none'">
+             <img src="${p.image}" onclick="openProductInfo(${i})" style="cursor:pointer" onerror="this.style.display='none'">
               <div class="product-info">
-                <div class="product-name">${p.name}</div>
+                <div class="product-name">${p.name} <i class="info-btn" onclick="openProductInfo(${i})">i</i></div>
                 <div class="product-price">NT$ ${p.price}</div>
                 ${limitText}
                 <div class="qty-row">
