@@ -125,7 +125,7 @@ html[data-fs="large"]  .hero { background-size: auto 160%; }
   /* 商品說明彈框 */
 .info-btn {
   display: inline-block; width: 16px; height: 16px; line-height: 16px;
-  text-align: center; border-radius: 50%; background: #D32F2F; color: #fff;
+  text-align: center; border-radius: 50%; background: #e3b16f; color: #fff;
   font-size: 11px; font-style: normal; margin-left: 4px; cursor: pointer;
 }
 .modal-overlay {
@@ -846,7 +846,7 @@ function closeProductInfo(event) {
             <div class="product-card" id="card_${i}">
              <img src="${p.image}" onclick="openProductInfo(${i})" style="cursor:pointer" onerror="this.style.display='none'">
               <div class="product-info">
-                <div class="product-name">${p.name} <i class="info-btn" onclick="openProductInfo(${i})">i</i></div>
+                <div class="product-name">${p.name} <i class="info-btn" onclick="openProductInfo(${i})">?</i></div>
                 <div class="product-price">NT$ ${p.price}</div>
                 ${limitText}
                 <div class="qty-row">
