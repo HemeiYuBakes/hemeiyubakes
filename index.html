@@ -122,6 +122,32 @@ html[data-fs="large"]  .hero { background-size: auto 160%; }
       0%, 100% { transform: translateY(0); }
       50%      { transform: translateY(-3px); }
     }
+  /* 商品說明彈框 */
+.info-btn {
+  display: inline-block; width: 16px; height: 16px; line-height: 16px;
+  text-align: center; border-radius: 50%; background: #D32F2F; color: #fff;
+  font-size: 11px; font-style: normal; margin-left: 4px; cursor: pointer;
+}
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  display: none; align-items: center; justify-content: center;
+  z-index: 200; padding: 20px;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  background: #fff; border-radius: 15px; padding: 20px;
+  max-width: min(360px, 90vw); width: 100%; max-height: 80vh;
+  overflow-y: auto; position: relative;
+}
+.modal-close {
+  position: absolute; top: 10px; right: 10px;
+  width: 30px; height: 30px; border-radius: 50%; border: none;
+  background: #f0f0f0; cursor: pointer; font-size: 15px; color: #666;
+}
+.modal-img { width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 12px; background: #eee; }
+.modal-name { color: #D32F2F; margin: 0 0 6px; font-size: 18px; }
+.modal-price { color: #D32F2F; font-weight: bold; margin-bottom: 12px; }
+.modal-desc { white-space: pre-line; line-height: 1.7; color: #555; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -665,7 +691,15 @@ html[data-fs="large"]  .hero { background-size: auto 160%; }
       <button class="btn" id="submitBtn" onclick="submitOrder()">確認並送出</button>
     </div>
   </div>
-
+<div id="productModal" class="modal-overlay" onclick="closeProductInfo(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeProductInfo()">✕</button>
+    <img id="modalImg" class="modal-img" onerror="this.style.display='none'">
+    <h3 class="modal-name" id="modalName"></h3>
+    <div class="modal-price" id="modalPrice"></div>
+    <div class="modal-desc" id="modalDesc"></div>
+  </div>
+</div>
   <div class="version-tag" id="versionTag"></div>
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -702,7 +736,28 @@ html[data-fs="large"]  .hero { background-size: auto 160%; }
       try { saved = localStorage.getItem('hm_fontSize') || 'small'; } catch (e) {}
       setFontSize(saved);
     })();
+// 載入時恢復偏好
+(function() {
+  let saved = 'small';
+  try { saved = localStorage.getItem('hm_fontSize') || 'small'; } catch (e) {}
+  setFontSize(saved);
+})();
 
+// ↓↓↓ 貼在這裡 ↓↓↓
+function openProductInfo(i) {
+  const p = productsData[i];
+  if (!p) return;
+  const img = document.getElementById('modalImg');
+  img.src = p.image || '';
+  img.style.display = p.image ? 'block' : 'none';
+  document.getElementById('modalName').innerText = p.name;
+  document.getElementById('modalPrice').innerText = 'NT$ ' + p.price;
+  document.getElementById('modalDesc').innerText = p.description || '暫無詳細說明';
+  document.getElementById('productModal').classList.add('show');
+}
+function closeProductInfo(event) {
+  document.getElementById('productModal').classList.remove('show');
+}
     function showError(msg) {
       document.getElementById('loading').style.display = 'none';
       const e = document.getElementById('errMsg');
