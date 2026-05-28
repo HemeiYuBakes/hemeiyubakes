@@ -846,7 +846,7 @@ function closeProductInfo(event) {
             <div class="product-card" id="card_${i}">
              <img src="${p.image}" onclick="openProductInfo(${i})" style="cursor:pointer" onerror="this.style.display='none'">
               <div class="product-info">
-                <div class="product-name">${p.name} <i class="info-btn" onclick="openProductInfo(${i})">?</i></div>
+                <div class="product-name">${p.name} <i class="info-btn" onclick="openProductInfo(${i})">!</i></div>
                 <div class="product-price">NT$ ${p.price}</div>
                 ${limitText}
                 <div class="qty-row">
