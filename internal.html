@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>和美小玉家｜內部填單</title>
+<title>和美小玉家｜內部系統</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
     background: #f4f4f4; color: #333; padding: 15px;
-    max-width: 480px; margin: 0 auto;
+    max-width: 900px; margin: 0 auto;
   }
   h1 { font-size: 20px; margin-bottom: 12px; color: #D32F2F; text-align: center; }
   h2 { font-size: 16px; margin: 0 0 10px; color: #D32F2F; }
@@ -27,13 +27,22 @@
     border-radius: 8px; font-size: 15px; cursor: pointer; font-family: inherit;
   }
   button.small { padding: 6px 12px; font-size: 13px; }
+  button.outline { background: #fff; color: #D32F2F; border: 1px solid #D32F2F; }
+  button.gray { background: #888; }
   .hint { font-size: 12px; color: #888; margin-top: 4px; }
   .customer-info {
     background: #fff8f8; border-left: 3px solid #D32F2F;
     padding: 8px 12px; margin-top: 8px; font-size: 13px; border-radius: 4px;
   }
+  /* ===== Tab ===== */
+  .tab-nav { display: flex; gap: 6px; margin-bottom: 12px; }
+  .tab-btn {
+    flex: 1; background: #eee; color: #666; border-radius: 10px 10px 0 0;
+    padding: 12px 8px; font-weight: bold; font-size: 14px;
+  }
+  .tab-btn.active { background: #D32F2F; color: #fff; }
 
-  /* 商品卡 */
+  /* ===== 內部填單頁的商品/加購等(原 v2 樣式) ===== */
   .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .product-card { border: 2px solid #eee; border-radius: 10px; overflow: hidden; }
   .product-card.selected { border-color: #D32F2F; }
@@ -43,201 +52,295 @@
   .product-price { font-size: 13px; color: #D32F2F; margin-bottom: 6px; }
   .product-limit { font-size: 11px; color: #888; margin-bottom: 6px; }
   .qty-row { display: flex; align-items: center; gap: 6px; }
-  .qty-btn {
-    width: 28px; height: 28px; border: 1px solid #ddd; border-radius: 6px;
-    background: #f5f5f5; font-size: 16px; cursor: pointer; color: #333; padding: 0;
-  }
-  .qty-input {
-    width: 40px; text-align: center; padding: 4px; border: 1px solid #ddd;
-    border-radius: 6px; font-size: 14px;
-  }
-
-  /* 優惠進度 */
-  .promo-section {
-    background: #fffae6; border-radius: 10px; padding: 14px;
-    border: 1px solid #ffe082;
-  }
+  .qty-btn { width: 28px; height: 28px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5; font-size: 16px; cursor: pointer; color: #333; padding: 0; }
+  .qty-input { width: 40px; text-align: center; padding: 4px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+  .promo-section { background: #fffae6; border-radius: 10px; padding: 14px; border: 1px solid #ffe082; }
   .promo-title { font-weight: bold; color: #f57c00; margin-bottom: 10px; font-size: 14px; }
-  .promo-item {
-    background: #fff; padding: 8px 10px; border-radius: 6px;
-    margin-bottom: 6px; font-size: 13px; color: #f57c00;
-  }
-
-  /* 加購 */
-  .addon-section {
-    background: #fff8f0; border-radius: 10px; padding: 14px;
-    border: 1px solid #ffe0c0;
-  }
+  .promo-item { background: #fff; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 13px; color: #f57c00; }
+  .addon-section { background: #fff8f0; border-radius: 10px; padding: 14px; border: 1px solid #ffe0c0; }
   .addon-title { font-weight: bold; color: #D32F2F; margin-bottom: 10px; font-size: 14px; }
   .addon-item { margin-bottom: 12px; }
-  .addon-item:last-child { margin-bottom: 0; }
   .addon-name { font-weight: bold; color: #333; font-size: 14px; margin-bottom: 4px; }
   .addon-desc { font-size: 12px; color: #888; margin-bottom: 6px; }
-  .addon-auto-info {
-    font-size: 13px; color: #4caf50; background: #f0f9f0;
-    padding: 6px 10px; border-radius: 6px; margin-bottom: 6px;
-  }
+  .addon-auto-info { font-size: 13px; color: #4caf50; background: #f0f9f0; padding: 6px 10px; border-radius: 6px; margin-bottom: 6px; }
   .addon-selectable { background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #eee; }
   .addon-selectable-prompt { font-size: 13px; color: #555; margin-bottom: 6px; }
   .addon-selectable-row { display: flex; align-items: center; gap: 8px; }
   .addon-limit-hint { font-size: 12px; color: #888; }
-
-  /* 金額 */
   .subtotal-box { background: #fff8f8; border-radius: 10px; padding: 12px; font-size: 14px; }
-  .subtotal-row {
-    display: flex; justify-content: space-between;
-    padding: 4px 8px; border-radius: 4px;
-  }
+  .subtotal-row { display: flex; justify-content: space-between; padding: 4px 8px; border-radius: 4px; }
   .subtotal-row.gift-row { background: #fff5f5; color: #D32F2F; }
   .gift-source { color: #888; font-size: 12px; font-weight: normal; }
-  .subtotal-total {
-    font-weight: bold; font-size: 16px; color: #D32F2F;
-    border-top: 1px solid #eee; padding-top: 6px; margin-top: 6px;
+  .subtotal-total { font-weight: bold; font-size: 16px; color: #D32F2F; border-top: 1px solid #eee; padding-top: 6px; margin-top: 6px; }
+  .btn-submit { width: 100%; padding: 14px; font-size: 16px; border-radius: 25px; font-weight: bold; }
+
+  /* ===== 排單系統 ===== */
+  .prep-alert {
+    background: #ffebee; border: 2px solid #D32F2F; border-radius: 10px;
+    padding: 12px 16px; margin-bottom: 12px; color: #D32F2F; font-weight: bold;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .prep-alert.hidden { display: none; }
+  .calendar-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px; gap: 8px;
+  }
+  .calendar-header button { padding: 6px 12px; }
+  .calendar-title { flex: 1; text-align: center; font-weight: bold; font-size: 16px; color: #D32F2F; }
+  .calendar-weekdays {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 2px; margin-bottom: 4px;
+  }
+  .calendar-weekdays > div {
+    text-align: center; padding: 6px 2px; background: #f0f0f0;
+    font-size: 12px; font-weight: bold; color: #666; border-radius: 4px;
+  }
+  .calendar-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+  }
+  .day-cell {
+    min-height: 80px; background: #fafafa; border-radius: 4px;
+    padding: 4px; font-size: 12px; cursor: pointer; transition: background 0.15s;
+    border: 1px solid transparent;
+  }
+  .day-cell.other-month { opacity: 0.35; }
+  .day-cell.today { background: #fff3e0; border-color: #ff9800; }
+  .day-cell.target-mode { background: #e3f2fd; border-color: #1976d2; cursor: cell; }
+  .day-cell.target-mode:hover { background: #bbdefb; }
+  .day-number { font-weight: bold; color: #555; }
+  .day-cell.today .day-number { color: #e65100; }
+  .day-orders { margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }
+  .day-order-chip {
+    background: #fff; padding: 3px 5px; border-radius: 3px; font-size: 10px;
+    border-left: 3px solid #D32F2F; line-height: 1.3; cursor: pointer;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .day-order-chip.confirmed { border-left-color: #4caf50; }
+  .day-order-chip:hover { background: #fff8f8; }
+
+  .order-list { display: flex; flex-direction: column; gap: 8px; }
+  .order-card {
+    background: #fafafa; border: 2px solid #eee; border-radius: 8px;
+    padding: 10px 12px; cursor: pointer; transition: all 0.15s;
+  }
+  .order-card:hover { border-color: #ccc; }
+  .order-card.selected { border-color: #D32F2F; background: #fff5f5; }
+  .order-card-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 4px; font-size: 13px;
+  }
+  .order-card-id { color: #888; font-weight: bold; }
+  .order-card-tag {
+    font-size: 11px; padding: 2px 8px; border-radius: 10px;
+    background: #e0e0e0; color: #555;
+  }
+  .order-card-tag.ship { background: #e3f2fd; color: #1976d2; }
+  .order-card-tag.pickup { background: #f3e5f5; color: #7b1fa2; }
+  .order-card-name { font-weight: bold; font-size: 14px; color: #333; }
+  .order-card-items { font-size: 12px; color: #666; margin-top: 2px; white-space: pre-line; }
+
+  /* ===== Modal(共用) ===== */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: none; align-items: center; justify-content: center;
+    z-index: 200; padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: 15px; padding: 20px;
+    max-width: min(420px, 92vw); width: 100%; max-height: 85vh;
+    overflow-y: auto; position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 10px; right: 10px;
+    width: 30px; height: 30px; border-radius: 50%; border: none;
+    background: #f0f0f0; cursor: pointer; font-size: 15px; color: #666;
   }
 
   #loginScreen, #mainForm { display: none; }
   .error { color: #c33; font-size: 13px; margin-top: 6px; }
   .success { color: #2a7; font-size: 13px; margin-top: 6px; }
-  .btn-submit { width: 100%; padding: 14px; font-size: 16px; border-radius: 25px; font-weight: bold; }
 </style>
 </head>
 <body>
 
-<h1>🍪 和美小玉家｜內部填單</h1>
+<h1>🍪 和美小玉家｜內部系統</h1>
 
 <!-- 登入畫面 -->
 <div id="loginScreen" class="card">
   <h2>請輸入密碼</h2>
-  <div class="row">
-    <input type="password" id="pwInput" placeholder="內部填單密碼" autocomplete="off">
-  </div>
+  <div class="row"><input type="password" id="pwInput" placeholder="內部填單密碼" autocomplete="off"></div>
   <button onclick="doLogin()">進入</button>
   <div id="loginMsg" class="error"></div>
 </div>
 
-<!-- 主要填單 -->
+<!-- 主畫面 -->
 <div id="mainForm">
 
-  <!-- 客戶資料 -->
-  <div class="card">
-    <h2>客戶資料</h2>
-    <div class="row">
-      <label>📞 電話 <span style="color:#c33">*</span></label>
-      <div class="row-flex">
-        <input type="tel" id="phone" placeholder="0912-345-678" style="flex:1">
-        <button class="small" onclick="lookupCustomer()" style="flex:0 0 auto">查歷史</button>
+  <!-- Tab 切換 -->
+  <div class="tab-nav">
+    <button class="tab-btn active" id="tab-btn-form" onclick="switchTab('form')">📝 內部填單</button>
+    <button class="tab-btn" id="tab-btn-schedule" onclick="switchTab('schedule')">📅 排單系統</button>
+  </div>
+
+  <!-- ========== Tab 1: 內部填單 ========== -->
+  <div id="tab-form">
+
+    <div class="card">
+      <h2>客戶資料</h2>
+      <div class="row">
+        <label>📞 電話 <span style="color:#c33">*</span></label>
+        <div class="row-flex">
+          <input type="tel" id="phone" placeholder="0912-345-678" style="flex:1">
+          <button class="small" onclick="lookupCustomer()" style="flex:0 0 auto">查歷史</button>
+        </div>
+        <div id="customerInfo"></div>
       </div>
-      <div id="customerInfo"></div>
-    </div>
-    <div class="row">
-      <label>👤 姓名 <span style="color:#c33">*</span></label>
-      <input type="text" id="name">
-    </div>
-    <div class="row">
-      <label>📍 地址</label>
-      <input type="text" id="address">
-    </div>
-    <div class="row">
-      <label>LINE User ID（選填，填了才發通知）</label>
-      <input type="text" id="lineUserId" placeholder="U xxxxxxxxxxxx...">
-    </div>
-    <div class="row">
-      <label>📌 訂單來源 <span style="color:#c33">*</span></label>
-      <select id="orderSource">
-        <option value="">請選擇</option>
-        <option value="電話訂購">電話訂購</option>
-        <option value="現場下單">現場下單</option>
-        <option value="LINE 私訊">LINE 私訊</option>
-        <option value="FB 私訊">FB 私訊</option>
-        <option value="親友介紹">親友介紹</option>
-        <option value="市集現場">市集現場</option>
-        <option value="其他">其他</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- 商品 -->
-  <div class="card">
-    <h2>🛍 商品</h2>
-    <div class="product-grid" id="productGrid">載入中...</div>
-  </div>
-
-  <!-- 優惠進度 -->
-  <div class="card" id="promoSection" style="display:none">
-    <div class="promo-section">
-      <div class="promo-title">🎉 優惠進度</div>
-      <div id="promoItems"></div>
-    </div>
-  </div>
-
-  <!-- 加購 -->
-  <div class="card" id="addonSection" style="display:none">
-    <div class="addon-section">
-      <div class="addon-title">🎁 贈品</div>
-      <div id="addonItems"></div>
-    </div>
-  </div>
-
-  <!-- 金額 -->
-  <div class="card" id="subtotalBox" style="display:none">
-    <h2>💰 訂單明細</h2>
-    <div class="subtotal-box">
-      <div id="subtotalItems"></div>
-      <div id="subtotalGifts"></div>
-      <div class="subtotal-row subtotal-total">
-        <span>總金額</span><span id="totalAmt">0 元</span>
+      <div class="row"><label>👤 姓名 <span style="color:#c33">*</span></label><input type="text" id="name"></div>
+      <div class="row"><label>📍 地址</label><input type="text" id="address"></div>
+      <div class="row"><label>LINE User ID（選填，填了才發通知）</label><input type="text" id="lineUserId" placeholder="U xxxxxxxxxxxx..."></div>
+      <div class="row">
+        <label>📌 訂單來源 <span style="color:#c33">*</span></label>
+        <select id="orderSource">
+          <option value="">請選擇</option>
+          <option value="電話訂購">電話訂購</option>
+          <option value="現場下單">現場下單</option>
+          <option value="LINE 私訊">LINE 私訊</option>
+          <option value="FB 私訊">FB 私訊</option>
+          <option value="親友介紹">親友介紹</option>
+          <option value="市集現場">市集現場</option>
+          <option value="其他">其他</option>
+        </select>
       </div>
     </div>
-    <div class="hint">⚠️ 最終金額以後端寫入 Orders 表為準</div>
-  </div>
 
-  <!-- 運送/付款 -->
-  <div class="card">
-    <h2>🚚 運送與付款</h2>
-    <div class="row">
-      <label>運送方式</label>
-      <select id="shippingSelect">
-        <option value="現場取貨">現場取貨</option>
-        <option value="黑貓宅配">黑貓宅配</option>
-      </select>
+    <div class="card">
+      <h2>🛍 商品</h2>
+      <div class="product-grid" id="productGrid">載入中...</div>
     </div>
-    <div class="row">
-      <label>付款方式</label>
-      <select id="paymentSelect">
-        <option value="現場付款">現場付款</option>
-        <option value="匯款">匯款</option>
-      </select>
+
+    <div class="card" id="promoSection" style="display:none">
+      <div class="promo-section">
+        <div class="promo-title">🎉 優惠進度</div>
+        <div id="promoItems"></div>
+      </div>
     </div>
+
+    <div class="card" id="addonSection" style="display:none">
+      <div class="addon-section">
+        <div class="addon-title">🎁 贈品</div>
+        <div id="addonItems"></div>
+      </div>
+    </div>
+
+    <div class="card" id="subtotalBox" style="display:none">
+      <h2>💰 訂單明細</h2>
+      <div class="subtotal-box">
+        <div id="subtotalItems"></div>
+        <div id="subtotalGifts"></div>
+        <div class="subtotal-row subtotal-total"><span>總金額</span><span id="totalAmt">0 元</span></div>
+      </div>
+      <div class="hint">⚠️ 最終金額以後端寫入 Orders 表為準</div>
+    </div>
+
+    <div class="card">
+      <h2>🚚 運送與付款</h2>
+      <div class="row"><label>運送方式</label><select id="shippingSelect"><option value="現場取貨">現場取貨</option><option value="黑貓宅配">黑貓宅配</option></select></div>
+      <div class="row"><label>付款方式</label><select id="paymentSelect"><option value="現場付款">現場付款</option><option value="匯款">匯款</option></select></div>
+    </div>
+
+    <div class="card"><h2>✍️ 備註</h2><textarea id="note" rows="2" placeholder="（選填）"></textarea></div>
+
+    <div class="card">
+      <button class="btn-submit" onclick="submitOrder()">送出訂單</button>
+      <div id="submitMsg" class="error"></div>
+    </div>
+
   </div>
 
-  <!-- 備註 -->
-  <div class="card">
-    <h2>✍️ 備註</h2>
-    <textarea id="note" rows="2" placeholder="（選填）"></textarea>
+  <!-- ========== Tab 2: 排單系統 ========== -->
+  <div id="tab-schedule" style="display:none">
+
+    <div id="prepAlert" class="prep-alert hidden"></div>
+
+    <div class="card">
+      <div class="calendar-header">
+        <button class="small outline" onclick="prevMonth()">‹ 上月</button>
+        <div class="calendar-title" id="calendarTitle"></div>
+        <button class="small outline" onclick="nextMonth()">下月 ›</button>
+      </div>
+      <div class="calendar-weekdays">
+        <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <div class="card">
+      <h2>📋 待排定訂單 <span id="unscheduledCount" style="color:#888;font-size:13px;font-weight:normal"></span></h2>
+      <div class="hint" id="scheduleHint">點訂單卡片，再點月曆日期即可排定</div>
+      <div class="order-list" id="unscheduledList" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <button class="outline" onclick="loadSchedule()">🔄 重新整理</button>
+    </div>
+
   </div>
 
-  <!-- 送出 -->
-  <div class="card">
-    <button class="btn-submit" onclick="submitOrder()">送出訂單</button>
-    <div id="submitMsg" class="error"></div>
-  </div>
+</div>
 
+<!-- 時段選擇 modal -->
+<div id="periodModal" class="modal-overlay" onclick="closePeriodModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closePeriodModal()">✕</button>
+    <h2 style="margin-bottom:12px">📅 設定取貨日期</h2>
+    <div id="periodModalInfo" style="background:#fafafa;padding:10px;border-radius:6px;margin-bottom:12px;font-size:14px"></div>
+    <div class="row">
+      <label>取貨時段</label>
+      <select id="periodSelect"></select>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="outline" style="flex:1" onclick="closePeriodModal()">取消</button>
+      <button style="flex:1" onclick="confirmSchedule()">確定排定</button>
+    </div>
+    <div id="periodModalMsg" class="error"></div>
+  </div>
+</div>
+
+<!-- 訂單詳情 modal -->
+<div id="orderDetailModal" class="modal-overlay" onclick="closeOrderDetail(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeOrderDetail()">✕</button>
+    <h2 id="detailTitle" style="margin-bottom:8px"></h2>
+    <div id="detailBody" style="font-size:13px;line-height:1.7;color:#555"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button class="small outline" onclick="reschedule()">📅 改日期</button>
+      <button class="small gray" onclick="cancelSchedule()">取消排定</button>
+      <button class="small" onclick="closeOrderDetail()" style="margin-left:auto">關閉</button>
+    </div>
+    <div id="detailMsg" class="error"></div>
+  </div>
 </div>
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
 
 let PASSWORD = '';
+// 內部填單頁狀態
 let productsData = [];
 let addonsData = [];
 let promotionsData = [];
 let addonSelections = {};
+// 排單頁狀態
+let scheduleData = null;
+let selectedOrderId = null;          // 已選的待排定訂單
+let calendarYear, calendarMonth;     // 0-based month
+let pendingDate = null;              // 暫存:準備寫入的日期(yyyy-MM-dd)
+let detailOrder = null;              // 訂單詳情 modal 當前訂單
 
 // ---------- 啟動 ----------
 document.getElementById('loginScreen').style.display = 'block';
-document.getElementById('pwInput').addEventListener('keypress', e => {
-  if (e.key === 'Enter') doLogin();
-});
+document.getElementById('pwInput').addEventListener('keypress', e => { if (e.key === 'Enter') doLogin(); });
 
 // ---------- 登入 ----------
 async function doLogin() {
@@ -260,11 +363,22 @@ async function doLogin() {
   }
 }
 
-// ---------- 載入資料 ----------
+// ---------- Tab 切換 ----------
+function switchTab(tab) {
+  document.getElementById('tab-form').style.display = (tab === 'form') ? 'block' : 'none';
+  document.getElementById('tab-schedule').style.display = (tab === 'schedule') ? 'block' : 'none';
+  document.getElementById('tab-btn-form').classList.toggle('active', tab === 'form');
+  document.getElementById('tab-btn-schedule').classList.toggle('active', tab === 'schedule');
+  if (tab === 'schedule') loadSchedule();
+}
+
+/* ============================================================
+ * Tab 1: 內部填單(原 v2 邏輯,沿用)
+ * ============================================================ */
+
 async function loadData() {
   try {
     const data = await callServer('getInitData', {});
-    console.log('getInitData:', data);
     productsData = data.products || [];
     addonsData = data.addons || [];
     promotionsData = data.promotions || [];
@@ -275,7 +389,6 @@ async function loadData() {
   }
 }
 
-// ---------- 渲染商品 ----------
 function renderProducts() {
   const grid = document.getElementById('productGrid');
   if (productsData.length === 0) { grid.innerHTML = '無商品'; return; }
@@ -321,14 +434,8 @@ function onQtyChange(i) {
   refreshAll();
 }
 
-// ---------- 統一重新渲染 ----------
-function refreshAll() {
-  renderAddons();
-  renderPromotions();
-  updateTotal();
-}
+function refreshAll() { renderAddons(); renderPromotions(); updateTotal(); }
 
-// ---------- 加購邏輯（從 LIFF 移植）----------
 function parseGiftRules(rulesStr) {
   if (!rulesStr) return [];
   return rulesStr.split(',').map(r => {
@@ -340,11 +447,8 @@ function parseGiftRules(rulesStr) {
 
 function calcAddonForProduct(addon) {
   const rules = parseGiftRules(addon.giftRules);
-  let autoGifted = 0;
-  let maxSelectable = 0;
-  const autoTypes = [];
-  const selectTypes = [];
-
+  let autoGifted = 0, maxSelectable = 0;
+  const autoTypes = [], selectTypes = [];
   rules.forEach(rule => {
     let matchingQty = 0;
     productsData.forEach((p, i) => {
@@ -363,12 +467,10 @@ function calcAddonForProduct(addon) {
       if (maxSel > 0) selectTypes.push({ type: rule.type, qty: matchingQty, max: maxSel });
     }
   });
-
   let userSelected = addonSelections[addon.name] || 0;
   userSelected = Math.max(0, Math.min(userSelected, maxSelectable));
   if (addon.maxQty) userSelected = Math.min(userSelected, addon.maxQty);
   addonSelections[addon.name] = userSelected;
-
   return { autoGifted, maxSelectable, userSelected, totalGifted: autoGifted + userSelected, autoTypes, selectTypes };
 }
 
@@ -387,25 +489,15 @@ function shouldShowAddon(addon) {
 function renderAddons() {
   const section = document.getElementById('addonSection');
   const container = document.getElementById('addonItems');
-
   const anySelected = productsData.some((p, i) =>
-    parseInt(document.getElementById('qty_' + i)?.value || 0) > 0
-  );
-  if (!anySelected || addonsData.length === 0) {
-    section.style.display = 'none';
-    return;
-  }
-
-  let anyAddonShown = false;
-  let html = '';
-
+    parseInt(document.getElementById('qty_' + i)?.value || 0) > 0);
+  if (!anySelected || addonsData.length === 0) { section.style.display = 'none'; return; }
+  let anyAddonShown = false, html = '';
   addonsData.forEach(addon => {
     if (!shouldShowAddon(addon)) return;
     const calc = calcAddonForProduct(addon);
-    const hasAuto = calc.autoGifted > 0;
-    const hasSelectable = calc.maxSelectable > 0;
+    const hasAuto = calc.autoGifted > 0, hasSelectable = calc.maxSelectable > 0;
     if (!hasAuto && !hasSelectable) return;
-
     anyAddonShown = true;
     let h = '<div class="addon-item">';
     h += `<div class="addon-name">📦 ${addon.name}</div>`;
@@ -416,21 +508,11 @@ function renderAddons() {
     }
     if (hasSelectable) {
       const selectDesc = calc.selectTypes.map(t => t.type).join('、');
-      h += `
-        <div class="addon-selectable">
-          <div class="addon-selectable-prompt">有送禮需求嗎？選擇 ${selectDesc} 需要的紙袋數量</div>
-          <div class="addon-selectable-row">
-            <button class="qty-btn" onclick="changeAddonQty('${addon.name}', -1)">－</button>
-            <input class="qty-input" id="addon_${addon.name}" type="number" value="${calc.userSelected}" min="0" max="${calc.maxSelectable}" onchange="onAddonInputChange('${addon.name}')">
-            <button class="qty-btn" onclick="changeAddonQty('${addon.name}', 1)">＋</button>
-            <span class="addon-limit-hint">最多 ${calc.maxSelectable} 個</span>
-          </div>
-        </div>`;
+      h += `<div class="addon-selectable"><div class="addon-selectable-prompt">有送禮需求嗎？選擇 ${selectDesc} 需要的紙袋數量</div><div class="addon-selectable-row"><button class="qty-btn" onclick="changeAddonQty('${addon.name}', -1)">－</button><input class="qty-input" id="addon_${addon.name}" type="number" value="${calc.userSelected}" min="0" max="${calc.maxSelectable}" onchange="onAddonInputChange('${addon.name}')"><button class="qty-btn" onclick="changeAddonQty('${addon.name}', 1)">＋</button><span class="addon-limit-hint">最多 ${calc.maxSelectable} 個</span></div></div>`;
     }
     h += '</div>';
     html += h;
   });
-
   section.style.display = anyAddonShown ? 'block' : 'none';
   container.innerHTML = html;
 }
@@ -444,7 +526,6 @@ function changeAddonQty(addonName, delta) {
   addonSelections[addonName] = val;
   refreshAll();
 }
-
 function onAddonInputChange(addonName) {
   const input = document.getElementById('addon_' + addonName);
   if (!input) return;
@@ -456,56 +537,32 @@ function onAddonInputChange(addonName) {
   refreshAll();
 }
 
-// ---------- 優惠邏輯（從 LIFF 移植）----------
 function calcPromotions() {
   const items = getSelectedItems();
   const results = [];
-
   promotionsData.forEach(promo => {
     let qualifyQty = 0, qualifyAmount = 0, giftQty = 0, triggered = false, remaining = 0;
-
     if (promo.conditionType === '滿件') {
-      const conditionProducts = promo.conditionProduct
-        ? promo.conditionProduct.split(',').map(s => s.trim())
-        : [];
+      const cps = promo.conditionProduct ? promo.conditionProduct.split(',').map(s => s.trim()) : [];
       let matched = 0;
-      items.forEach(item => {
-        if (conditionProducts.length === 0 || conditionProducts.indexOf(item.name) >= 0) {
-          matched += item.qty;
-        }
-      });
+      items.forEach(item => { if (cps.length === 0 || cps.indexOf(item.name) >= 0) matched += item.qty; });
       qualifyQty = matched;
       if (matched >= promo.conditionQty && promo.conditionQty > 0) {
         triggered = true;
-        giftQty = promo.multipleTrigger
-          ? Math.floor(matched / promo.conditionQty) * promo.giftQty
-          : promo.giftQty;
-      } else {
-        remaining = promo.conditionQty - matched;
-      }
+        giftQty = promo.multipleTrigger ? Math.floor(matched / promo.conditionQty) * promo.giftQty : promo.giftQty;
+      } else { remaining = promo.conditionQty - matched; }
     } else if (promo.conditionType === '滿額') {
-      const conditionProducts = promo.conditionProduct
-        ? promo.conditionProduct.split(',').map(s => s.trim())
-        : [];
+      const cps = promo.conditionProduct ? promo.conditionProduct.split(',').map(s => s.trim()) : [];
       let matched = 0;
-      items.forEach(item => {
-        if (conditionProducts.length === 0 || conditionProducts.indexOf(item.name) >= 0) {
-          matched += (item.price || 0) * item.qty;
-        }
-      });
+      items.forEach(item => { if (cps.length === 0 || cps.indexOf(item.name) >= 0) matched += (item.price || 0) * item.qty; });
       qualifyAmount = matched;
       if (matched >= promo.conditionAmount && promo.conditionAmount > 0) {
         triggered = true;
-        giftQty = promo.multipleTrigger
-          ? Math.floor(matched / promo.conditionAmount) * promo.giftQty
-          : promo.giftQty;
-      } else {
-        remaining = promo.conditionAmount - matched;
-      }
+        giftQty = promo.multipleTrigger ? Math.floor(matched / promo.conditionAmount) * promo.giftQty : promo.giftQty;
+      } else { remaining = promo.conditionAmount - matched; }
     }
     results.push({ promo, qualifyQty, qualifyAmount, giftQty, triggered, remaining });
   });
-
   return results;
 }
 
@@ -513,9 +570,7 @@ function renderPromotions() {
   const section = document.getElementById('promoSection');
   const container = document.getElementById('promoItems');
   const results = calcPromotions();
-  let html = '';
-  let anyShown = false;
-
+  let html = '', anyShown = false;
   results.forEach(r => {
     if (r.triggered) return;
     const threshold = r.promo.progressThreshold || 0;
@@ -525,7 +580,6 @@ function renderPromotions() {
       anyShown = true;
     }
   });
-
   section.style.display = anyShown ? 'block' : 'none';
   container.innerHTML = html;
 }
@@ -536,20 +590,12 @@ function buildGiftRowsHtml() {
     if (!shouldShowAddon(addon)) return;
     const calc = calcAddonForProduct(addon);
     if (calc.totalGifted > 0) {
-      html += `
-        <div class="subtotal-row gift-row">
-          <span>🎁 ${addon.name} x${calc.totalGifted}<span class="gift-source">（贈品）</span></span>
-          <span>—</span>
-        </div>`;
+      html += `<div class="subtotal-row gift-row"><span>🎁 ${addon.name} x${calc.totalGifted}<span class="gift-source">（贈品）</span></span><span>—</span></div>`;
     }
   });
   calcPromotions().forEach(r => {
     if (r.triggered && r.giftQty > 0) {
-      html += `
-        <div class="subtotal-row gift-row">
-          <span>🎁 ${r.promo.giftName} x${r.giftQty}<span class="gift-source">（${r.promo.name}）</span></span>
-          <span>—</span>
-        </div>`;
+      html += `<div class="subtotal-row gift-row"><span>🎁 ${r.promo.giftName} x${r.giftQty}<span class="gift-source">（${r.promo.name}）</span></span><span>—</span></div>`;
     }
   });
   return html;
@@ -579,7 +625,6 @@ function updateTotal() {
   document.getElementById('totalAmt').innerText = subtotal + ' 元';
 }
 
-// ---------- 查歷史客戶 ----------
 async function lookupCustomer() {
   const phone = document.getElementById('phone').value.trim();
   const box = document.getElementById('customerInfo');
@@ -599,11 +644,9 @@ async function lookupCustomer() {
   }
 }
 
-// ---------- 送出 ----------
 async function submitOrder() {
   const msg = document.getElementById('submitMsg');
   msg.className = 'error'; msg.textContent = '';
-
   const name = document.getElementById('name').value.trim();
   const phone = document.getElementById('phone').value.trim();
   const address = document.getElementById('address').value.trim();
@@ -612,28 +655,15 @@ async function submitOrder() {
   const shipping = document.getElementById('shippingSelect').value;
   const payment = document.getElementById('paymentSelect').value;
   const note = document.getElementById('note').value.trim();
-
   if (!name || !phone) { msg.textContent = '姓名與電話為必填'; return; }
   if (!orderSource) { msg.textContent = '請選擇訂單來源'; return; }
   if (shipping !== '現場取貨' && !address) { msg.textContent = '宅配需要填寫地址'; return; }
-
   const items = getSelectedItems();
   if (items.length === 0) { msg.textContent = '請至少選擇一項商品'; return; }
-
   const payload = {
-    password: PASSWORD,
-    name,
-    tel: phone,
-    address,
-    lineUserId,
-    items,
-    addonSelections,
-    shipping,
-    payment,
-    orderSource,
-    note
+    password: PASSWORD, name, tel: phone, address, lineUserId,
+    items, addonSelections, shipping, payment, orderSource, note
   };
-
   msg.textContent = '送出中...';
   try {
     const res = await callServer('submitInternalOrder', payload);
@@ -641,9 +671,7 @@ async function submitOrder() {
       msg.className = 'success';
       msg.textContent = '✅ 訂單已建立：' + res.orderId;
       setTimeout(() => {
-        if (confirm('訂單 ' + res.orderId + ' 已建立，要繼續填下一筆嗎？')) {
-          resetForm();
-        }
+        if (confirm('訂單 ' + res.orderId + ' 已建立，要繼續填下一筆嗎？')) resetForm();
       }, 300);
     } else {
       msg.textContent = '失敗：' + (res.error || '未知錯誤');
@@ -654,8 +682,7 @@ async function submitOrder() {
 }
 
 function resetForm() {
-  ['name','phone','address','lineUserId','note'].forEach(id =>
-    document.getElementById(id).value = '');
+  ['name','phone','address','lineUserId','note'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('orderSource').value = '';
   document.getElementById('shippingSelect').value = '現場取貨';
   document.getElementById('paymentSelect').value = '現場付款';
@@ -672,7 +699,265 @@ function resetForm() {
   window.scrollTo(0, 0);
 }
 
-// ---------- 後端通訊 ----------
+/* ============================================================
+ * Tab 2: 排單系統
+ * ============================================================ */
+
+async function loadSchedule() {
+  try {
+    scheduleData = await callServer('getScheduleData', {});
+    if (scheduleData.error) { alert('載入失敗：' + scheduleData.error); return; }
+    if (calendarYear === undefined) {
+      const today = new Date();
+      calendarYear = today.getFullYear();
+      calendarMonth = today.getMonth();
+    }
+    renderPrepAlert();
+    renderCalendar();
+    renderUnscheduled();
+    fillPeriodSelect();
+  } catch (e) {
+    alert('排單載入失敗：' + e.message);
+  }
+}
+
+function renderPrepAlert() {
+  const el = document.getElementById('prepAlert');
+  const t = scheduleData.prepAlertToday || 0;
+  const tm = scheduleData.prepAlertTomorrow || 0;
+  if (t === 0 && tm === 0) { el.classList.add('hidden'); return; }
+  let parts = [];
+  if (t > 0) parts.push(`今天有 <b>${t}</b> 筆要備料`);
+  if (tm > 0) parts.push(`明天有 <b>${tm}</b> 筆要備料`);
+  el.innerHTML = '⚠️ ' + parts.join('、');
+  el.classList.remove('hidden');
+}
+
+function fillPeriodSelect() {
+  const select = document.getElementById('periodSelect');
+  const periods = scheduleData.periods || [];
+  select.innerHTML = periods.map(p => `<option value="${p}">${p}</option>`).join('');
+}
+
+function prevMonth() {
+  calendarMonth--;
+  if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+  renderCalendar();
+}
+function nextMonth() {
+  calendarMonth++;
+  if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  document.getElementById('calendarTitle').innerText = `${calendarYear} 年 ${calendarMonth + 1} 月`;
+  const firstDay = new Date(calendarYear, calendarMonth, 1);
+  const lastDay = new Date(calendarYear, calendarMonth + 1, 0);
+  const startWeekday = firstDay.getDay();  // 0=日
+  const daysInMonth = lastDay.getDate();
+  const prevMonthLastDay = new Date(calendarYear, calendarMonth, 0).getDate();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // 把已排訂單依日期歸類
+  const scheduledByDate = {};
+  (scheduleData.scheduled || []).forEach(o => {
+    if (!scheduledByDate[o.pickupDate]) scheduledByDate[o.pickupDate] = [];
+    scheduledByDate[o.pickupDate].push(o);
+  });
+
+  const grid = document.getElementById('calendarGrid');
+  let html = '';
+  const totalCells = Math.ceil((startWeekday + daysInMonth) / 7) * 7;
+
+  for (let i = 0; i < totalCells; i++) {
+    let dayNum, isOtherMonth = false, dateObj;
+    if (i < startWeekday) {
+      dayNum = prevMonthLastDay - (startWeekday - 1 - i);
+      isOtherMonth = true;
+      dateObj = new Date(calendarYear, calendarMonth - 1, dayNum);
+    } else if (i >= startWeekday + daysInMonth) {
+      dayNum = i - startWeekday - daysInMonth + 1;
+      isOtherMonth = true;
+      dateObj = new Date(calendarYear, calendarMonth + 1, dayNum);
+    } else {
+      dayNum = i - startWeekday + 1;
+      dateObj = new Date(calendarYear, calendarMonth, dayNum);
+    }
+    const dateStr = formatDateStr(dateObj);
+    const isToday = dateObj.getTime() === today.getTime();
+    const ordersHere = scheduledByDate[dateStr] || [];
+    const classes = ['day-cell'];
+    if (isOtherMonth) classes.push('other-month');
+    if (isToday) classes.push('today');
+    if (selectedOrderId) classes.push('target-mode');
+
+    let chips = '';
+    ordersHere.forEach(o => {
+      const idShort = o.orderId.slice(-3);
+      const confirmedCls = o.pickupConfirmed ? ' confirmed' : '';
+      chips += `<div class="day-order-chip${confirmedCls}" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}">${idShort} ${o.name}</div>`;
+    });
+
+    html += `<div class="${classes.join(' ')}" onclick="onDayClick('${dateStr}')">
+      <div class="day-number">${dayNum}</div>
+      <div class="day-orders">${chips}</div>
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function formatDateStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+}
+
+function onDayClick(dateStr) {
+  if (!selectedOrderId) return;  // 沒選訂單,點月曆無動作
+  // 找選中的訂單
+  const order = findOrder(selectedOrderId);
+  if (!order) return;
+  pendingDate = dateStr;
+  document.getElementById('periodModalInfo').innerHTML =
+    `將「${order.name}」（${order.orderId.slice(-3)}）<br>排定到 <b>${dateStr}</b>`;
+  document.getElementById('periodModalMsg').textContent = '';
+  document.getElementById('periodModal').classList.add('show');
+}
+
+function findOrder(orderId) {
+  let o = (scheduleData.unscheduled || []).find(x => x.orderId === orderId);
+  if (o) return o;
+  return (scheduleData.scheduled || []).find(x => x.orderId === orderId);
+}
+
+function renderUnscheduled() {
+  const list = scheduleData.unscheduled || [];
+  document.getElementById('unscheduledCount').innerText = `（${list.length} 筆）`;
+  const box = document.getElementById('unscheduledList');
+  if (list.length === 0) {
+    box.innerHTML = '<div class="hint">目前沒有待排定的訂單 ✨</div>';
+    return;
+  }
+  box.innerHTML = list.map(o => {
+    const idShort = o.orderId.slice(-3);
+    const shipTag = o.shipping === '現場取貨'
+      ? `<span class="order-card-tag pickup">${o.shipping}</span>`
+      : `<span class="order-card-tag ship">${o.shipping}</span>`;
+    const sel = (selectedOrderId === o.orderId) ? ' selected' : '';
+    return `<div class="order-card${sel}" onclick="selectOrder('${o.orderId}')">
+      <div class="order-card-header">
+        <span class="order-card-id">#${idShort}</span>
+        ${shipTag}
+      </div>
+      <div class="order-card-name">${o.name}</div>
+      <div class="order-card-items">${o.items.split('\\n').slice(0, 2).join('｜')}</div>
+    </div>`;
+  }).join('');
+}
+
+function selectOrder(orderId) {
+  selectedOrderId = (selectedOrderId === orderId) ? null : orderId;
+  document.getElementById('scheduleHint').innerText = selectedOrderId
+    ? '👇 已選取訂單，請點月曆日期排定（再次點訂單可取消選擇）'
+    : '點訂單卡片，再點月曆日期即可排定';
+  renderUnscheduled();
+  renderCalendar();  // 重渲染讓格子變藍色
+}
+
+function closePeriodModal(event) {
+  document.getElementById('periodModal').classList.remove('show');
+  pendingDate = null;
+}
+
+async function confirmSchedule() {
+  if (!selectedOrderId || !pendingDate) return;
+  const period = document.getElementById('periodSelect').value;
+  const msg = document.getElementById('periodModalMsg');
+  msg.textContent = '處理中...';
+  try {
+    const res = await callServer('setOrderPickupDate', {
+      password: PASSWORD,
+      orderId: selectedOrderId,
+      pickupDate: pendingDate,
+      pickupPeriod: period
+    });
+    if (res && res.success) {
+      closePeriodModal();
+      selectedOrderId = null;
+      await loadSchedule();
+    } else {
+      msg.textContent = '失敗：' + (res.error || '未知錯誤');
+    }
+  } catch (e) {
+    msg.textContent = '失敗：' + e.message;
+  }
+}
+
+// ---------- 訂單詳情 ----------
+function openOrderDetail(orderId) {
+  const o = findOrder(orderId);
+  if (!o) return;
+  detailOrder = o;
+  document.getElementById('detailTitle').innerText = `#${o.orderId.slice(-3)}｜${o.name}`;
+  const lines = [];
+  lines.push(`<b>訂單編號：</b>${o.orderId}`);
+  lines.push(`<b>電話：</b>${o.tel}`);
+  if (o.pickupDate) lines.push(`<b>取貨/出貨日：</b>${o.pickupDate} ${o.pickupPeriod || ''} ${o.pickupConfirmed ? '✅ 客人已確認' : '⏳ 客人未確認'}`);
+  lines.push(`<b>運送：</b>${o.shipping}`);
+  if (o.address) lines.push(`<b>地址：</b>${o.address}`);
+  lines.push(`<b>付款：</b>${o.payment} ${o.paid ? '✅ 已付款' : '⏳ 未付款'}`);
+  lines.push(`<b>總額：</b>${o.total} 元`);
+  lines.push(`<b>商品：</b><br>${o.items.split('\\n').join('<br>')}`);
+  if (o.addons) lines.push(`<b>贈品/加購：</b><br>${o.addons.split('\\n').join('<br>')}`);
+  if (o.note) lines.push(`<b>備註：</b>${o.note}`);
+  if (!o.hasLineUserId) lines.push('<span style="color:#888;font-size:12px">（無 LINE userId，不會自動通知）</span>');
+  document.getElementById('detailBody').innerHTML = lines.join('<br>');
+  document.getElementById('detailMsg').textContent = '';
+  document.getElementById('orderDetailModal').classList.add('show');
+}
+
+function closeOrderDetail(event) {
+  document.getElementById('orderDetailModal').classList.remove('show');
+  detailOrder = null;
+}
+
+function reschedule() {
+  if (!detailOrder) return;
+  selectedOrderId = detailOrder.orderId;
+  closeOrderDetail();
+  document.getElementById('scheduleHint').innerText = '👇 請點月曆日期重新排定';
+  renderUnscheduled();
+  renderCalendar();
+  alert('已選取訂單，請點月曆日期重新排定');
+}
+
+async function cancelSchedule() {
+  if (!detailOrder) return;
+  if (!confirm('確定取消「' + detailOrder.name + '」的排定？')) return;
+  const msg = document.getElementById('detailMsg');
+  msg.textContent = '處理中...';
+  try {
+    const res = await callServer('setOrderPickupDate', {
+      password: PASSWORD,
+      orderId: detailOrder.orderId,
+      pickupDate: '',
+      pickupPeriod: ''
+    });
+    if (res && res.success) {
+      closeOrderDetail();
+      await loadSchedule();
+    } else {
+      msg.textContent = '失敗：' + (res.error || '未知錯誤');
+    }
+  } catch (e) {
+    msg.textContent = '失敗：' + e.message;
+  }
+}
+
+// ---------- 通用後端通訊 ----------
 async function callServer(action, params) {
   const url = SCRIPT_URL + '?action=' + encodeURIComponent(action);
   const res = await fetch(url, {
