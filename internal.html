@@ -13,6 +13,7 @@
   }
   h1 { font-size: 20px; margin-bottom: 12px; color: #D32F2F; text-align: center; }
   h2 { font-size: 16px; margin: 0 0 10px; color: #D32F2F; }
+  h3 { font-size: 14px; color: #D32F2F; margin: 0 0 10px; }
   .card { background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 12px; }
   label { display: block; font-weight: bold; margin-bottom: 6px; color: #D32F2F; font-size: 14px; }
   input, select, textarea {
@@ -42,7 +43,7 @@
   }
   .tab-btn.active { background: #D32F2F; color: #fff; }
 
-  /* ===== 內部填單頁的商品/加購等(原 v2 樣式) ===== */
+  /* ===== 內部填單頁的商品/加購 ===== */
   .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .product-card { border: 2px solid #eee; border-radius: 10px; overflow: hidden; }
   .product-card.selected { border-color: #D32F2F; }
@@ -75,34 +76,15 @@
   .btn-submit { width: 100%; padding: 14px; font-size: 16px; border-radius: 25px; font-weight: bold; }
 
   /* ===== 排單系統 ===== */
-  .prep-alert {
-    background: #ffebee; border: 2px solid #D32F2F; border-radius: 10px;
-    padding: 12px 16px; margin-bottom: 12px; color: #D32F2F; font-weight: bold;
-    display: flex; align-items: center; gap: 8px;
-  }
+  .prep-alert { background: #ffebee; border: 2px solid #D32F2F; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; color: #D32F2F; font-weight: bold; display: flex; align-items: center; gap: 8px; }
   .prep-alert.hidden { display: none; }
-  .calendar-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 10px; gap: 8px;
-  }
+  .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
   .calendar-header button { padding: 6px 12px; }
   .calendar-title { flex: 1; text-align: center; font-weight: bold; font-size: 16px; color: #D32F2F; }
-  .calendar-weekdays {
-    display: grid; grid-template-columns: repeat(7, 1fr);
-    gap: 2px; margin-bottom: 4px;
-  }
-  .calendar-weekdays > div {
-    text-align: center; padding: 6px 2px; background: #f0f0f0;
-    font-size: 12px; font-weight: bold; color: #666; border-radius: 4px;
-  }
-  .calendar-grid {
-    display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
-  }
-  .day-cell {
-    min-height: 80px; background: #fafafa; border-radius: 4px;
-    padding: 4px; font-size: 12px; cursor: pointer; transition: background 0.15s;
-    border: 1px solid transparent;
-  }
+  .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 4px; }
+  .calendar-weekdays > div { text-align: center; padding: 6px 2px; background: #f0f0f0; font-size: 12px; font-weight: bold; color: #666; border-radius: 4px; }
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .day-cell { min-height: 80px; background: #fafafa; border-radius: 4px; padding: 4px; font-size: 12px; cursor: pointer; transition: background 0.15s; border: 1px solid transparent; }
   .day-cell.other-month { opacity: 0.35; }
   .day-cell.today { background: #fff3e0; border-color: #ff9800; }
   .day-cell.target-mode { background: #e3f2fd; border-color: #1976d2; cursor: cell; }
@@ -110,52 +92,40 @@
   .day-number { font-weight: bold; color: #555; }
   .day-cell.today .day-number { color: #e65100; }
   .day-orders { margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }
-  .day-order-chip {
-    background: #fff; padding: 3px 5px; border-radius: 3px; font-size: 10px;
-    border-left: 3px solid #D32F2F; line-height: 1.3; cursor: pointer;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
+  .day-order-chip { background: #fff; padding: 3px 5px; border-radius: 3px; font-size: 10px; border-left: 3px solid #D32F2F; line-height: 1.3; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .day-order-chip.confirmed { border-left-color: #4caf50; }
+  .day-order-chip.done { border-left-color: #888; opacity: 0.5; text-decoration: line-through; }
   .day-order-chip:hover { background: #fff8f8; }
 
   .order-list { display: flex; flex-direction: column; gap: 8px; }
-  .order-card {
-    background: #fafafa; border: 2px solid #eee; border-radius: 8px;
-    padding: 10px 12px; cursor: pointer; transition: all 0.15s;
-  }
+  .order-card { background: #fafafa; border: 2px solid #eee; border-radius: 8px; padding: 10px 12px; cursor: pointer; transition: all 0.15s; }
   .order-card:hover { border-color: #ccc; }
   .order-card.selected { border-color: #D32F2F; background: #fff5f5; }
-  .order-card-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 4px; font-size: 13px;
-  }
+  .order-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 13px; }
   .order-card-id { color: #888; font-weight: bold; }
-  .order-card-tag {
-    font-size: 11px; padding: 2px 8px; border-radius: 10px;
-    background: #e0e0e0; color: #555;
-  }
+  .order-card-tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #e0e0e0; color: #555; }
   .order-card-tag.ship { background: #e3f2fd; color: #1976d2; }
   .order-card-tag.pickup { background: #f3e5f5; color: #7b1fa2; }
   .order-card-name { font-weight: bold; font-size: 14px; color: #333; }
   .order-card-items { font-size: 12px; color: #666; margin-top: 2px; white-space: pre-line; }
+  .info-btn-sm { width: 22px; height: 22px; line-height: 22px; border-radius: 50%; background: #e0e0e0; color: #666; text-align: center; font-size: 12px; cursor: pointer; display: inline-block; }
+  .info-btn-sm:hover { background: #ccc; }
 
-  /* ===== Modal(共用) ===== */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-    display: none; align-items: center; justify-content: center;
-    z-index: 200; padding: 20px;
-  }
+  /* ===== Modal 共用 ===== */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
   .modal-overlay.show { display: flex; }
-  .modal-box {
-    background: #fff; border-radius: 15px; padding: 20px;
-    max-width: min(420px, 92vw); width: 100%; max-height: 85vh;
-    overflow-y: auto; position: relative;
-  }
-  .modal-close {
-    position: absolute; top: 10px; right: 10px;
-    width: 30px; height: 30px; border-radius: 50%; border: none;
-    background: #f0f0f0; cursor: pointer; font-size: 15px; color: #666;
-  }
+  .modal-box { background: #fff; border-radius: 15px; padding: 20px; max-width: min(440px, 92vw); width: 100%; max-height: 88vh; overflow-y: auto; position: relative; }
+  .modal-close { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; border: none; background: #f0f0f0; cursor: pointer; font-size: 15px; color: #666; }
+
+  /* ===== 訂單詳情狀態管理 ===== */
+  .detail-section { background: #fafafa; padding: 10px 12px; border-radius: 8px; margin: 10px 0; font-size: 13px; line-height: 1.7; color: #555; }
+  .pickup-display { background: #fff8e7; padding: 10px 12px; border-radius: 8px; margin: 10px 0; font-size: 13px; }
+  .status-section { border-top: 1px solid #eee; margin-top: 14px; padding-top: 14px; }
+  .status-checkbox { display: flex; align-items: center; gap: 10px; padding: 8px 0; cursor: pointer; font-size: 14px; }
+  .status-checkbox input { width: auto; margin: 0; transform: scale(1.2); cursor: pointer; }
+  .status-tracking { margin: 8px 0 8px 30px; }
+  .status-tracking input { padding: 6px 10px; font-size: 14px; }
+  .status-row-msg { font-size: 12px; color: #888; margin-left: 30px; margin-top: -4px; }
 
   #loginScreen, #mainForm { display: none; }
   .error { color: #c33; font-size: 13px; margin-top: 6px; }
@@ -277,7 +247,7 @@
 
     <div class="card">
       <h2>📋 待排定訂單 <span id="unscheduledCount" style="color:#888;font-size:13px;font-weight:normal"></span></h2>
-      <div class="hint" id="scheduleHint">點訂單卡片，再點月曆日期即可排定</div>
+      <div class="hint" id="scheduleHint">點訂單卡片，再點月曆日期即可排定（點 ⓘ 看詳情）</div>
       <div class="order-list" id="unscheduledList" style="margin-top:10px"></div>
     </div>
 
@@ -295,10 +265,7 @@
     <button class="modal-close" onclick="closePeriodModal()">✕</button>
     <h2 style="margin-bottom:12px">📅 設定取貨日期</h2>
     <div id="periodModalInfo" style="background:#fafafa;padding:10px;border-radius:6px;margin-bottom:12px;font-size:14px"></div>
-    <div class="row">
-      <label>取貨時段</label>
-      <select id="periodSelect"></select>
-    </div>
+    <div class="row"><label>取貨時段</label><select id="periodSelect"></select></div>
     <div style="display:flex;gap:8px">
       <button class="outline" style="flex:1" onclick="closePeriodModal()">取消</button>
       <button style="flex:1" onclick="confirmSchedule()">確定排定</button>
@@ -307,18 +274,18 @@
   </div>
 </div>
 
-<!-- 訂單詳情 modal -->
+<!-- 訂單詳情 modal (含狀態管理) -->
 <div id="orderDetailModal" class="modal-overlay" onclick="closeOrderDetail(event)">
   <div class="modal-box" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeOrderDetail()">✕</button>
     <h2 id="detailTitle" style="margin-bottom:8px"></h2>
-    <div id="detailBody" style="font-size:13px;line-height:1.7;color:#555"></div>
-    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
-      <button class="small outline" onclick="reschedule()">📅 改日期</button>
-      <button class="small gray" onclick="cancelSchedule()">取消排定</button>
-      <button class="small" onclick="closeOrderDetail()" style="margin-left:auto">關閉</button>
+    <div id="detailInfo" class="detail-section"></div>
+    <div id="detailPickup"></div>
+    <div class="status-section">
+      <h3>📋 狀態管理（勾選即儲存）</h3>
+      <div id="statusControls"></div>
     </div>
-    <div id="detailMsg" class="error"></div>
+    <div id="detailMsg" class="hint" style="margin-top:8px;min-height:18px"></div>
   </div>
 </div>
 
@@ -326,17 +293,10 @@
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
 
 let PASSWORD = '';
-// 內部填單頁狀態
-let productsData = [];
-let addonsData = [];
-let promotionsData = [];
-let addonSelections = {};
-// 排單頁狀態
-let scheduleData = null;
-let selectedOrderId = null;          // 已選的待排定訂單
-let calendarYear, calendarMonth;     // 0-based month
-let pendingDate = null;              // 暫存:準備寫入的日期(yyyy-MM-dd)
-let detailOrder = null;              // 訂單詳情 modal 當前訂單
+// 內部填單
+let productsData = [], addonsData = [], promotionsData = [], addonSelections = {};
+// 排單
+let scheduleData = null, selectedOrderId = null, calendarYear, calendarMonth, pendingDate = null, detailOrder = null;
 
 // ---------- 啟動 ----------
 document.getElementById('loginScreen').style.display = 'block';
@@ -355,15 +315,10 @@ async function doLogin() {
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('mainForm').style.display = 'block';
       await loadData();
-    } else {
-      msg.textContent = '密碼錯誤';
-    }
-  } catch (e) {
-    msg.textContent = '連線失敗：' + e.message;
-  }
+    } else { msg.textContent = '密碼錯誤'; }
+  } catch (e) { msg.textContent = '連線失敗：' + e.message; }
 }
 
-// ---------- Tab 切換 ----------
 function switchTab(tab) {
   document.getElementById('tab-form').style.display = (tab === 'form') ? 'block' : 'none';
   document.getElementById('tab-schedule').style.display = (tab === 'schedule') ? 'block' : 'none';
@@ -372,10 +327,7 @@ function switchTab(tab) {
   if (tab === 'schedule') loadSchedule();
 }
 
-/* ============================================================
- * Tab 1: 內部填單(原 v2 邏輯,沿用)
- * ============================================================ */
-
+/* ===== Tab 1: 內部填單 ===== */
 async function loadData() {
   try {
     const data = await callServer('getInitData', {});
@@ -384,11 +336,8 @@ async function loadData() {
     promotionsData = data.promotions || [];
     renderProducts();
     refreshAll();
-  } catch (e) {
-    alert('載入失敗：' + e.message);
-  }
+  } catch (e) { alert('載入失敗：' + e.message); }
 }
-
 function renderProducts() {
   const grid = document.getElementById('productGrid');
   if (productsData.length === 0) { grid.innerHTML = '無商品'; return; }
@@ -396,23 +345,9 @@ function renderProducts() {
   productsData.forEach((p, i) => {
     const limitText = p.maxQty > 0 ? `<div class="product-limit">限購 ${p.maxQty} 個</div>` : '';
     const maxAttr = p.maxQty > 0 ? `max="${p.maxQty}"` : '';
-    grid.innerHTML += `
-      <div class="product-card" id="card_${i}">
-        <img src="${p.image || ''}" onerror="this.style.display='none'">
-        <div class="product-info">
-          <div class="product-name">${p.name}</div>
-          <div class="product-price">NT$ ${p.price}</div>
-          ${limitText}
-          <div class="qty-row">
-            <button class="qty-btn" onclick="changeQty(${i},-1)">－</button>
-            <input class="qty-input" id="qty_${i}" type="number" value="0" min="0" ${maxAttr} onchange="onQtyChange(${i})">
-            <button class="qty-btn" onclick="changeQty(${i},1)">＋</button>
-          </div>
-        </div>
-      </div>`;
+    grid.innerHTML += `<div class="product-card" id="card_${i}"><img src="${p.image || ''}" onerror="this.style.display='none'"><div class="product-info"><div class="product-name">${p.name}</div><div class="product-price">NT$ ${p.price}</div>${limitText}<div class="qty-row"><button class="qty-btn" onclick="changeQty(${i},-1)">－</button><input class="qty-input" id="qty_${i}" type="number" value="0" min="0" ${maxAttr} onchange="onQtyChange(${i})"><button class="qty-btn" onclick="changeQty(${i},1)">＋</button></div></div></div>`;
   });
 }
-
 function changeQty(i, delta) {
   const input = document.getElementById('qty_' + i);
   const max = productsData[i].maxQty;
@@ -422,7 +357,6 @@ function changeQty(i, delta) {
   document.getElementById('card_' + i).classList.toggle('selected', val > 0);
   refreshAll();
 }
-
 function onQtyChange(i) {
   const input = document.getElementById('qty_' + i);
   const max = productsData[i].maxQty;
@@ -433,9 +367,7 @@ function onQtyChange(i) {
   document.getElementById('card_' + i).classList.toggle('selected', val > 0);
   refreshAll();
 }
-
 function refreshAll() { renderAddons(); renderPromotions(); updateTotal(); }
-
 function parseGiftRules(rulesStr) {
   if (!rulesStr) return [];
   return rulesStr.split(',').map(r => {
@@ -444,7 +376,6 @@ function parseGiftRules(rulesStr) {
     return { type: parts[0], mode: parts[1], n: parseInt(parts[2]) || 1 };
   }).filter(r => r);
 }
-
 function calcAddonForProduct(addon) {
   const rules = parseGiftRules(addon.giftRules);
   let autoGifted = 0, maxSelectable = 0;
@@ -473,24 +404,19 @@ function calcAddonForProduct(addon) {
   addonSelections[addon.name] = userSelected;
   return { autoGifted, maxSelectable, userSelected, totalGifted: autoGifted + userSelected, autoTypes, selectTypes };
 }
-
 function shouldShowAddon(addon) {
   const cond = (addon.showCondition || 'always').trim();
   if (cond === 'always') return true;
   if (cond.startsWith('有')) {
     const type = cond.substring(1);
-    return productsData.some((p, i) =>
-      p.type === type && parseInt(document.getElementById('qty_' + i)?.value || 0) > 0
-    );
+    return productsData.some((p, i) => p.type === type && parseInt(document.getElementById('qty_' + i)?.value || 0) > 0);
   }
   return true;
 }
-
 function renderAddons() {
   const section = document.getElementById('addonSection');
   const container = document.getElementById('addonItems');
-  const anySelected = productsData.some((p, i) =>
-    parseInt(document.getElementById('qty_' + i)?.value || 0) > 0);
+  const anySelected = productsData.some((p, i) => parseInt(document.getElementById('qty_' + i)?.value || 0) > 0);
   if (!anySelected || addonsData.length === 0) { section.style.display = 'none'; return; }
   let anyAddonShown = false, html = '';
   addonsData.forEach(addon => {
@@ -516,7 +442,6 @@ function renderAddons() {
   section.style.display = anyAddonShown ? 'block' : 'none';
   container.innerHTML = html;
 }
-
 function changeAddonQty(addonName, delta) {
   const input = document.getElementById('addon_' + addonName);
   if (!input) return;
@@ -536,7 +461,6 @@ function onAddonInputChange(addonName) {
   addonSelections[addonName] = val;
   refreshAll();
 }
-
 function calcPromotions() {
   const items = getSelectedItems();
   const results = [];
@@ -565,7 +489,6 @@ function calcPromotions() {
   });
   return results;
 }
-
 function renderPromotions() {
   const section = document.getElementById('promoSection');
   const container = document.getElementById('promoItems');
@@ -583,31 +506,24 @@ function renderPromotions() {
   section.style.display = anyShown ? 'block' : 'none';
   container.innerHTML = html;
 }
-
 function buildGiftRowsHtml() {
   let html = '';
   addonsData.forEach(addon => {
     if (!shouldShowAddon(addon)) return;
     const calc = calcAddonForProduct(addon);
-    if (calc.totalGifted > 0) {
-      html += `<div class="subtotal-row gift-row"><span>🎁 ${addon.name} x${calc.totalGifted}<span class="gift-source">（贈品）</span></span><span>—</span></div>`;
-    }
+    if (calc.totalGifted > 0) html += `<div class="subtotal-row gift-row"><span>🎁 ${addon.name} x${calc.totalGifted}<span class="gift-source">（贈品）</span></span><span>—</span></div>`;
   });
   calcPromotions().forEach(r => {
-    if (r.triggered && r.giftQty > 0) {
-      html += `<div class="subtotal-row gift-row"><span>🎁 ${r.promo.giftName} x${r.giftQty}<span class="gift-source">（${r.promo.name}）</span></span><span>—</span></div>`;
-    }
+    if (r.triggered && r.giftQty > 0) html += `<div class="subtotal-row gift-row"><span>🎁 ${r.promo.giftName} x${r.giftQty}<span class="gift-source">（${r.promo.name}）</span></span><span>—</span></div>`;
   });
   return html;
 }
-
 function getSelectedItems() {
   return productsData.map((p, i) => ({
     name: p.name, price: p.price, type: p.type,
     qty: parseInt(document.getElementById('qty_' + i)?.value || 0)
   })).filter(it => it.qty > 0);
 }
-
 function updateTotal() {
   let subtotal = 0, itemsHtml = '', hasItem = false;
   productsData.forEach((p, i) => {
@@ -624,7 +540,6 @@ function updateTotal() {
   document.getElementById('subtotalGifts').innerHTML = buildGiftRowsHtml();
   document.getElementById('totalAmt').innerText = subtotal + ' 元';
 }
-
 async function lookupCustomer() {
   const phone = document.getElementById('phone').value.trim();
   const box = document.getElementById('customerInfo');
@@ -639,11 +554,8 @@ async function lookupCustomer() {
     } else {
       box.innerHTML = '<div class="customer-info">🆕 新客戶</div>';
     }
-  } catch (e) {
-    box.innerHTML = '<div class="error">查詢失敗：' + e.message + '</div>';
-  }
+  } catch (e) { box.innerHTML = '<div class="error">查詢失敗：' + e.message + '</div>'; }
 }
-
 async function submitOrder() {
   const msg = document.getElementById('submitMsg');
   msg.className = 'error'; msg.textContent = '';
@@ -660,10 +572,7 @@ async function submitOrder() {
   if (shipping !== '現場取貨' && !address) { msg.textContent = '宅配需要填寫地址'; return; }
   const items = getSelectedItems();
   if (items.length === 0) { msg.textContent = '請至少選擇一項商品'; return; }
-  const payload = {
-    password: PASSWORD, name, tel: phone, address, lineUserId,
-    items, addonSelections, shipping, payment, orderSource, note
-  };
+  const payload = { password: PASSWORD, name, tel: phone, address, lineUserId, items, addonSelections, shipping, payment, orderSource, note };
   msg.textContent = '送出中...';
   try {
     const res = await callServer('submitInternalOrder', payload);
@@ -673,14 +582,9 @@ async function submitOrder() {
       setTimeout(() => {
         if (confirm('訂單 ' + res.orderId + ' 已建立，要繼續填下一筆嗎？')) resetForm();
       }, 300);
-    } else {
-      msg.textContent = '失敗：' + (res.error || '未知錯誤');
-    }
-  } catch (e) {
-    msg.textContent = '送出失敗：' + e.message;
-  }
+    } else { msg.textContent = '失敗：' + (res.error || '未知錯誤'); }
+  } catch (e) { msg.textContent = '送出失敗：' + e.message; }
 }
-
 function resetForm() {
   ['name','phone','address','lineUserId','note'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('orderSource').value = '';
@@ -699,10 +603,7 @@ function resetForm() {
   window.scrollTo(0, 0);
 }
 
-/* ============================================================
- * Tab 2: 排單系統
- * ============================================================ */
-
+/* ===== Tab 2: 排單系統 ===== */
 async function loadSchedule() {
   try {
     scheduleData = await callServer('getScheduleData', {});
@@ -716,11 +617,8 @@ async function loadSchedule() {
     renderCalendar();
     renderUnscheduled();
     fillPeriodSelect();
-  } catch (e) {
-    alert('排單載入失敗：' + e.message);
-  }
+  } catch (e) { alert('排單載入失敗：' + e.message); }
 }
-
 function renderPrepAlert() {
   const el = document.getElementById('prepAlert');
   const t = scheduleData.prepAlertToday || 0;
@@ -732,13 +630,9 @@ function renderPrepAlert() {
   el.innerHTML = '⚠️ ' + parts.join('、');
   el.classList.remove('hidden');
 }
-
 function fillPeriodSelect() {
-  const select = document.getElementById('periodSelect');
-  const periods = scheduleData.periods || [];
-  select.innerHTML = periods.map(p => `<option value="${p}">${p}</option>`).join('');
+  document.getElementById('periodSelect').innerHTML = (scheduleData.periods || []).map(p => `<option value="${p}">${p}</option>`).join('');
 }
-
 function prevMonth() {
   calendarMonth--;
   if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
@@ -749,28 +643,22 @@ function nextMonth() {
   if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
   renderCalendar();
 }
-
 function renderCalendar() {
   document.getElementById('calendarTitle').innerText = `${calendarYear} 年 ${calendarMonth + 1} 月`;
   const firstDay = new Date(calendarYear, calendarMonth, 1);
   const lastDay = new Date(calendarYear, calendarMonth + 1, 0);
-  const startWeekday = firstDay.getDay();  // 0=日
+  const startWeekday = firstDay.getDay();
   const daysInMonth = lastDay.getDate();
   const prevMonthLastDay = new Date(calendarYear, calendarMonth, 0).getDate();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  // 把已排訂單依日期歸類
+  const today = new Date(); today.setHours(0, 0, 0, 0);
   const scheduledByDate = {};
   (scheduleData.scheduled || []).forEach(o => {
     if (!scheduledByDate[o.pickupDate]) scheduledByDate[o.pickupDate] = [];
     scheduledByDate[o.pickupDate].push(o);
   });
-
   const grid = document.getElementById('calendarGrid');
   let html = '';
   const totalCells = Math.ceil((startWeekday + daysInMonth) / 7) * 7;
-
   for (let i = 0; i < totalCells; i++) {
     let dayNum, isOtherMonth = false, dateObj;
     if (i < startWeekday) {
@@ -792,55 +680,42 @@ function renderCalendar() {
     if (isOtherMonth) classes.push('other-month');
     if (isToday) classes.push('today');
     if (selectedOrderId) classes.push('target-mode');
-
     let chips = '';
     ordersHere.forEach(o => {
       const idShort = o.orderId.slice(-3);
-      const confirmedCls = o.pickupConfirmed ? ' confirmed' : '';
-      chips += `<div class="day-order-chip${confirmedCls}" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}">${idShort} ${o.name}</div>`;
+      let chipCls = '';
+      if (o.pickupConfirmed) chipCls = ' confirmed';
+      chips += `<div class="day-order-chip${chipCls}" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}">${idShort} ${o.name}</div>`;
     });
-
-    html += `<div class="${classes.join(' ')}" onclick="onDayClick('${dateStr}')">
-      <div class="day-number">${dayNum}</div>
-      <div class="day-orders">${chips}</div>
-    </div>`;
+    html += `<div class="${classes.join(' ')}" onclick="onDayClick('${dateStr}')"><div class="day-number">${dayNum}</div><div class="day-orders">${chips}</div></div>`;
   }
   grid.innerHTML = html;
 }
-
 function formatDateStr(d) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${dd}`;
 }
-
 function onDayClick(dateStr) {
-  if (!selectedOrderId) return;  // 沒選訂單,點月曆無動作
-  // 找選中的訂單
+  if (!selectedOrderId) return;
   const order = findOrder(selectedOrderId);
   if (!order) return;
   pendingDate = dateStr;
-  document.getElementById('periodModalInfo').innerHTML =
-    `將「${order.name}」（${order.orderId.slice(-3)}）<br>排定到 <b>${dateStr}</b>`;
+  document.getElementById('periodModalInfo').innerHTML = `將「${order.name}」（${order.orderId.slice(-3)}）<br>排定到 <b>${dateStr}</b>`;
   document.getElementById('periodModalMsg').textContent = '';
   document.getElementById('periodModal').classList.add('show');
 }
-
 function findOrder(orderId) {
   let o = (scheduleData.unscheduled || []).find(x => x.orderId === orderId);
   if (o) return o;
   return (scheduleData.scheduled || []).find(x => x.orderId === orderId);
 }
-
 function renderUnscheduled() {
   const list = scheduleData.unscheduled || [];
   document.getElementById('unscheduledCount').innerText = `（${list.length} 筆）`;
   const box = document.getElementById('unscheduledList');
-  if (list.length === 0) {
-    box.innerHTML = '<div class="hint">目前沒有待排定的訂單 ✨</div>';
-    return;
-  }
+  if (list.length === 0) { box.innerHTML = '<div class="hint">目前沒有待排定的訂單 ✨</div>'; return; }
   box.innerHTML = list.map(o => {
     const idShort = o.orderId.slice(-3);
     const shipTag = o.shipping === '現場取貨'
@@ -850,80 +725,157 @@ function renderUnscheduled() {
     return `<div class="order-card${sel}" onclick="selectOrder('${o.orderId}')">
       <div class="order-card-header">
         <span class="order-card-id">#${idShort}</span>
-        ${shipTag}
+        <span style="display:flex;gap:6px;align-items:center">${shipTag}<span class="info-btn-sm" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')">ⓘ</span></span>
       </div>
       <div class="order-card-name">${o.name}</div>
       <div class="order-card-items">${o.items.split('\\n').slice(0, 2).join('｜')}</div>
     </div>`;
   }).join('');
 }
-
 function selectOrder(orderId) {
   selectedOrderId = (selectedOrderId === orderId) ? null : orderId;
   document.getElementById('scheduleHint').innerText = selectedOrderId
     ? '👇 已選取訂單，請點月曆日期排定（再次點訂單可取消選擇）'
-    : '點訂單卡片，再點月曆日期即可排定';
+    : '點訂單卡片，再點月曆日期即可排定（點 ⓘ 看詳情）';
   renderUnscheduled();
-  renderCalendar();  // 重渲染讓格子變藍色
+  renderCalendar();
 }
-
 function closePeriodModal(event) {
   document.getElementById('periodModal').classList.remove('show');
   pendingDate = null;
 }
-
 async function confirmSchedule() {
   if (!selectedOrderId || !pendingDate) return;
   const period = document.getElementById('periodSelect').value;
   const msg = document.getElementById('periodModalMsg');
   msg.textContent = '處理中...';
   try {
-    const res = await callServer('setOrderPickupDate', {
-      password: PASSWORD,
-      orderId: selectedOrderId,
-      pickupDate: pendingDate,
-      pickupPeriod: period
-    });
+    const res = await callServer('setOrderPickupDate', { password: PASSWORD, orderId: selectedOrderId, pickupDate: pendingDate, pickupPeriod: period });
     if (res && res.success) {
       closePeriodModal();
       selectedOrderId = null;
       await loadSchedule();
-    } else {
-      msg.textContent = '失敗：' + (res.error || '未知錯誤');
-    }
-  } catch (e) {
-    msg.textContent = '失敗：' + e.message;
-  }
+    } else { msg.textContent = '失敗：' + (res.error || '未知錯誤'); }
+  } catch (e) { msg.textContent = '失敗：' + e.message; }
 }
 
-// ---------- 訂單詳情 ----------
+/* ===== 訂單詳情 + 狀態管理 ===== */
 function openOrderDetail(orderId) {
   const o = findOrder(orderId);
   if (!o) return;
   detailOrder = o;
+
   document.getElementById('detailTitle').innerText = `#${o.orderId.slice(-3)}｜${o.name}`;
+
+  // 訂單基本資訊
   const lines = [];
   lines.push(`<b>訂單編號：</b>${o.orderId}`);
   lines.push(`<b>電話：</b>${o.tel}`);
-  if (o.pickupDate) lines.push(`<b>取貨/出貨日：</b>${o.pickupDate} ${o.pickupPeriod || ''} ${o.pickupConfirmed ? '✅ 客人已確認' : '⏳ 客人未確認'}`);
   lines.push(`<b>運送：</b>${o.shipping}`);
   if (o.address) lines.push(`<b>地址：</b>${o.address}`);
-  lines.push(`<b>付款：</b>${o.payment} ${o.paid ? '✅ 已付款' : '⏳ 未付款'}`);
+  lines.push(`<b>付款方式：</b>${o.payment}`);
   lines.push(`<b>總額：</b>${o.total} 元`);
   lines.push(`<b>商品：</b><br>${o.items.split('\\n').join('<br>')}`);
   if (o.addons) lines.push(`<b>贈品/加購：</b><br>${o.addons.split('\\n').join('<br>')}`);
   if (o.note) lines.push(`<b>備註：</b>${o.note}`);
-  if (!o.hasLineUserId) lines.push('<span style="color:#888;font-size:12px">（無 LINE userId，不會自動通知）</span>');
-  document.getElementById('detailBody').innerHTML = lines.join('<br>');
+  if (!o.hasLineUserId) lines.push('<span style="color:#888;font-size:12px">⚠️ 無 LINE userId，狀態變更不會發 LINE 通知</span>');
+  document.getElementById('detailInfo').innerHTML = lines.join('<br>');
+
+  // 取貨日期區
+  const pickupHtml = o.pickupDate
+    ? `<div class="pickup-display">
+         📅 <b>${o.pickupDate}</b> ${o.pickupPeriod || ''}
+         <div style="margin-top:6px;display:flex;gap:6px">
+           <button class="small outline" onclick="reschedule()">改日期</button>
+           <button class="small gray" onclick="cancelSchedule()">取消排定</button>
+         </div>
+       </div>`
+    : `<div class="pickup-display" style="background:#fafafa;color:#888">尚未排定取貨日期，請從待排定清單選取後點月曆排定</div>`;
+  document.getElementById('detailPickup').innerHTML = pickupHtml;
+
+  // 狀態管理
+  renderStatusControls(o);
+
   document.getElementById('detailMsg').textContent = '';
   document.getElementById('orderDetailModal').classList.add('show');
+}
+
+function renderStatusControls(o) {
+  let html = [];
+
+  // 已收匯款(只匯款訂單)
+  if (o.payment === '匯款') {
+    html.push(checkboxHtml('paid', '💰 已收匯款', o.paid));
+  }
+
+  // 客人已確認時間(已排定才顯示)
+  if (o.pickupDate) {
+    html.push(checkboxHtml('pickupConfirmed', '✅ 客人已確認取貨時間', o.pickupConfirmed));
+  }
+
+  // 宅配:貨運單號 + 已出貨
+  if (o.shipping !== '現場取貨') {
+    html.push(`<div class="status-tracking">
+      <label style="font-size:12px;color:#666;margin-bottom:4px">📦 貨運單號</label>
+      <input type="text" id="ts_trackingNum" value="${o.trackingNum || ''}" onchange="saveStatus('trackingNum', this.value)" placeholder="（填了才會在通知訊息附上）">
+    </div>`);
+  }
+
+  // 已出貨
+  html.push(checkboxHtml('shipped', '🚚 已出貨', o.shipped));
+
+  // 訂單完成
+  html.push(checkboxHtml('done', '🎉 訂單完成', o.done));
+
+  document.getElementById('statusControls').innerHTML = html.join('');
+}
+
+function checkboxHtml(key, label, checked) {
+  return `<label class="status-checkbox"><input type="checkbox" id="ts_${key}" ${checked ? 'checked' : ''} onchange="saveStatus('${key}', this.checked)"><span>${label}</span></label>`;
+}
+
+async function saveStatus(key, value) {
+  if (!detailOrder) return;
+  const msg = document.getElementById('detailMsg');
+  msg.className = 'hint';
+  msg.textContent = '儲存中...';
+  const updates = {};
+  updates[key] = value;
+  try {
+    const res = await callServer('updateOrderStatus', { password: PASSWORD, orderId: detailOrder.orderId, updates });
+    if (res && res.success) {
+      msg.className = 'success';
+      msg.textContent = '✅ 已儲存';
+      // 重新載入資料但不關 modal
+      const refreshed = await callServer('getScheduleData', {});
+      if (refreshed && !refreshed.error) {
+        scheduleData = refreshed;
+        renderPrepAlert();
+        renderCalendar();
+        renderUnscheduled();
+        // 更新 detailOrder 為最新資料
+        const updated = findOrder(detailOrder.orderId);
+        if (updated) detailOrder = updated;
+      }
+      setTimeout(() => {
+        if (document.getElementById('detailMsg').textContent === '✅ 已儲存') {
+          document.getElementById('detailMsg').textContent = '';
+        }
+      }, 2000);
+    } else {
+      msg.className = 'error';
+      msg.textContent = '失敗：' + (res.error || '未知錯誤');
+    }
+  } catch (e) {
+    msg.className = 'error';
+    msg.textContent = '失敗：' + e.message;
+  }
 }
 
 function closeOrderDetail(event) {
   document.getElementById('orderDetailModal').classList.remove('show');
   detailOrder = null;
 }
-
 function reschedule() {
   if (!detailOrder) return;
   selectedOrderId = detailOrder.orderId;
@@ -933,38 +885,24 @@ function reschedule() {
   renderCalendar();
   alert('已選取訂單，請點月曆日期重新排定');
 }
-
 async function cancelSchedule() {
   if (!detailOrder) return;
   if (!confirm('確定取消「' + detailOrder.name + '」的排定？')) return;
   const msg = document.getElementById('detailMsg');
   msg.textContent = '處理中...';
   try {
-    const res = await callServer('setOrderPickupDate', {
-      password: PASSWORD,
-      orderId: detailOrder.orderId,
-      pickupDate: '',
-      pickupPeriod: ''
-    });
+    const res = await callServer('setOrderPickupDate', { password: PASSWORD, orderId: detailOrder.orderId, pickupDate: '', pickupPeriod: '' });
     if (res && res.success) {
       closeOrderDetail();
       await loadSchedule();
-    } else {
-      msg.textContent = '失敗：' + (res.error || '未知錯誤');
-    }
-  } catch (e) {
-    msg.textContent = '失敗：' + e.message;
-  }
+    } else { msg.textContent = '失敗：' + (res.error || '未知錯誤'); }
+  } catch (e) { msg.textContent = '失敗：' + e.message; }
 }
 
-// ---------- 通用後端通訊 ----------
+// ---------- 後端通訊 ----------
 async function callServer(action, params) {
   const url = SCRIPT_URL + '?action=' + encodeURIComponent(action);
-  const res = await fetch(url, {
-    method: 'POST',
-    body: JSON.stringify(params || {}),
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-  });
+  const res = await fetch(url, { method: 'POST', body: JSON.stringify(params || {}), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
   const text = await res.text();
   let data;
   try { data = JSON.parse(text); }
