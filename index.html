@@ -13,7 +13,7 @@
   --bg:#F2EDE6;--surface:#EDEAE3;--white:#FAFAF8;
   --orange:#E8732A;--text:#1A1410;--muted:#9A8E82;--faint:#D8D2C8;
 }
-body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);margin:0;padding:0;min-height:100vh;display:flex;flex-direction:column}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);margin:0;padding:0}
 
 /* ── LOADING ── */
 #loading{position:fixed;inset:0;background:rgba(242,237,230,0.97);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:12px}
@@ -199,7 +199,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);margin:0;padding
   <p id="maintMsg">系統維護中，請稍後再試。</p>
 </div>
 
-<div id="appShell" style="display:none;flex:1;flex-direction:column">
+<div id="appShell" style="display:none;min-height:100vh;flex-direction:column">
 <div class="phone">
 
   <div class="confirm-overlay" id="confirm-overlay">
@@ -374,7 +374,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);margin:0;padding
 <div class="version-tag" id="version-tag"></div>
 
 <script>
-const APP_VERSION = '2.6.0';
+const APP_VERSION = '2.7.0';
 const LIFF_ID = '2009988690-V5uuqIVX';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
 
