@@ -179,6 +179,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);margin:0;padding
 </head>
 <body>
 
+<div id="debug-bar" style="position:fixed;top:0;left:0;right:0;background:#E8732A;color:#fff;font-size:11px;padding:6px 12px;z-index:9999;font-family:monospace">載入中...</div>
 <div id="loading">
   <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
     <circle cx="30" cy="30" r="28" fill="#E8732A" opacity="0.15"/>
@@ -373,7 +374,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);margin:0;padding
 <div class="version-tag" id="version-tag"></div>
 
 <script>
-const APP_VERSION = '2.4.0';
+const APP_VERSION = '2.5.0';
 const LIFF_ID = '2009988690-V5uuqIVX';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
 
@@ -409,7 +410,7 @@ function loadJsonp(url){
 }
 
 function showError(msg){
-  document.getElementById('loading').style.display='none';
+  dbg('完成');document.getElementById('loading').style.display='none';
   const el=document.getElementById('errMsg');
   el.style.display='block';
   el.innerHTML='<div style="font-size:40px;margin-bottom:12px">😢</div><div>'+msg+'</div><div style="font-size:11px;color:#aaa;margin-top:12px;word-break:break-all">'+msg+'</div>';
@@ -424,15 +425,19 @@ setTimeout(()=>{
 }, 12000);
 
 async function init(){
+  const dbg = d => { const el=document.getElementById('debug-bar'); if(el) el.textContent=d; };
   try{
+    dbg('LIFF init...');
     await liff.init({liffId:LIFF_ID});
-    if(!liff.isLoggedIn()){liff.login();return;}
+    if(!liff.isLoggedIn()){dbg('未登入，導向登入...');liff.login();return;}
+    dbg('取得 profile...');
     const profile=await liff.getProfile();
     lineUserId=profile.userId;
     document.getElementById('f-name').value=profile.displayName||'';
 
+    dbg('載入商品資料...');
     const data=await loadJsonp(SCRIPT_URL+'?action=data');
-    if(data.error){showError('讀取失敗：'+data.error);return;}
+    if(data.error){dbg('資料錯誤:'+data.error);showError('讀取失敗：'+data.error);return;}
     pageData=data;
 
     if(checkVersionAndReload(data.settings['目前版本'])) return;
@@ -472,7 +477,7 @@ async function init(){
     shell.style.display='flex';
     shell.style.flexDirection='column';
   }catch(e){
-    showError('初始化失敗：'+e.message);
+    dbg('錯誤: '+e.message);showError('初始化失敗：'+e.message);
   }
 }
 
