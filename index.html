@@ -320,7 +320,7 @@ body{font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;bac
 <div class="version-tag" id="version-tag"></div>
 
 <script>
-const APP_VERSION='4.0.0';
+const APP_VERSION='4.1.0';
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
 let pageData=null,lineUserId='',qtys={},addonSelections={};
 document.getElementById('version-tag').textContent='v'+APP_VERSION;
@@ -527,7 +527,12 @@ function sw(p){
   document.getElementById('page-'+p).scrollTop=0;
 }
 function tog(el){const b=el.nextElementSibling,ic=el.querySelector('.acc-icon');b.classList.toggle('open');ic.classList.toggle('open');ic.textContent=b.classList.contains('open')?'－':'＋';}
-document.addEventListener('DOMContentLoaded', init);
+// Call init immediately if DOM ready, otherwise wait
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 </script>
 </body>
 </html>
