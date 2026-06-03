@@ -327,7 +327,7 @@ body{font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;bac
 <div class="version-tag" id="version-tag"></div>
 
 <script>
-const APP_VERSION='3.0.0';
+const APP_VERSION='3.1.0';
 const LIFF_ID='2009988690-V5uuqIVX';
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
 let pageData=null,lineUserId='',qtys={},addonSelections={};
@@ -353,11 +353,19 @@ function loadJsonp(url){
 }
 async function init(){
   try{
-    await liff.init({liffId:LIFF_ID});
-    if(!liff.isLoggedIn()){liff.login();return;}
-    const profile=await liff.getProfile();
-    lineUserId=profile.userId;
-    document.getElementById('f-name').value=profile.displayName||'';
+    try{
+      await liff.init({liffId:LIFF_ID});
+      if(liff.isLoggedIn()){
+        const profile=await liff.getProfile();
+        lineUserId=profile.userId;
+        document.getElementById('f-name').value=profile.displayName||'';
+      } else {
+        liff.login();return;
+      }
+    }catch(liffErr){
+      console.warn('LIFF init failed, continuing without LINE context:', liffErr);
+      // Continue without LINE userId - order will still work
+    }
     const data=await loadJsonp(SCRIPT_URL+'?action=data');
     if(data.error){showError('讀取失敗：'+data.error);return;}
     pageData=data;
