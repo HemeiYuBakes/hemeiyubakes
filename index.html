@@ -593,11 +593,6 @@ async function init() {
     // 預填名字
     document.getElementById('f-name').value = profile.displayName || '';
 
-    // 店鋪名
-    if (settingsData['店鋪名稱']) {
-      document.getElementById('shop-name-status').innerText = settingsData['店鋪名稱'];
-    }
-
     // 備註 placeholder
     const notePh = settingsData['備註提示文字'];
     if (notePh) document.getElementById('f-note').placeholder = notePh;
