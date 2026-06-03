@@ -622,10 +622,6 @@ async function init() {
       document.getElementById('notice-bar').style.display = 'flex';
     }
 
-    // 強制匯款門檻顯示
-    const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
-    document.getElementById('threshold-amt').innerText = threshold;
-
     // 商品列表
     renderProducts();
 
