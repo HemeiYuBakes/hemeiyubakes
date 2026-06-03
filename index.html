@@ -10,7 +10,9 @@
   --bg:#F2EDE6;--surface:#EDEAE3;--white:#FAFAF8;
   --orange:#E8732A;--text:#1A1410;--muted:#9A8E82;--faint:#D8D2C8;
 }
-body{font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;background:var(--bg);margin:0;padding:0}
+@font-face{font-family:'LINE Seed Sans TW';src:url('https://cdn.jsdelivr.net/gh/line/LineSeed@main/build/web/LINESeedSansTW_W_Rg.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'LINE Seed Sans TW';src:url('https://cdn.jsdelivr.net/gh/line/LineSeed@main/build/web/LINESeedSansTW_W_Bd.woff2') format('woff2');font-weight:700;font-display:swap}
+body{font-family:'LINE Seed Sans TW',-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;background:var(--bg);margin:0;padding:0}
 
 /* LOADING */
 #loading{position:fixed;inset:0;background:rgba(242,237,230,0.97);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:16px}
@@ -32,11 +34,12 @@ body{font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;bac
 .confirm-overlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:100;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center;overflow-y:auto}
 .confirm-overlay.show{display:flex}
 .confirm-icon{font-size:52px;margin-bottom:20px}
+.confirm-img{width:80px;height:80px;border-radius:14px;object-fit:cover;margin-bottom:20px;background:var(--surface)}
 .confirm-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:8px}
 .confirm-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px}
-.confirm-line{width:100%;max-width:360px;background:var(--white);border-radius:12px;padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;font-size:12px;gap:12px}
+.confirm-line{width:100%;max-width:360px;background:var(--white);border-radius:12px;padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;font-size:12px;gap:12px;align-items:flex-start}
 .confirm-line .lbl{color:var(--muted);flex-shrink:0}
-.confirm-line .val{color:var(--text);font-weight:500;text-align:right;word-break:break-all}
+.confirm-line .val{color:var(--text);font-weight:500;text-align:right;word-break:break-all;line-height:1.7}
 .confirm-orderid{font-size:11px;color:var(--orange);font-weight:700;margin:16px 0 8px;letter-spacing:1px}
 .confirm-back{width:100%;max-width:360px;background:var(--orange);color:#fff;border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:8px}
 .confirm-back:disabled{opacity:0.6;cursor:not-allowed}
@@ -44,6 +47,11 @@ body{font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;bac
 /* STATUS BAR */
 .status{height:44px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;background:var(--bg)}
 .status-time{font-size:14px;font-weight:500;color:var(--text)}
+
+/* FONT SIZE CONTROL */
+.fs-control{display:flex;gap:2px;background:var(--white);border-radius:14px;padding:3px}
+.fs-btn{width:26px;height:24px;border:none;background:transparent;font-family:inherit;font-size:11px;color:var(--muted);cursor:pointer;border-radius:11px;font-weight:500;padding:0;display:flex;align-items:center;justify-content:center}
+.fs-btn.active{background:var(--orange);color:#fff;font-weight:700}
 
 /* MARQUEE */
 .marquee-bar{background:rgba(232,115,42,0.08);padding:8px 20px;overflow:hidden}
@@ -130,7 +138,10 @@ body{font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;bac
 .f-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239A8E82'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-color:var(--white)}
 .f-note{height:48px;resize:none}
 
-/* SEGMENTED CONTROL (payment) */
+/* PAYMENT DISPLAY */
+.payment-display{background:var(--white);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--text);font-weight:500}
+
+/* SEGMENTED CONTROL (payment, unused now) */
 .segmented{display:flex;background:var(--white);border-radius:12px;padding:4px;gap:4px}
 .seg-btn{flex:1;border:none;background:transparent;padding:10px 8px;font-size:13px;color:var(--muted);font-family:inherit;cursor:pointer;border-radius:9px;font-weight:500;transition:all .15s}
 .seg-btn.active{background:var(--orange);color:#fff;font-weight:700}
@@ -179,13 +190,13 @@ body{font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;bac
 .no-additive{margin:0 20px 24px;text-align:center;font-size:11px;color:var(--muted);font-weight:500;padding:10px 0}
 
 /* STORY PAGE */
-.story-header{background:var(--orange);padding:26px 28px 80px;position:relative;overflow:hidden}
+.story-header{background:var(--orange);padding:18px 28px 60px;position:relative;overflow:hidden}
 .story-header::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,0.06) 0,rgba(255,255,255,0.06) 1px,transparent 1px,transparent 18px),repeating-linear-gradient(90deg,rgba(255,255,255,0.06) 0,rgba(255,255,255,0.06) 1px,transparent 1px,transparent 18px)}
 .story-header-fade{position:absolute;bottom:0;left:0;right:0;height:100px;background:linear-gradient(to bottom,transparent 0%,rgba(242,237,230,0.25) 35%,rgba(242,237,230,0.7) 65%,var(--bg) 100%)}
 .story-brand{position:relative;z-index:1;color:#fff;font-size:26px;font-weight:700;letter-spacing:2px}
 .story-brand-en{color:rgba(255,255,255,0.7);font-size:11px;letter-spacing:2px;margin-top:3px;font-weight:300}
 .story-year{color:rgba(255,255,255,0.5);font-size:10px;margin-top:10px;letter-spacing:1px}
-.story-section-label{text-align:center;font-size:12px;font-weight:700;letter-spacing:2px;padding:14px 0;color:rgba(232,115,42,0.6)}
+.story-section-label{text-align:center;font-size:12px;font-weight:700;letter-spacing:2px;padding:0 0 10px;color:rgba(232,115,42,0.6);margin-top:-30px;position:relative;z-index:2}
 .story-blocks{padding:0 20px;display:flex;flex-direction:column;gap:2px}
 .story-block{background:var(--white);padding:16px;display:flex;gap:14px;align-items:center}
 .story-block:first-child{border-radius:16px 16px 0 0}
@@ -237,7 +248,7 @@ body{font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;bac
 
   <!-- 訂單成功 overlay -->
   <div class="confirm-overlay" id="confirm-overlay">
-    <div class="confirm-icon" id="conf-icon">📝</div>
+    <img class="confirm-img" id="conf-img" style="display:none" alt=""><div class="confirm-icon" id="conf-icon">📝</div>
     <div class="confirm-title" id="conf-title">訂單確認</div>
     <div class="confirm-sub" id="conf-sub">請確認以下資料後送出</div>
     <div id="conf-lines"></div>
@@ -249,7 +260,11 @@ body{font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;bac
   <!-- 狀態列 -->
   <div class="status">
     <span class="status-time" id="status-time">9:41</span>
-    <span style="font-size:11px;color:var(--muted);letter-spacing:0.5px" id="shop-name-status">和美小玉家</span>
+    <div class="fs-control">
+      <button class="fs-btn" id="fs-small" onclick="setFontSize('small')">小</button>
+      <button class="fs-btn" id="fs-medium" onclick="setFontSize('medium')">中</button>
+      <button class="fs-btn" id="fs-large" onclick="setFontSize('large')">大</button>
+    </div>
   </div>
 
   <!-- 跑馬燈 -->
@@ -309,11 +324,7 @@ body{font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;bac
 
       <div id="payment-block" style="display:none">
         <span class="f-label">付款方式</span>
-        <div class="segmented" id="payment-seg">
-          <button type="button" class="seg-btn" data-payment="現場付款" onclick="selectPayment('現場付款')">現場付款</button>
-          <button type="button" class="seg-btn" data-payment="匯款" onclick="selectPayment('匯款')">匯款</button>
-        </div>
-        <div class="payment-hint" id="payment-hint" style="display:none">⚠️ 金額已達 <span id="threshold-amt">0</span> 元，僅可使用匯款</div>
+        <div class="payment-display">匯款</div>
       </div>
 
       <div id="dynZone"></div>
@@ -376,38 +387,16 @@ body{font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;bac
   <!-- 品牌故事頁 -->
   <div id="page-story" class="scroll-body page">
     <div class="story-header">
-      <div class="story-brand">和美小玉家</div>
-      <div class="story-brand-en">Hemei Yu's Bakes</div>
-      <div class="story-year">SINCE 2005 · 彰化和美</div>
+      <div class="story-brand" id="story-brand">和美小玉家</div>
+      <div class="story-brand-en" id="story-brand-en">Hemei Yu's Bakes</div>
+      <div class="story-year" id="story-year">SINCE 2005 · 彰化和美</div>
       <div class="story-header-fade"></div>
     </div>
-    <div class="story-section-label">小玉家的故事</div>
-    <div class="story-blocks">
-      <div class="story-block">
-        <div class="story-block-left">
-          <div class="story-num">01 — 起點</div>
-          <div class="story-text">2005 年，為了做點心給孩子們吃，一台小烤箱出現在<strong>小玉媽媽的廚房</strong>。這台充滿愛的小烤箱，烤出了我們記憶中的香氣。</div>
-        </div>
-        <div class="story-illus"><img src="https://hemeiyubakes.github.io/hemeiyubakes/assets/%E5%B0%8F%E6%99%82%E5%80%99%E5%AA%BD%E5%AA%BD%E7%83%A4%E9%A4%85%E4%B9%BE%E7%B5%A6%E6%88%91%E5%80%91%E5%90%83.svg" alt="起點" onerror="this.style.display='none'"></div>
-      </div>
-      <div class="story-block">
-        <div class="story-block-left">
-          <div class="story-num">02 — 堅持</div>
-          <div class="story-text">那個在爐火旁忙碌穿梭的身影，與餅乾香氣交織成了家中的日常。因為喜歡這份味道的人越來越多，<strong>這份堅持，一守就是二十年</strong>。</div>
-        </div>
-        <div class="story-illus"><img src="https://hemeiyubakes.github.io/hemeiyubakes/assets/%E5%AA%BD%E5%AA%BD%E7%8D%A8%E8%87%AA%E5%BF%99%E7%A2%8C%E7%9A%84%E8%BA%AB%E5%BD%B1.svg" alt="堅持" onerror="this.style.display='none'"></div>
-      </div>
-      <div class="story-block">
-        <div class="story-block-left">
-          <div class="story-num">03 — 傳承</div>
-          <div class="story-text">如今，換孩子們回家接手，升級了設備、延續了手藝。我們是「<strong>和美小玉家</strong>」，想讓媽媽守護二十年的味道，飄往更遠的地方。</div>
-        </div>
-        <div class="story-illus"><img src="https://hemeiyubakes.github.io/hemeiyubakes/assets/%E6%88%91%E5%80%91%E8%A6%81%E5%BB%B6%E7%BA%8C%E5%AA%BD%E5%AA%BD%E7%9A%84%E5%A5%BD%E5%91%B3%E9%81%93.svg" alt="傳承" onerror="this.style.display='none'"></div>
-      </div>
-    </div>
+    <div class="story-section-label" id="story-section-label">小玉家的故事</div>
+    <div class="story-blocks" id="story-blocks"></div>
     <div class="story-footer">
-      <div class="story-footer-title">用心製作，無添加防腐劑</div>
-      <div class="story-footer-sub">每一片都是媽媽味道的延續</div>
+      <div class="story-footer-title" id="story-footer-title">用心製作，無添加防腐劑</div>
+      <div class="story-footer-sub" id="story-footer-sub">每一片都是媽媽味道的延續</div>
     </div>
     <div style="height:24px"></div>
   </div>
@@ -447,7 +436,7 @@ body{font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;bac
 //   1. APP_VERSION 改成新版本號
 //   2. 同步 Settings 工作表「目前版本」=同版本號
 // ============================================================
-const APP_VERSION = '2.0.0';
+const APP_VERSION = '2.1.0';
 
 const LIFF_ID = '2009988690-V5uuqIVX';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
@@ -455,9 +444,25 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n
 let fieldsData = [], productsData = [], settingsData = {}, addonsData = [], promotionsData = [], lineUserId = '';
 let addonSelections = {};
 let wasForcedTransfer = false;
-let currentPayment = '現場付款';
+let currentPayment = '匯款';
 
 document.getElementById('version-tag').innerText = 'v' + APP_VERSION;
+
+/* ---- 字級調整 ---- */
+function setFontSize(level) {
+  const sizeMap = { small: 1, medium: 1.15, large: 1.3 };
+  document.body.style.zoom = sizeMap[level] || 1;
+  try { localStorage.setItem('hm_fontSize', level); } catch (e) {}
+  ['small','medium','large'].forEach(l => {
+    const btn = document.getElementById('fs-' + l);
+    if (btn) btn.classList.toggle('active', l === level);
+  });
+}
+(function() {
+  let saved = 'small';
+  try { saved = localStorage.getItem('hm_fontSize') || 'small'; } catch (e) {}
+  setTimeout(() => setFontSize(saved), 0);
+})();
 
 /* ---- 狀態列時間 ---- */
 function updateClock() {
@@ -593,6 +598,22 @@ async function init() {
       document.getElementById('shop-name-status').innerText = settingsData['店鋪名稱'];
     }
 
+    // 備註 placeholder
+    const notePh = settingsData['備註提示文字'];
+    if (notePh) document.getElementById('f-note').placeholder = notePh;
+
+    // 確認頁圖片
+    const confirmImg = settingsData['訂單確認圖片'];
+    if (confirmImg) {
+      const img = document.getElementById('conf-img');
+      img.src = confirmImg;
+      img.style.display = 'block';
+      document.getElementById('conf-icon').style.display = 'none';
+    }
+
+    // 故事頁內容
+    renderStoryPage();
+
     // 跑馬燈
     if (settingsData['公告文字']) {
       document.getElementById('marquee-text').innerText = settingsData['公告文字'];
@@ -632,6 +653,40 @@ async function init() {
   } catch (e) {
     showError('錯誤：' + e.message);
   }
+}
+
+function renderStoryPage() {
+  const s = settingsData;
+  const get = (key, fallback) => (s[key] && String(s[key]).trim()) || fallback;
+
+  document.getElementById('story-brand').innerText = get('故事頁_品牌名', '和美小玉家');
+  document.getElementById('story-brand-en').innerText = get('故事頁_品牌英文', "Hemei Yu's Bakes");
+  document.getElementById('story-year').innerText = get('故事頁_副標', 'SINCE 2005 · 彰化和美');
+  document.getElementById('story-section-label').innerText = get('故事頁_章節標題', '小玉家的故事');
+  document.getElementById('story-footer-title').innerText = get('故事頁_結尾標', '用心製作，無添加防腐劑');
+  document.getElementById('story-footer-sub').innerText = get('故事頁_結尾副', '每一片都是媽媽味道的延續');
+
+  const defaults = [
+    { num: '01 — 起點', text: '2005 年，為了做點心給孩子們吃，一台小烤箱出現在<strong>小玉媽媽的廚房</strong>。這台充滿愛的小烤箱，烤出了我們記憶中的香氣。', img: 'https://hemeiyubakes.github.io/hemeiyubakes/assets/%E5%B0%8F%E6%99%82%E5%80%99%E5%AA%BD%E5%AA%BD%E7%83%A4%E9%A4%85%E4%B9%BE%E7%B5%A6%E6%88%91%E5%80%91%E5%90%83.svg' },
+    { num: '02 — 堅持', text: '那個在爐火旁忙碌穿梭的身影，與餅乾香氣交織成了家中的日常。因為喜歡這份味道的人越來越多，<strong>這份堅持，一守就是二十年</strong>。', img: 'https://hemeiyubakes.github.io/hemeiyubakes/assets/%E5%AA%BD%E5%AA%BD%E7%8D%A8%E8%87%AA%E5%BF%99%E7%A2%8C%E7%9A%84%E8%BA%AB%E5%BD%B1.svg' },
+    { num: '03 — 傳承', text: '如今，換孩子們回家接手，升級了設備、延續了手藝。我們是「<strong>和美小玉家</strong>」，想讓媽媽守護二十年的味道，飄往更遠的地方。', img: 'https://hemeiyubakes.github.io/hemeiyubakes/assets/%E6%88%91%E5%80%91%E8%A6%81%E5%BB%B6%E7%BA%8C%E5%AA%BD%E5%AA%BD%E7%9A%84%E5%A5%BD%E5%91%B3%E9%81%93.svg' }
+  ];
+
+  let html = '';
+  for (let i = 1; i <= 3; i++) {
+    const num = get('故事頁_段' + i + '_標', defaults[i-1].num);
+    const text = get('故事頁_段' + i + '_文', defaults[i-1].text);
+    const img = get('故事頁_段' + i + '_圖', defaults[i-1].img);
+    html += `
+      <div class="story-block">
+        <div class="story-block-left">
+          <div class="story-num">${num}</div>
+          <div class="story-text">${text}</div>
+        </div>
+        <div class="story-illus"><img src="${img}" alt="" onerror="this.style.display='none'"></div>
+      </div>`;
+  }
+  document.getElementById('story-blocks').innerHTML = html;
 }
 
 function renderProducts() {
@@ -684,27 +739,9 @@ function renderDynFields() {
   });
 }
 
+// 付款方式固定匯款,不需切換邏輯
 function initPaymentOptions() {
-  if (!isCashOptionEnabled()) {
-    currentPayment = '匯款';
-  } else {
-    currentPayment = '現場付款';
-  }
-  updatePaymentUI();
-}
-
-function updatePaymentUI() {
-  document.querySelectorAll('#payment-seg .seg-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.payment === currentPayment);
-  });
-}
-
-function selectPayment(method) {
-  // 檢查是否被強制匯款
-  if (wasForcedTransfer && method === '現場付款') return;
-  if (!isCashOptionEnabled() && method === '現場付款') return;
-  currentPayment = method;
-  updatePaymentUI();
+  currentPayment = '匯款';
 }
 
 /* ---- 主要重新渲染 ---- */
@@ -1001,30 +1038,8 @@ function updateTotal() {
   const paymentBlock = document.getElementById('payment-block');
   paymentBlock.style.display = hasItem ? 'block' : 'none';
 
-  // 強制匯款邏輯
-  const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
-  const shouldForce = !isCashOptionEnabled() || (threshold > 0 && subtotal >= threshold);
-
-  if (shouldForce) {
-    currentPayment = '匯款';
-    wasForcedTransfer = true;
-    document.getElementById('payment-hint').style.display = isCashOptionEnabled() ? 'block' : 'none';
-  } else {
-    if (wasForcedTransfer) {
-      currentPayment = '現場付款';
-      wasForcedTransfer = false;
-    }
-    document.getElementById('payment-hint').style.display = 'none';
-  }
-  updatePaymentUI();
-
-  // 強制匯款時讓現場付款按鈕看起來 disable
-  document.querySelectorAll('#payment-seg .seg-btn').forEach(btn => {
-    if (btn.dataset.payment === '現場付款') {
-      btn.style.opacity = shouldForce ? '0.4' : '1';
-      btn.style.cursor = shouldForce ? 'not-allowed' : 'pointer';
-    }
-  });
+  // 付款方式固定為匯款(不再需要強制邏輯)
+  currentPayment = '匯款';
 }
 
 function buildGiftRowsHtml() {
@@ -1071,8 +1086,8 @@ function showConfirm() {
     if (r.triggered && r.giftQty > 0) giftLines.push(`${r.promo.giftName} x${r.giftQty}（${r.promo.name}）`);
   });
 
-  const itemsDisplay = items.map(i => i.name + ' x' + i.qty).join(' / ');
-  const giftsDisplay = giftLines.length > 0 ? ' + 🎁 ' + giftLines.join('、') : '';
+  const itemsDisplay = items.map(i => i.name + ' x' + i.qty).join('<br>');
+  const giftsDisplay = giftLines.length > 0 ? '<br>🎁 ' + giftLines.join('<br>🎁 ') : '';
 
   let html = '';
   html += `<div class="confirm-line"><span class="lbl">姓名</span><span class="val">${name}</span></div>`;
