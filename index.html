@@ -374,7 +374,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);margin:0;padding
 <div class="version-tag" id="version-tag"></div>
 
 <script>
-const APP_VERSION = '2.5.0';
+const APP_VERSION = '2.6.0';
 const LIFF_ID = '2009988690-V5uuqIVX';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
 
@@ -409,8 +409,10 @@ function loadJsonp(url){
   });
 }
 
+function dbg(d){ const el=document.getElementById('debug-bar'); if(el) el.textContent=d; }
+
 function showError(msg){
-  dbg('完成');document.getElementById('loading').style.display='none';
+  document.getElementById('loading').style.display='none';
   const el=document.getElementById('errMsg');
   el.style.display='block';
   el.innerHTML='<div style="font-size:40px;margin-bottom:12px">😢</div><div>'+msg+'</div><div style="font-size:11px;color:#aaa;margin-top:12px;word-break:break-all">'+msg+'</div>';
@@ -425,7 +427,6 @@ setTimeout(()=>{
 }, 12000);
 
 async function init(){
-  const dbg = d => { const el=document.getElementById('debug-bar'); if(el) el.textContent=d; };
   try{
     dbg('LIFF init...');
     await liff.init({liffId:LIFF_ID});
