@@ -320,7 +320,7 @@ body{font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;bac
 <div class="version-tag" id="version-tag"></div>
 
 <script>
-const APP_VERSION='3.8.0';
+const APP_VERSION='4.0.0';
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
 let pageData=null,lineUserId='',qtys={},addonSelections={};
 document.getElementById('version-tag').textContent='v'+APP_VERSION;
@@ -344,9 +344,17 @@ function loadJsonp(url){
   });
 }
 async function init(){
+  alert("init started");
   try{
-    const data=await loadJsonp(SCRIPT_URL+'?action=data');
-    if(data.error){showError('讀取失敗：'+data.error);return;}
+    // Try fetch first, fallback to JSONP
+    let data;
+    try{
+      const res=await fetch(SCRIPT_URL+'?action=data');
+      data=await res.json();
+    }catch(fetchErr){
+      data=await loadJsonp(SCRIPT_URL+'?action=data');
+    }
+    if(!data||data.error){showError('讀取失敗：'+(data&&data.error||'未知錯誤'));return;}
     pageData=data;
     if(data.settings['維護模式開關']===true){
       document.getElementById('loading').style.display='none';
