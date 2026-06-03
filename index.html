@@ -1,485 +1,1166 @@
----
-name: skill-creator
-description: Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.
----
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>和美小玉家</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F2EDE6;--surface:#EDEAE3;--white:#FAFAF8;
+  --orange:#E8732A;--text:#1A1410;--muted:#9A8E82;--faint:#D8D2C8;
+}
+body{font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;background:var(--bg);margin:0;padding:0}
 
-# Skill Creator
+/* LOADING */
+#loading{position:fixed;inset:0;background:rgba(242,237,230,0.97);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:16px}
+#loading .spinner{width:48px;height:48px;border:4px solid rgba(232,115,42,0.2);border-top-color:#E8732A;border-radius:50%;animation:spin 1s linear infinite}
+#loading p{font-size:14px;color:var(--muted);font-weight:300}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-A skill for creating new skills and iteratively improving them.
+/* ERROR / MAINT */
+#errMsg{display:none;padding:40px 24px;text-align:center;color:var(--orange);font-size:14px;line-height:1.7}
+#maintPage{display:none;padding:48px 24px;text-align:center}
+#maintPage img{width:100%;max-width:320px;border-radius:16px;margin-bottom:20px}
+#maintPage p{color:var(--muted);font-size:14px}
 
-At a high level, the process of creating a skill goes like this:
+/* APP SHELL */
+#appShell{display:none}
+.phone{max-width:480px;margin:0 auto;width:100%;position:relative;min-height:100vh;display:flex;flex-direction:column}
 
-- Decide what you want the skill to do and roughly how it should do it
-- Write a draft of the skill
-- Create a few test prompts and run claude-with-access-to-the-skill on them
-- Help the user evaluate the results both qualitatively and quantitatively
-  - While the runs happen in the background, draft some quantitative evals if there aren't any (if there are some, you can either use as is or modify if you feel something needs to change about them). Then explain them to the user (or if they already existed, explain the ones that already exist)
-  - Use the `eval-viewer/generate_review.py` script to show the user the results for them to look at, and also let them look at the quantitative metrics
-- Rewrite the skill based on feedback from the user's evaluation of the results (and also if there are any glaring flaws that become apparent from the quantitative benchmarks)
-- Repeat until you're satisfied
-- Expand the test set and try again at larger scale
+/* CONFIRM OVERLAY */
+.confirm-overlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:100;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center;overflow-y:auto}
+.confirm-overlay.show{display:flex}
+.confirm-icon{font-size:52px;margin-bottom:20px}
+.confirm-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:8px}
+.confirm-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px}
+.confirm-line{width:100%;max-width:360px;background:var(--white);border-radius:12px;padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;font-size:12px;gap:12px}
+.confirm-line .lbl{color:var(--muted);flex-shrink:0}
+.confirm-line .val{color:var(--text);font-weight:500;text-align:right;word-break:break-all}
+.confirm-orderid{font-size:11px;color:var(--orange);font-weight:700;margin:16px 0 8px;letter-spacing:1px}
+.confirm-back{width:100%;max-width:360px;background:var(--orange);color:#fff;border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:8px}
+.confirm-back:disabled{opacity:0.6;cursor:not-allowed}
 
-Your job when using this skill is to figure out where the user is in this process and then jump in and help them progress through these stages. So for instance, maybe they're like "I want to make a skill for X". You can help narrow down what they mean, write a draft, write the test cases, figure out how they want to evaluate, run all the prompts, and repeat.
+/* STATUS BAR */
+.status{height:44px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;background:var(--bg)}
+.status-time{font-size:14px;font-weight:500;color:var(--text)}
 
-On the other hand, maybe they already have a draft of the skill. In this case you can go straight to the eval/iterate part of the loop.
+/* MARQUEE */
+.marquee-bar{background:rgba(232,115,42,0.08);padding:8px 20px;overflow:hidden}
+.marquee-inner{display:inline-block;white-space:nowrap;animation:marquee 14s linear infinite;color:var(--orange);font-size:12px;font-weight:500}
+@keyframes marquee{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
 
-Of course, you should always be flexible and if the user is like "I don't need to run a bunch of evaluations, just vibe with me", you can do that instead.
+/* SCROLL PAGES */
+.scroll-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:80px}
+.scroll-body::-webkit-scrollbar{display:none}
+.page{display:none}.page.active{display:block}
 
-Then after the skill is done (but again, the order is flexible), you can also run the skill description improver, which we have a whole separate script for, to optimize the triggering of the skill.
+/* HERO */
+.hero{padding:20px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.hero-left{flex:1}
+.shop-badge{display:inline-flex;align-items:center;background:var(--orange);color:#fff;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:4px 12px;border-radius:20px;margin-bottom:10px}
+.hero-title{font-size:26px;font-weight:700;color:var(--text);line-height:1.2;letter-spacing:-0.5px}
+.hero-title span{color:var(--orange)}
+.hero-sub{font-size:11px;color:var(--muted);margin-top:4px;font-weight:300}
+.hero-mascot{width:95px;flex-shrink:0}
 
-Cool? Cool.
+/* NOTICE BAR */
+.notice-bar{margin:0 20px 14px;background:var(--white);border-radius:14px;padding:10px 16px;display:flex;align-items:center;gap:10px}
+.ndot{width:7px;height:7px;background:var(--orange);border-radius:50%;flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.ntext{font-size:12px;color:var(--muted);line-height:1.4}
+.ntext strong{color:var(--text);font-weight:500}
 
-## Communicating with the user
+/* PROMO STRIP */
+.promo-strip{margin:0 20px 14px;background:var(--orange);border-radius:14px;padding:12px 18px;align-items:center;justify-content:space-between;display:none;gap:10px}
+.promo-strip.show{display:flex}
+.promo-text{color:#fff;font-size:13px;font-weight:500;line-height:1.4}
+.promo-text small{font-size:10px;opacity:0.85;display:block;margin-top:2px}
+.promo-pill{background:rgba(255,255,255,0.22);color:#fff;font-size:10px;font-weight:700;padding:5px 12px;border-radius:20px;white-space:nowrap;flex-shrink:0}
 
-The skill creator is liable to be used by people across a wide range of familiarity with coding jargon. If you haven't heard (and how could you, it's only very recently that it started), there's a trend now where the power of Claude is inspiring plumbers to open up their terminals, parents and grandparents to google "how to install npm". On the other hand, the bulk of users are probably fairly computer-literate.
+/* SECTION HEAD */
+.sec-head{padding:0 24px 10px;display:flex;align-items:baseline;justify-content:space-between}
+.sec-title{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted)}
+.sec-cnt{font-size:10px;color:var(--orange);font-weight:500}
 
-So please pay attention to context cues to understand how to phrase your communication! In the default case, just to give you some idea:
+/* PRODUCT */
+.product-stack{display:flex;flex-direction:column;gap:2px;padding:0 20px}
+.product-row{background:var(--white);padding:13px;display:flex;align-items:center;gap:12px;border-radius:0}
+.product-row:first-child{border-radius:16px 16px 0 0}
+.product-row:last-child{border-radius:0 0 16px 16px}
+.product-row:only-child{border-radius:16px}
+.p-img{width:62px;height:62px;border-radius:12px;object-fit:cover;flex-shrink:0;background:var(--surface);cursor:pointer}
+.p-info{flex:1;min-width:0}
+.p-name{font-size:13px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:6px;cursor:pointer}
+.p-name .info-dot{width:14px;height:14px;border-radius:50%;background:var(--surface);color:var(--muted);font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-style:normal;flex-shrink:0}
+.p-tag{font-size:10px;color:var(--muted);margin-top:2px;font-weight:300}
+.p-price{font-size:14px;font-weight:700;color:var(--orange);margin-top:3px}
+.qty-ctrl{display:flex;align-items:center;flex-shrink:0}
+.q-btn{width:30px;height:30px;border-radius:50%;background:var(--surface);border:none;color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:300;font-family:inherit;padding:0}
+.q-btn.on{background:var(--orange);color:#fff}
+.q-btn:disabled{opacity:0.3;cursor:not-allowed}
+.q-num{width:26px;text-align:center;font-size:13px;font-weight:500;color:var(--text);border:none;background:transparent;font-family:inherit;-moz-appearance:textfield}
+.q-num::-webkit-outer-spin-button,.q-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 
-- "evaluation" and "benchmark" are borderline, but OK
-- for "JSON" and "assertion" you want to see serious cues from the user that they know what those things are before using them without explaining them
+/* DIVIDER */
+.div-label{padding:18px 24px 10px;display:flex;align-items:center;gap:10px}
+.div-label::before,.div-label::after{content:'';flex:1;height:1px;background:var(--faint)}
+.div-label span{font-size:10px;letter-spacing:2px;color:var(--muted);font-weight:700;white-space:nowrap}
 
-It's OK to briefly explain terms if you're in doubt, and feel free to clarify terms with a short definition if you're unsure if the user will get it.
+/* ADDONS */
+.addon-grid{display:flex;flex-direction:column;gap:2px;padding:0 20px 4px}
+.addon-item{background:var(--white);padding:12px 14px}
+.addon-item:first-child{border-radius:16px 16px 0 0}
+.addon-item:last-child{border-radius:0 0 16px 16px}
+.addon-item:only-child{border-radius:16px}
+.addon-head{display:flex;align-items:flex-start;gap:10px}
+.addon-body{flex:1;min-width:0}
+.addon-name{font-size:13px;color:var(--text);font-weight:500}
+.addon-desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5}
+.addon-auto{font-size:11px;color:var(--orange);background:rgba(232,115,42,0.08);padding:6px 10px;border-radius:8px;margin-top:8px;line-height:1.5}
+.addon-selectable{margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.addon-selectable-prompt{font-size:11px;color:var(--muted);width:100%;line-height:1.5}
+.addon-limit-hint{font-size:10px;color:var(--muted);margin-left:4px}
 
----
+/* FORM */
+.form-block{padding:4px 20px 14px}
+.f-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px;margin-top:12px;display:block}
+.f-input,.f-select,.f-note{width:100%;background:var(--white);border:none;border-radius:12px;padding:12px 14px;font-size:14px;color:var(--text);font-family:inherit;outline:none;display:block}
+.f-input::placeholder,.f-note::placeholder{color:var(--faint)}
+.f-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239A8E82'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-color:var(--white)}
+.f-note{height:48px;resize:none}
 
-## Creating a skill
+/* SEGMENTED CONTROL (payment) */
+.segmented{display:flex;background:var(--white);border-radius:12px;padding:4px;gap:4px}
+.seg-btn{flex:1;border:none;background:transparent;padding:10px 8px;font-size:13px;color:var(--muted);font-family:inherit;cursor:pointer;border-radius:9px;font-weight:500;transition:all .15s}
+.seg-btn.active{background:var(--orange);color:#fff;font-weight:700}
+.payment-hint{font-size:11px;color:var(--orange);margin-top:6px;line-height:1.5}
 
-### Capture Intent
+/* DYNAMIC FIELDS */
+.dyn-field{margin-top:12px}
+.dyn-opt{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.dyn-opt label{display:inline-flex;align-items:center;gap:5px;background:var(--white);padding:8px 12px;border-radius:10px;font-size:13px;color:var(--text);cursor:pointer}
+.dyn-opt input{margin:0}
 
-Start by understanding the user's intent. The current conversation might already contain a workflow the user wants to capture (e.g., they say "turn this into a skill"). If so, extract answers from the conversation history first — the tools used, the sequence of steps, corrections the user made, input/output formats observed. The user may need to fill the gaps, and should confirm before proceeding to the next step.
+/* SUMMARY */
+.summary{margin:0 20px 14px;background:var(--white);border-radius:14px;padding:12px 16px}
+.sum-row{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;color:var(--muted);align-items:flex-start;gap:10px}
+.sum-row .label{flex:1;line-height:1.5}
+.sum-row .val{flex-shrink:0;text-align:right;font-weight:500;color:var(--text)}
+.sum-row.gift{color:var(--orange)}
+.sum-divider{height:1px;background:var(--faint);margin:8px 0}
+.sum-total{display:flex;justify-content:space-between;align-items:center;padding-top:4px}
+.sum-total-label{font-size:14px;font-weight:700;color:var(--text)}
+.sum-total-val{font-size:18px;font-weight:700;color:var(--orange)}
 
-1. What should this skill enable Claude to do?
-2. When should this skill trigger? (what user phrases/contexts)
-3. What's the expected output format?
-4. Should we set up test cases to verify the skill works? Skills with objectively verifiable outputs (file transforms, data extraction, code generation, fixed workflow steps) benefit from test cases. Skills with subjective outputs (writing style, art) often don't need them. Suggest the appropriate default based on the skill type, but let the user decide.
+/* CTA */
+.cta-zone{padding:0 20px 24px}
+.cta{width:100%;background:var(--orange);color:#fff;border:none;border-radius:16px;padding:15px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:0.5px}
+.cta:disabled{opacity:0.6;cursor:not-allowed}
+.cta-note{text-align:center;font-size:10px;color:var(--muted);margin-top:8px}
 
-### Interview and Research
+/* NOTICE PAGE */
+.page-hero{padding:28px 28px 18px}
+.page-title{font-size:26px;font-weight:700;color:var(--text);letter-spacing:-0.5px}
+.page-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.highlight-card{margin:0 20px 14px;background:var(--orange);border-radius:16px;padding:14px 18px;color:#fff}
+.hc-label{font-size:10px;font-weight:700;letter-spacing:1.5px;opacity:0.8;margin-bottom:6px}
+.hc-body{font-size:14px;font-weight:500;line-height:1.6}
+.accordion-stack{display:flex;flex-direction:column;gap:2px;padding:0 20px 16px}
+.acc-item{background:var(--white)}
+.acc-item:first-child{border-radius:16px 16px 0 0}
+.acc-item:last-child{border-radius:0 0 16px 16px}
+.acc-head{padding:13px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.acc-head-title{font-size:13px;font-weight:500;color:var(--text)}
+.acc-icon{font-size:16px;color:var(--muted);transition:transform .2s}
+.acc-icon.open{transform:rotate(45deg)}
+.acc-body{font-size:12px;color:var(--muted);line-height:1.7;padding:0 16px 13px;display:none}
+.acc-body.open{display:block}
+.no-additive{margin:0 20px 24px;text-align:center;font-size:11px;color:var(--muted);font-weight:500;padding:10px 0}
 
-Proactively ask questions about edge cases, input/output formats, example files, success criteria, and dependencies. Wait to write test prompts until you've got this part ironed out.
+/* STORY PAGE */
+.story-header{background:var(--orange);padding:26px 28px 80px;position:relative;overflow:hidden}
+.story-header::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,0.06) 0,rgba(255,255,255,0.06) 1px,transparent 1px,transparent 18px),repeating-linear-gradient(90deg,rgba(255,255,255,0.06) 0,rgba(255,255,255,0.06) 1px,transparent 1px,transparent 18px)}
+.story-header-fade{position:absolute;bottom:0;left:0;right:0;height:100px;background:linear-gradient(to bottom,transparent 0%,rgba(242,237,230,0.25) 35%,rgba(242,237,230,0.7) 65%,var(--bg) 100%)}
+.story-brand{position:relative;z-index:1;color:#fff;font-size:26px;font-weight:700;letter-spacing:2px}
+.story-brand-en{color:rgba(255,255,255,0.7);font-size:11px;letter-spacing:2px;margin-top:3px;font-weight:300}
+.story-year{color:rgba(255,255,255,0.5);font-size:10px;margin-top:10px;letter-spacing:1px}
+.story-section-label{text-align:center;font-size:12px;font-weight:700;letter-spacing:2px;padding:14px 0;color:rgba(232,115,42,0.6)}
+.story-blocks{padding:0 20px;display:flex;flex-direction:column;gap:2px}
+.story-block{background:var(--white);padding:16px;display:flex;gap:14px;align-items:center}
+.story-block:first-child{border-radius:16px 16px 0 0}
+.story-block:last-child{border-radius:0 0 16px 16px;margin-bottom:20px}
+.story-block-left{flex:1}
+.story-num{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--orange);margin-bottom:6px}
+.story-text{font-size:12px;color:var(--text);line-height:1.8;font-weight:300}
+.story-text strong{font-weight:500}
+.story-illus{width:90px;flex-shrink:0}
+.story-illus img{width:100%;height:auto;display:block}
+.story-footer{margin:0 20px 24px;text-align:center}
+.story-footer-title{font-size:13px;font-weight:700;color:var(--orange);margin-bottom:3px}
+.story-footer-sub{font-size:11px;color:var(--muted)}
 
-Check available MCPs - if useful for research (searching docs, finding similar skills, looking up best practices), research in parallel via subagents if available, otherwise inline. Come prepared with context to reduce burden on the user.
+/* PRODUCT INFO MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:300;padding:20px}
+.modal-overlay.show{display:flex}
+.modal-box{background:var(--white);border-radius:16px;padding:20px;max-width:380px;width:100%;max-height:85vh;overflow-y:auto;position:relative}
+.modal-close{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;border:none;background:var(--surface);color:var(--muted);font-size:14px;cursor:pointer}
+.modal-img{width:100%;border-radius:12px;margin-bottom:14px;background:var(--surface)}
+.modal-name{font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px}
+.modal-price{font-size:16px;color:var(--orange);font-weight:700;margin-bottom:12px}
+.modal-desc{font-size:13px;color:var(--muted);line-height:1.7;white-space:pre-wrap}
 
-### Write the SKILL.md
+/* NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--white);padding:10px 0 18px;border-top:1px solid var(--faint);z-index:50;max-width:480px;margin:0 auto}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;letter-spacing:1px;color:var(--muted);font-weight:700;cursor:pointer;padding:4px 0}
+.nav-item.active{color:var(--orange)}
+.nav-icon{font-size:18px;line-height:1}
+.nav-bar{width:18px;height:3px;background:var(--orange);border-radius:2px;display:none}
+.nav-item.active .nav-bar{display:block}
+.version-tag{position:fixed;bottom:4px;right:8px;font-size:9px;color:var(--faint);z-index:51;pointer-events:none}
+</style>
+</head>
+<body>
 
-Based on the user interview, fill in these components:
+<div id="loading">
+  <div class="spinner"></div>
+  <p>系統連線中…</p>
+</div>
+<div id="errMsg"></div>
+<div id="maintPage">
+  <img id="maintImg" src="" alt="" onerror="this.style.display='none'">
+  <p id="maintMsg">系統維護中，請稍後再試。</p>
+</div>
 
-- **name**: Skill identifier
-- **description**: When to trigger, what it does. This is the primary triggering mechanism - include both what the skill does AND specific contexts for when to use it. All "when to use" info goes here, not in the body. Note: currently Claude has a tendency to "undertrigger" skills -- to not use them when they'd be useful. To combat this, please make the skill descriptions a little bit "pushy". So for instance, instead of "How to build a simple fast dashboard to display internal Anthropic data.", you might write "How to build a simple fast dashboard to display internal Anthropic data. Make sure to use this skill whenever the user mentions dashboards, data visualization, internal metrics, or wants to display any kind of company data, even if they don't explicitly ask for a 'dashboard.'"
-- **compatibility**: Required tools, dependencies (optional, rarely needed)
-- **the rest of the skill :)**
+<div id="appShell">
+<div class="phone">
 
-### Skill Writing Guide
+  <!-- 訂單成功 overlay -->
+  <div class="confirm-overlay" id="confirm-overlay">
+    <div class="confirm-icon" id="conf-icon">📝</div>
+    <div class="confirm-title" id="conf-title">訂單確認</div>
+    <div class="confirm-sub" id="conf-sub">請確認以下資料後送出</div>
+    <div id="conf-lines"></div>
+    <div class="confirm-orderid" id="conf-orderid"></div>
+    <button class="confirm-back" id="conf-submit-btn" onclick="submitOrder()">確認並送出</button>
+    <button class="confirm-back" id="conf-back-btn" onclick="closeConfirm()" style="background:transparent;color:var(--muted);margin-top:6px">返回修改</button>
+  </div>
 
-#### Anatomy of a Skill
+  <!-- 狀態列 -->
+  <div class="status">
+    <span class="status-time" id="status-time">9:41</span>
+    <span style="font-size:11px;color:var(--muted);letter-spacing:0.5px" id="shop-name-status">和美小玉家</span>
+  </div>
 
-```
-skill-name/
-├── SKILL.md (required)
-│   ├── YAML frontmatter (name, description required)
-│   └── Markdown instructions
-└── Bundled Resources (optional)
-    ├── scripts/    - Executable code for deterministic/repetitive tasks
-    ├── references/ - Docs loaded into context as needed
-    └── assets/     - Files used in output (templates, icons, fonts)
-```
+  <!-- 跑馬燈 -->
+  <div id="marquee-bar" class="marquee-bar" style="display:none">
+    <span class="marquee-inner" id="marquee-text"></span>
+  </div>
 
-#### Progressive Disclosure
+  <!-- 訂購頁 -->
+  <div id="page-order" class="scroll-body page active">
+    <div class="hero">
+      <div class="hero-left">
+        <div class="shop-badge">HEMEI YU'S BAKES</div>
+        <div class="hero-title">手工餅乾<br><span>線上訂購</span></div>
+        <div class="hero-sub" id="hero-sub">熱銷 20 年 · 和美在地製作</div>
+      </div>
+      <div class="hero-mascot">
+        <img src="https://hemeiyubakes.github.io/hemeiyubakes/assets/%E7%9C%A8%E7%9C%BC%E9%A4%85%E4%B9%BE.svg" alt="吉祥物" style="width:100%;height:auto;display:block" onerror="this.style.display='none'">
+      </div>
+    </div>
 
-Skills use a three-level loading system:
-1. **Metadata** (name + description) - Always in context (~100 words)
-2. **SKILL.md body** - In context whenever skill triggers (<500 lines ideal)
-3. **Bundled resources** - As needed (unlimited, scripts can execute without loading)
+    <div class="notice-bar" id="notice-bar" style="display:none">
+      <div class="ndot"></div>
+      <div class="ntext" id="deadline-text"></div>
+    </div>
 
-These word counts are approximate and you can feel free to go longer if needed.
+    <div class="promo-strip" id="promo-strip">
+      <div class="promo-text"><span id="promo-main"></span><small id="promo-sub"></small></div>
+      <div class="promo-pill">優惠</div>
+    </div>
 
-**Key patterns:**
-- Keep SKILL.md under 500 lines; if you're approaching this limit, add an additional layer of hierarchy along with clear pointers about where the model using the skill should go next to follow up.
-- Reference files clearly from SKILL.md with guidance on when to read them
-- For large reference files (>300 lines), include a table of contents
+    <div class="sec-head">
+      <span class="sec-title">選擇商品</span>
+      <span class="sec-cnt" id="sec-cnt">載入中…</span>
+    </div>
+    <div class="product-stack" id="product-stack">
+      <div class="product-row" style="border-radius:16px;justify-content:center;color:var(--muted);font-size:13px;padding:20px">載入商品中…</div>
+    </div>
 
-**Domain organization**: When a skill supports multiple domains/frameworks, organize by variant:
-```
-cloud-deploy/
-├── SKILL.md (workflow + selection)
-└── references/
-    ├── aws.md
-    ├── gcp.md
-    └── azure.md
-```
-Claude reads only the relevant reference file.
+    <div class="div-label" id="addon-section-label" style="display:none"><span>加購選項</span></div>
+    <div class="addon-grid" id="addon-grid"></div>
 
-#### Principle of Lack of Surprise
+    <div class="div-label"><span>訂購資訊</span></div>
+    <div class="form-block">
+      <span class="f-label">姓名</span>
+      <input class="f-input" id="f-name" type="text" placeholder="請輸入姓名">
 
-This goes without saying, but skills must not contain malware, exploit code, or any content that could compromise system security. A skill's contents should not surprise the user in their intent if described. Don't go along with requests to create misleading skills or skills designed to facilitate unauthorized access, data exfiltration, or other malicious activities. Things like a "roleplay as an XYZ" are OK though.
+      <span class="f-label">手機號碼</span>
+      <input class="f-input" id="f-tel" type="tel" inputmode="tel" placeholder="09xxxxxxxx">
 
-#### Writing Patterns
+      <span class="f-label">取貨方式</span>
+      <select class="f-select" id="f-pickup" onchange="onShippingChange()"></select>
 
-Prefer using the imperative form in instructions.
+      <div id="address-group" style="display:none">
+        <span class="f-label">收件地址</span>
+        <input class="f-input" id="f-address" placeholder="請輸入完整地址">
+      </div>
 
-**Defining output formats** - You can do it like this:
-```markdown
-## Report structure
-ALWAYS use this exact template:
-# [Title]
-## Executive summary
-## Key findings
-## Recommendations
-```
+      <div id="payment-block" style="display:none">
+        <span class="f-label">付款方式</span>
+        <div class="segmented" id="payment-seg">
+          <button type="button" class="seg-btn" data-payment="現場付款" onclick="selectPayment('現場付款')">現場付款</button>
+          <button type="button" class="seg-btn" data-payment="匯款" onclick="selectPayment('匯款')">匯款</button>
+        </div>
+        <div class="payment-hint" id="payment-hint" style="display:none">⚠️ 金額已達 <span id="threshold-amt">0</span> 元，僅可使用匯款</div>
+      </div>
 
-**Examples pattern** - It's useful to include examples. You can format them like this (but if "Input" and "Output" are in the examples you might want to deviate a little):
-```markdown
-## Commit message format
-**Example 1:**
-Input: Added user authentication with JWT tokens
-Output: feat(auth): implement JWT-based authentication
-```
+      <div id="dynZone"></div>
 
-### Writing Style
+      <span class="f-label">備註</span>
+      <textarea class="f-note" id="f-note" placeholder="口味喜好、過敏資訊…"></textarea>
+    </div>
 
-Try to explain to the model why things are important in lieu of heavy-handed musty MUSTs. Use theory of mind and try to make the skill general and not super-narrow to specific examples. Start by writing a draft and then look at it with fresh eyes and improve it.
+    <div class="summary" id="summary-block" style="display:none">
+      <div id="summary-items"></div>
+      <div id="summary-gifts"></div>
+      <div class="sum-divider"></div>
+      <div class="sum-total">
+        <span class="sum-total-label">合計</span>
+        <span class="sum-total-val" id="sum-total">$0</span>
+      </div>
+    </div>
 
-### Test Cases
+    <div class="cta-zone">
+      <button class="cta" id="cta-btn" onclick="showConfirm()">確認訂單</button>
+      <div class="cta-note">送出後將透過 LINE 收到確認通知</div>
+    </div>
+  </div>
 
-After writing the skill draft, come up with 2-3 realistic test prompts — the kind of thing a real user would actually say. Share them with the user: [you don't have to use this exact language] "Here are a few test cases I'd like to try. Do these look right, or do you want to add more?" Then run them.
+  <!-- 訂購須知頁 -->
+  <div id="page-notice" class="scroll-body page">
+    <div class="page-hero">
+      <div class="page-title">訂購須知</div>
+      <div class="page-sub">下單前請詳細閱讀</div>
+    </div>
+    <div class="highlight-card">
+      <div class="hc-label">⏰ 重要時間</div>
+      <div class="hc-body">每週製作有限<br>建議提早下單避免向隅</div>
+    </div>
+    <div class="accordion-stack">
+      <div class="acc-item">
+        <div class="acc-head" onclick="tog(this)"><span class="acc-head-title">🚚 取貨方式</span><span class="acc-icon">＋</span></div>
+        <div class="acc-body">現場取貨：彰化縣和美鎮，詳細地址於確認訊息提供。<br>宅配到府：黑貓宅急便，運費依重量計算。</div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-head" onclick="tog(this)"><span class="acc-head-title">💳 付款方式</span><span class="acc-icon">＋</span></div>
+        <div class="acc-body">現場取貨：取貨時現場付款或事前匯款均可。<br>宅配到府：請於收到訂單確認訊息後完成匯款，匯款帳號將於確認訊息中提供。</div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-head" onclick="tog(this)"><span class="acc-head-title">⚠️ 過敏原標示</span><span class="acc-icon">＋</span></div>
+        <div class="acc-body">本產品含：蛋、奶、杏仁、麥（麩質）。於同一環境製作，無法保證完全無交叉污染，對堅果嚴重過敏者請謹慎。</div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-head" onclick="tog(this)"><span class="acc-head-title">🔄 退換貨說明</span><span class="acc-icon">＋</span></div>
+        <div class="acc-body">食品類商品一經拆封恕不接受退換。若收到商品有明顯瑕疵，請於收貨當日拍照聯繫客服處理。</div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-head" onclick="tog(this)"><span class="acc-head-title">📦 保存方式</span><span class="acc-icon">＋</span></div>
+        <div class="acc-body">請置於陰涼乾燥處，避免陽光直射。開封後請盡速食用，以密封袋保存。賞味期限為製造日起 30 天。</div>
+      </div>
+    </div>
+    <div class="no-additive">餅乾無添加防腐劑，請注意保存期限喔。</div>
+  </div>
 
-Save test cases to `evals/evals.json`. Don't write assertions yet — just the prompts. You'll draft assertions in the next step while the runs are in progress.
+  <!-- 品牌故事頁 -->
+  <div id="page-story" class="scroll-body page">
+    <div class="story-header">
+      <div class="story-brand">和美小玉家</div>
+      <div class="story-brand-en">Hemei Yu's Bakes</div>
+      <div class="story-year">SINCE 2005 · 彰化和美</div>
+      <div class="story-header-fade"></div>
+    </div>
+    <div class="story-section-label">小玉家的故事</div>
+    <div class="story-blocks">
+      <div class="story-block">
+        <div class="story-block-left">
+          <div class="story-num">01 — 起點</div>
+          <div class="story-text">2005 年，為了做點心給孩子們吃，一台小烤箱出現在<strong>小玉媽媽的廚房</strong>。這台充滿愛的小烤箱，烤出了我們記憶中的香氣。</div>
+        </div>
+        <div class="story-illus"><img src="https://hemeiyubakes.github.io/hemeiyubakes/assets/%E5%B0%8F%E6%99%82%E5%80%99%E5%AA%BD%E5%AA%BD%E7%83%A4%E9%A4%85%E4%B9%BE%E7%B5%A6%E6%88%91%E5%80%91%E5%90%83.svg" alt="起點" onerror="this.style.display='none'"></div>
+      </div>
+      <div class="story-block">
+        <div class="story-block-left">
+          <div class="story-num">02 — 堅持</div>
+          <div class="story-text">那個在爐火旁忙碌穿梭的身影，與餅乾香氣交織成了家中的日常。因為喜歡這份味道的人越來越多，<strong>這份堅持，一守就是二十年</strong>。</div>
+        </div>
+        <div class="story-illus"><img src="https://hemeiyubakes.github.io/hemeiyubakes/assets/%E5%AA%BD%E5%AA%BD%E7%8D%A8%E8%87%AA%E5%BF%99%E7%A2%8C%E7%9A%84%E8%BA%AB%E5%BD%B1.svg" alt="堅持" onerror="this.style.display='none'"></div>
+      </div>
+      <div class="story-block">
+        <div class="story-block-left">
+          <div class="story-num">03 — 傳承</div>
+          <div class="story-text">如今，換孩子們回家接手，升級了設備、延續了手藝。我們是「<strong>和美小玉家</strong>」，想讓媽媽守護二十年的味道，飄往更遠的地方。</div>
+        </div>
+        <div class="story-illus"><img src="https://hemeiyubakes.github.io/hemeiyubakes/assets/%E6%88%91%E5%80%91%E8%A6%81%E5%BB%B6%E7%BA%8C%E5%AA%BD%E5%AA%BD%E7%9A%84%E5%A5%BD%E5%91%B3%E9%81%93.svg" alt="傳承" onerror="this.style.display='none'"></div>
+      </div>
+    </div>
+    <div class="story-footer">
+      <div class="story-footer-title">用心製作，無添加防腐劑</div>
+      <div class="story-footer-sub">每一片都是媽媽味道的延續</div>
+    </div>
+    <div style="height:24px"></div>
+  </div>
 
-```json
-{
-  "skill_name": "example-skill",
-  "evals": [
-    {
-      "id": 1,
-      "prompt": "User's task prompt",
-      "expected_output": "Description of expected result",
-      "files": []
+  <!-- 底部導航 -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-order" onclick="sw('order')">
+      <div class="nav-icon">🛒</div><span>訂購</span><div class="nav-bar"></div>
+    </div>
+    <div class="nav-item" id="nav-notice" onclick="sw('notice')">
+      <div class="nav-icon">📌</div><span>訂購須知</span><div class="nav-bar"></div>
+    </div>
+    <div class="nav-item" id="nav-story" onclick="sw('story')">
+      <div class="nav-icon">🫶</div><span>品牌故事</span><div class="nav-bar"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 商品資訊 modal -->
+<div class="modal-overlay" id="productModal" onclick="closeProductInfo(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeProductInfo()">✕</button>
+    <img class="modal-img" id="modal-img" src="" alt="" style="display:none">
+    <div class="modal-name" id="modal-name"></div>
+    <div class="modal-price" id="modal-price"></div>
+    <div class="modal-desc" id="modal-desc"></div>
+  </div>
+</div>
+
+<div class="version-tag" id="version-tag"></div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+// ============================================================
+// ⚠️ 改完這個檔案：
+//   1. APP_VERSION 改成新版本號
+//   2. 同步 Settings 工作表「目前版本」=同版本號
+// ============================================================
+const APP_VERSION = '2.0.0';
+
+const LIFF_ID = '2009988690-V5uuqIVX';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
+
+let fieldsData = [], productsData = [], settingsData = {}, addonsData = [], promotionsData = [], lineUserId = '';
+let addonSelections = {};
+let wasForcedTransfer = false;
+let currentPayment = '現場付款';
+
+document.getElementById('version-tag').innerText = 'v' + APP_VERSION;
+
+/* ---- 狀態列時間 ---- */
+function updateClock() {
+  const d = new Date();
+  document.getElementById('status-time').innerText =
+    d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+updateClock();
+setInterval(updateClock, 30000);
+
+/* ---- 頁面切換 ---- */
+function sw(page) {
+  ['order','notice','story'].forEach(p => {
+    document.getElementById('page-' + p).classList.toggle('active', p === page);
+    document.getElementById('nav-' + p).classList.toggle('active', p === page);
+  });
+  window.scrollTo(0, 0);
+}
+
+/* ---- 手風琴 ---- */
+function tog(el) {
+  const body = el.nextElementSibling;
+  const icon = el.querySelector('.acc-icon');
+  body.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+
+/* ---- 商品資訊 modal ---- */
+function openProductInfo(i) {
+  const p = productsData[i];
+  if (!p) return;
+  const img = document.getElementById('modal-img');
+  if (p.image) { img.src = p.image; img.style.display = 'block'; }
+  else { img.style.display = 'none'; }
+  document.getElementById('modal-name').innerText = p.name;
+  document.getElementById('modal-price').innerText = 'NT$ ' + p.price;
+  document.getElementById('modal-desc').innerText = p.description || '暫無詳細說明';
+  document.getElementById('productModal').classList.add('show');
+}
+function closeProductInfo(event) {
+  document.getElementById('productModal').classList.remove('show');
+}
+
+/* ---- 工具 ---- */
+function showError(msg) {
+  document.getElementById('loading').style.display = 'none';
+  const e = document.getElementById('errMsg');
+  e.style.display = 'block';
+  e.innerHTML = '❌ ' + msg;
+}
+
+function loadJsonp(url) {
+  return new Promise((resolve, reject) => {
+    const cb = 'cb_' + Date.now();
+    const s = document.createElement('script');
+    window[cb] = d => { delete window[cb]; s.remove(); resolve(d); };
+    s.onerror = () => { delete window[cb]; s.remove(); reject(new Error('載入失敗')); };
+    const sep = url.includes('?') ? '&' : '?';
+    s.src = url + '&callback=' + cb + sep + '_t=' + Date.now();
+    document.head.appendChild(s);
+  });
+}
+
+function checkVersionAndReload(serverVersion) {
+  if (!serverVersion || serverVersion === APP_VERSION) return false;
+  const reloaded = sessionStorage.getItem('hm_reloaded');
+  if (reloaded === '1') return false;
+  sessionStorage.setItem('hm_reloaded', '1');
+  const url = new URL(window.location.href);
+  url.searchParams.set('_v', Date.now());
+  window.location.replace(url.toString());
+  return true;
+}
+
+function isCashOptionEnabled() {
+  var v = settingsData['LIFF顯示現場付款'];
+  if (v === undefined || v === null || v === '') return true;
+  var s = v.toString().trim();
+  return s === '是' || s === 'true' || s === '1' || s === 'Y';
+}
+
+/* ---- URL 預選商品 ---- */
+function applyPresetProduct() {
+  const params = new URLSearchParams(window.location.search);
+  const productName = params.get('p') || params.get('product');
+  if (!productName) return;
+  const decoded = decodeURIComponent(productName);
+  const idx = productsData.findIndex(p => p.name === decoded);
+  if (idx < 0) return;
+  const input = document.getElementById('qty_' + idx);
+  if (!input) return;
+  input.value = 1;
+  refreshAll();
+  setTimeout(() => {
+    document.getElementById('prow_' + idx)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 300);
+}
+
+/* ---- 初始化 ---- */
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    const profile = await liff.getProfile();
+    lineUserId = profile.userId;
+
+    const data = await loadJsonp(SCRIPT_URL + '?action=data');
+    if (data.error) { showError('讀取失敗：' + data.error); return; }
+
+    settingsData = data.settings || {};
+    productsData = data.products || [];
+    fieldsData = data.fields || [];
+    addonsData = data.addons || [];
+    promotionsData = data.promotions || [];
+
+    if (checkVersionAndReload(settingsData['目前版本'])) return;
+    sessionStorage.removeItem('hm_reloaded');
+
+    // 維護模式
+    if (settingsData['維護模式開關'] === true) {
+      document.getElementById('loading').style.display = 'none';
+      const maintImg = settingsData['維護模式'] || '';
+      if (maintImg) document.getElementById('maintImg').src = maintImg;
+      document.getElementById('maintPage').style.display = 'block';
+      return;
     }
-  ]
+
+    // 預填名字
+    document.getElementById('f-name').value = profile.displayName || '';
+
+    // 店鋪名
+    if (settingsData['店鋪名稱']) {
+      document.getElementById('shop-name-status').innerText = settingsData['店鋪名稱'];
+    }
+
+    // 跑馬燈
+    if (settingsData['公告文字']) {
+      document.getElementById('marquee-text').innerText = settingsData['公告文字'];
+      document.getElementById('marquee-bar').style.display = 'block';
+    }
+
+    // 截單通知條（用公告文字當截單訊息，或自訂）
+    const deadlineMsg = settingsData['截單訊息'] || settingsData['公告文字'];
+    if (deadlineMsg) {
+      document.getElementById('deadline-text').innerHTML = deadlineMsg;
+      document.getElementById('notice-bar').style.display = 'flex';
+    }
+
+    // 強制匯款門檻顯示
+    const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
+    document.getElementById('threshold-amt').innerText = threshold;
+
+    // 商品列表
+    renderProducts();
+
+    // 動態欄位
+    renderDynFields();
+
+    // 取貨方式
+    updateShipping();
+
+    // 付款方式
+    initPaymentOptions();
+
+    refreshAll();
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('appShell').style.display = 'block';
+
+    // URL 預選商品
+    applyPresetProduct();
+  } catch (e) {
+    showError('錯誤：' + e.message);
+  }
 }
-```
 
-See `references/schemas.md` for the full schema (including the `assertions` field, which you'll add later).
-
-## Running and evaluating test cases
-
-This section is one continuous sequence — don't stop partway through. Do NOT use `/skill-test` or any other testing skill.
-
-Put results in `<skill-name>-workspace/` as a sibling to the skill directory. Within the workspace, organize results by iteration (`iteration-1/`, `iteration-2/`, etc.) and within that, each test case gets a directory (`eval-0/`, `eval-1/`, etc.). Don't create all of this upfront — just create directories as you go.
-
-### Step 1: Spawn all runs (with-skill AND baseline) in the same turn
-
-For each test case, spawn two subagents in the same turn — one with the skill, one without. This is important: don't spawn the with-skill runs first and then come back for baselines later. Launch everything at once so it all finishes around the same time.
-
-**With-skill run:**
-
-```
-Execute this task:
-- Skill path: <path-to-skill>
-- Task: <eval prompt>
-- Input files: <eval files if any, or "none">
-- Save outputs to: <workspace>/iteration-<N>/eval-<ID>/with_skill/outputs/
-- Outputs to save: <what the user cares about — e.g., "the .docx file", "the final CSV">
-```
-
-**Baseline run** (same prompt, but the baseline depends on context):
-- **Creating a new skill**: no skill at all. Same prompt, no skill path, save to `without_skill/outputs/`.
-- **Improving an existing skill**: the old version. Before editing, snapshot the skill (`cp -r <skill-path> <workspace>/skill-snapshot/`), then point the baseline subagent at the snapshot. Save to `old_skill/outputs/`.
-
-Write an `eval_metadata.json` for each test case (assertions can be empty for now). Give each eval a descriptive name based on what it's testing — not just "eval-0". Use this name for the directory too. If this iteration uses new or modified eval prompts, create these files for each new eval directory — don't assume they carry over from previous iterations.
-
-```json
-{
-  "eval_id": 0,
-  "eval_name": "descriptive-name-here",
-  "prompt": "The user's task prompt",
-  "assertions": []
+function renderProducts() {
+  const stack = document.getElementById('product-stack');
+  if (productsData.length === 0) {
+    stack.innerHTML = '<div class="product-row" style="border-radius:16px;justify-content:center;color:var(--muted);font-size:13px">目前沒有商品</div>';
+    document.getElementById('sec-cnt').innerText = '0 項';
+    return;
+  }
+  let html = '';
+  productsData.forEach((p, i) => {
+    const maxAttr = p.maxQty > 0 ? `max="${p.maxQty}"` : '';
+    const limitText = p.maxQty > 0 ? `<div class="p-tag">限購 ${p.maxQty} 個</div>` : '';
+    html += `
+      <div class="product-row" id="prow_${i}">
+        <img class="p-img" src="${p.image || ''}" onclick="openProductInfo(${i})" onerror="this.style.display='none'">
+        <div class="p-info">
+          <div class="p-name" onclick="openProductInfo(${i})">${p.name} <i class="info-dot">i</i></div>
+          ${limitText}
+          <div class="p-price">NT$ ${p.price}</div>
+        </div>
+        <div class="qty-ctrl">
+          <button class="q-btn" onclick="changeQty(${i},-1)">－</button>
+          <input class="q-num" id="qty_${i}" type="number" value="0" min="0" ${maxAttr} onchange="onProductQtyChange(${i})">
+          <button class="q-btn" id="qbtn_plus_${i}" onclick="changeQty(${i},1)">＋</button>
+        </div>
+      </div>`;
+  });
+  stack.innerHTML = html;
+  document.getElementById('sec-cnt').innerText = productsData.length + ' 項';
 }
-```
 
-### Step 2: While runs are in progress, draft assertions
-
-Don't just wait for the runs to finish — you can use this time productively. Draft quantitative assertions for each test case and explain them to the user. If assertions already exist in `evals/evals.json`, review them and explain what they check.
-
-Good assertions are objectively verifiable and have descriptive names — they should read clearly in the benchmark viewer so someone glancing at the results immediately understands what each one checks. Subjective skills (writing style, design quality) are better evaluated qualitatively — don't force assertions onto things that need human judgment.
-
-Update the `eval_metadata.json` files and `evals/evals.json` with the assertions once drafted. Also explain to the user what they'll see in the viewer — both the qualitative outputs and the quantitative benchmark.
-
-### Step 3: As runs complete, capture timing data
-
-When each subagent task completes, you receive a notification containing `total_tokens` and `duration_ms`. Save this data immediately to `timing.json` in the run directory:
-
-```json
-{
-  "total_tokens": 84852,
-  "duration_ms": 23332,
-  "total_duration_seconds": 23.3
+function renderDynFields() {
+  const zone = document.getElementById('dynZone');
+  zone.innerHTML = '';
+  if (!fieldsData || fieldsData.length === 0) return;
+  fieldsData.forEach(f => {
+    let html = `<div class="dyn-field"><span class="f-label">${f.name}${f.req ? ' *' : ''}</span>`;
+    if (f.type === 'text') {
+      html += `<input class="f-input" name="${f.name}" ${f.req ? 'required' : ''}>`;
+    } else {
+      html += '<div class="dyn-opt">';
+      f.options.forEach(o => {
+        html += `<label><input type="${f.type}" name="${f.name}" value="${o}"> ${o}</label>`;
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+    zone.innerHTML += html;
+  });
 }
-```
 
-This is the only opportunity to capture this data — it comes through the task notification and isn't persisted elsewhere. Process each notification as it arrives rather than trying to batch them.
-
-### Step 4: Grade, aggregate, and launch the viewer
-
-Once all runs are done:
-
-1. **Grade each run** — spawn a grader subagent (or grade inline) that reads `agents/grader.md` and evaluates each assertion against the outputs. Save results to `grading.json` in each run directory. The grading.json expectations array must use the fields `text`, `passed`, and `evidence` (not `name`/`met`/`details` or other variants) — the viewer depends on these exact field names. For assertions that can be checked programmatically, write and run a script rather than eyeballing it — scripts are faster, more reliable, and can be reused across iterations.
-
-2. **Aggregate into benchmark** — run the aggregation script from the skill-creator directory:
-   ```bash
-   python -m scripts.aggregate_benchmark <workspace>/iteration-N --skill-name <name>
-   ```
-   This produces `benchmark.json` and `benchmark.md` with pass_rate, time, and tokens for each configuration, with mean ± stddev and the delta. If generating benchmark.json manually, see `references/schemas.md` for the exact schema the viewer expects.
-Put each with_skill version before its baseline counterpart.
-
-3. **Do an analyst pass** — read the benchmark data and surface patterns the aggregate stats might hide. See `agents/analyzer.md` (the "Analyzing Benchmark Results" section) for what to look for — things like assertions that always pass regardless of skill (non-discriminating), high-variance evals (possibly flaky), and time/token tradeoffs.
-
-4. **Launch the viewer** with both qualitative outputs and quantitative data:
-   ```bash
-   nohup python <skill-creator-path>/eval-viewer/generate_review.py \
-     <workspace>/iteration-N \
-     --skill-name "my-skill" \
-     --benchmark <workspace>/iteration-N/benchmark.json \
-     > /dev/null 2>&1 &
-   VIEWER_PID=$!
-   ```
-   For iteration 2+, also pass `--previous-workspace <workspace>/iteration-<N-1>`.
-
-   **Cowork / headless environments:** If `webbrowser.open()` is not available or the environment has no display, use `--static <output_path>` to write a standalone HTML file instead of starting a server. Feedback will be downloaded as a `feedback.json` file when the user clicks "Submit All Reviews". After download, copy `feedback.json` into the workspace directory for the next iteration to pick up.
-
-Note: please use generate_review.py to create the viewer; there's no need to write custom HTML.
-
-5. **Tell the user** something like: "I've opened the results in your browser. There are two tabs — 'Outputs' lets you click through each test case and leave feedback, 'Benchmark' shows the quantitative comparison. When you're done, come back here and let me know."
-
-### What the user sees in the viewer
-
-The "Outputs" tab shows one test case at a time:
-- **Prompt**: the task that was given
-- **Output**: the files the skill produced, rendered inline where possible
-- **Previous Output** (iteration 2+): collapsed section showing last iteration's output
-- **Formal Grades** (if grading was run): collapsed section showing assertion pass/fail
-- **Feedback**: a textbox that auto-saves as they type
-- **Previous Feedback** (iteration 2+): their comments from last time, shown below the textbox
-
-The "Benchmark" tab shows the stats summary: pass rates, timing, and token usage for each configuration, with per-eval breakdowns and analyst observations.
-
-Navigation is via prev/next buttons or arrow keys. When done, they click "Submit All Reviews" which saves all feedback to `feedback.json`.
-
-### Step 5: Read the feedback
-
-When the user tells you they're done, read `feedback.json`:
-
-```json
-{
-  "reviews": [
-    {"run_id": "eval-0-with_skill", "feedback": "the chart is missing axis labels", "timestamp": "..."},
-    {"run_id": "eval-1-with_skill", "feedback": "", "timestamp": "..."},
-    {"run_id": "eval-2-with_skill", "feedback": "perfect, love this", "timestamp": "..."}
-  ],
-  "status": "complete"
+function initPaymentOptions() {
+  if (!isCashOptionEnabled()) {
+    currentPayment = '匯款';
+  } else {
+    currentPayment = '現場付款';
+  }
+  updatePaymentUI();
 }
-```
 
-Empty feedback means the user thought it was fine. Focus your improvements on the test cases where the user had specific complaints.
-
-Kill the viewer server when you're done with it:
-
-```bash
-kill $VIEWER_PID 2>/dev/null
-```
-
----
-
-## Improving the skill
-
-This is the heart of the loop. You've run the test cases, the user has reviewed the results, and now you need to make the skill better based on their feedback.
-
-### How to think about improvements
-
-1. **Generalize from the feedback.** The big picture thing that's happening here is that we're trying to create skills that can be used a million times (maybe literally, maybe even more who knows) across many different prompts. Here you and the user are iterating on only a few examples over and over again because it helps move faster. The user knows these examples in and out and it's quick for them to assess new outputs. But if the skill you and the user are codeveloping works only for those examples, it's useless. Rather than put in fiddly overfitty changes, or oppressively constrictive MUSTs, if there's some stubborn issue, you might try branching out and using different metaphors, or recommending different patterns of working. It's relatively cheap to try and maybe you'll land on something great.
-
-2. **Keep the prompt lean.** Remove things that aren't pulling their weight. Make sure to read the transcripts, not just the final outputs — if it looks like the skill is making the model waste a bunch of time doing things that are unproductive, you can try getting rid of the parts of the skill that are making it do that and seeing what happens.
-
-3. **Explain the why.** Try hard to explain the **why** behind everything you're asking the model to do. Today's LLMs are *smart*. They have good theory of mind and when given a good harness can go beyond rote instructions and really make things happen. Even if the feedback from the user is terse or frustrated, try to actually understand the task and why the user is writing what they wrote, and what they actually wrote, and then transmit this understanding into the instructions. If you find yourself writing ALWAYS or NEVER in all caps, or using super rigid structures, that's a yellow flag — if possible, reframe and explain the reasoning so that the model understands why the thing you're asking for is important. That's a more humane, powerful, and effective approach.
-
-4. **Look for repeated work across test cases.** Read the transcripts from the test runs and notice if the subagents all independently wrote similar helper scripts or took the same multi-step approach to something. If all 3 test cases resulted in the subagent writing a `create_docx.py` or a `build_chart.py`, that's a strong signal the skill should bundle that script. Write it once, put it in `scripts/`, and tell the skill to use it. This saves every future invocation from reinventing the wheel.
-
-This task is pretty important (we are trying to create billions a year in economic value here!) and your thinking time is not the blocker; take your time and really mull things over. I'd suggest writing a draft revision and then looking at it anew and making improvements. Really do your best to get into the head of the user and understand what they want and need.
-
-### The iteration loop
-
-After improving the skill:
-
-1. Apply your improvements to the skill
-2. Rerun all test cases into a new `iteration-<N+1>/` directory, including baseline runs. If you're creating a new skill, the baseline is always `without_skill` (no skill) — that stays the same across iterations. If you're improving an existing skill, use your judgment on what makes sense as the baseline: the original version the user came in with, or the previous iteration.
-3. Launch the reviewer with `--previous-workspace` pointing at the previous iteration
-4. Wait for the user to review and tell you they're done
-5. Read the new feedback, improve again, repeat
-
-Keep going until:
-- The user says they're happy
-- The feedback is all empty (everything looks good)
-- You're not making meaningful progress
-
----
-
-## Advanced: Blind comparison
-
-For situations where you want a more rigorous comparison between two versions of a skill (e.g., the user asks "is the new version actually better?"), there's a blind comparison system. Read `agents/comparator.md` and `agents/analyzer.md` for the details. The basic idea is: give two outputs to an independent agent without telling it which is which, and let it judge quality. Then analyze why the winner won.
-
-This is optional, requires subagents, and most users won't need it. The human review loop is usually sufficient.
-
----
-
-## Description Optimization
-
-The description field in SKILL.md frontmatter is the primary mechanism that determines whether Claude invokes a skill. After creating or improving a skill, offer to optimize the description for better triggering accuracy.
-
-### Step 1: Generate trigger eval queries
-
-Create 20 eval queries — a mix of should-trigger and should-not-trigger. Save as JSON:
-
-```json
-[
-  {"query": "the user prompt", "should_trigger": true},
-  {"query": "another prompt", "should_trigger": false}
-]
-```
-
-The queries must be realistic and something a Claude Code or Claude.ai user would actually type. Not abstract requests, but requests that are concrete and specific and have a good amount of detail. For instance, file paths, personal context about the user's job or situation, column names and values, company names, URLs. A little bit of backstory. Some might be in lowercase or contain abbreviations or typos or casual speech. Use a mix of different lengths, and focus on edge cases rather than making them clear-cut (the user will get a chance to sign off on them).
-
-Bad: `"Format this data"`, `"Extract text from PDF"`, `"Create a chart"`
-
-Good: `"ok so my boss just sent me this xlsx file (its in my downloads, called something like 'Q4 sales final FINAL v2.xlsx') and she wants me to add a column that shows the profit margin as a percentage. The revenue is in column C and costs are in column D i think"`
-
-For the **should-trigger** queries (8-10), think about coverage. You want different phrasings of the same intent — some formal, some casual. Include cases where the user doesn't explicitly name the skill or file type but clearly needs it. Throw in some uncommon use cases and cases where this skill competes with another but should win.
-
-For the **should-not-trigger** queries (8-10), the most valuable ones are the near-misses — queries that share keywords or concepts with the skill but actually need something different. Think adjacent domains, ambiguous phrasing where a naive keyword match would trigger but shouldn't, and cases where the query touches on something the skill does but in a context where another tool is more appropriate.
-
-The key thing to avoid: don't make should-not-trigger queries obviously irrelevant. "Write a fibonacci function" as a negative test for a PDF skill is too easy — it doesn't test anything. The negative cases should be genuinely tricky.
-
-### Step 2: Review with user
-
-Present the eval set to the user for review using the HTML template:
-
-1. Read the template from `assets/eval_review.html`
-2. Replace the placeholders:
-   - `__EVAL_DATA_PLACEHOLDER__` → the JSON array of eval items (no quotes around it — it's a JS variable assignment)
-   - `__SKILL_NAME_PLACEHOLDER__` → the skill's name
-   - `__SKILL_DESCRIPTION_PLACEHOLDER__` → the skill's current description
-3. Write to a temp file (e.g., `/tmp/eval_review_<skill-name>.html`) and open it: `open /tmp/eval_review_<skill-name>.html`
-4. The user can edit queries, toggle should-trigger, add/remove entries, then click "Export Eval Set"
-5. The file downloads to `~/Downloads/eval_set.json` — check the Downloads folder for the most recent version in case there are multiple (e.g., `eval_set (1).json`)
-
-This step matters — bad eval queries lead to bad descriptions.
-
-### Step 3: Run the optimization loop
-
-Tell the user: "This will take some time — I'll run the optimization loop in the background and check on it periodically."
-
-Save the eval set to the workspace, then run in the background:
-
-```bash
-python -m scripts.run_loop \
-  --eval-set <path-to-trigger-eval.json> \
-  --skill-path <path-to-skill> \
-  --model <model-id-powering-this-session> \
-  --max-iterations 5 \
-  --verbose
-```
-
-Use the model ID from your system prompt (the one powering the current session) so the triggering test matches what the user actually experiences.
-
-While it runs, periodically tail the output to give the user updates on which iteration it's on and what the scores look like.
-
-This handles the full optimization loop automatically. It splits the eval set into 60% train and 40% held-out test, evaluates the current description (running each query 3 times to get a reliable trigger rate), then calls Claude to propose improvements based on what failed. It re-evaluates each new description on both train and test, iterating up to 5 times. When it's done, it opens an HTML report in the browser showing the results per iteration and returns JSON with `best_description` — selected by test score rather than train score to avoid overfitting.
-
-### How skill triggering works
-
-Understanding the triggering mechanism helps design better eval queries. Skills appear in Claude's `available_skills` list with their name + description, and Claude decides whether to consult a skill based on that description. The important thing to know is that Claude only consults skills for tasks it can't easily handle on its own — simple, one-step queries like "read this PDF" may not trigger a skill even if the description matches perfectly, because Claude can handle them directly with basic tools. Complex, multi-step, or specialized queries reliably trigger skills when the description matches.
-
-This means your eval queries should be substantive enough that Claude would actually benefit from consulting a skill. Simple queries like "read file X" are poor test cases — they won't trigger skills regardless of description quality.
-
-### Step 4: Apply the result
-
-Take `best_description` from the JSON output and update the skill's SKILL.md frontmatter. Show the user before/after and report the scores.
-
----
-
-### Package and Present (only if `present_files` tool is available)
-
-Check whether you have access to the `present_files` tool. If you don't, skip this step. If you do, package the skill and present the .skill file to the user:
-
-```bash
-python -m scripts.package_skill <path/to/skill-folder>
-```
-
-After packaging, direct the user to the resulting `.skill` file path so they can install it.
-
----
-
-## Claude.ai-specific instructions
-
-In Claude.ai, the core workflow is the same (draft → test → review → improve → repeat), but because Claude.ai doesn't have subagents, some mechanics change. Here's what to adapt:
-
-**Running test cases**: No subagents means no parallel execution. For each test case, read the skill's SKILL.md, then follow its instructions to accomplish the test prompt yourself. Do them one at a time. This is less rigorous than independent subagents (you wrote the skill and you're also running it, so you have full context), but it's a useful sanity check — and the human review step compensates. Skip the baseline runs — just use the skill to complete the task as requested.
-
-**Reviewing results**: If you can't open a browser (e.g., Claude.ai's VM has no display, or you're on a remote server), skip the browser reviewer entirely. Instead, present results directly in the conversation. For each test case, show the prompt and the output. If the output is a file the user needs to see (like a .docx or .xlsx), save it to the filesystem and tell them where it is so they can download and inspect it. Ask for feedback inline: "How does this look? Anything you'd change?"
-
-**Benchmarking**: Skip the quantitative benchmarking — it relies on baseline comparisons which aren't meaningful without subagents. Focus on qualitative feedback from the user.
-
-**The iteration loop**: Same as before — improve the skill, rerun the test cases, ask for feedback — just without the browser reviewer in the middle. You can still organize results into iteration directories on the filesystem if you have one.
-
-**Description optimization**: This section requires the `claude` CLI tool (specifically `claude -p`) which is only available in Claude Code. Skip it if you're on Claude.ai.
-
-**Blind comparison**: Requires subagents. Skip it.
-
-**Packaging**: The `package_skill.py` script works anywhere with Python and a filesystem. On Claude.ai, you can run it and the user can download the resulting `.skill` file.
-
-**Updating an existing skill**: The user might be asking you to update an existing skill, not create a new one. In this case:
-- **Preserve the original name.** Note the skill's directory name and `name` frontmatter field -- use them unchanged. E.g., if the installed skill is `research-helper`, output `research-helper.skill` (not `research-helper-v2`).
-- **Copy to a writeable location before editing.** The installed skill path may be read-only. Copy to `/tmp/skill-name/`, edit there, and package from the copy.
-- **If packaging manually, stage in `/tmp/` first**, then copy to the output directory -- direct writes may fail due to permissions.
-
----
-
-## Cowork-Specific Instructions
-
-If you're in Cowork, the main things to know are:
-
-- You have subagents, so the main workflow (spawn test cases in parallel, run baselines, grade, etc.) all works. (However, if you run into severe problems with timeouts, it's OK to run the test prompts in series rather than parallel.)
-- You don't have a browser or display, so when generating the eval viewer, use `--static <output_path>` to write a standalone HTML file instead of starting a server. Then proffer a link that the user can click to open the HTML in their browser.
-- For whatever reason, the Cowork setup seems to disincline Claude from generating the eval viewer after running the tests, so just to reiterate: whether you're in Cowork or in Claude Code, after running tests, you should always generate the eval viewer for the human to look at examples before revising the skill yourself and trying to make corrections, using `generate_review.py` (not writing your own boutique html code). Sorry in advance but I'm gonna go all caps here: GENERATE THE EVAL VIEWER *BEFORE* evaluating inputs yourself. You want to get them in front of the human ASAP!
-- Feedback works differently: since there's no running server, the viewer's "Submit All Reviews" button will download `feedback.json` as a file. You can then read it from there (you may have to request access first).
-- Packaging works — `package_skill.py` just needs Python and a filesystem.
-- Description optimization (`run_loop.py` / `run_eval.py`) should work in Cowork just fine since it uses `claude -p` via subprocess, not a browser, but please save it until you've fully finished making the skill and the user agrees it's in good shape.
-- **Updating an existing skill**: The user might be asking you to update an existing skill, not create a new one. Follow the update guidance in the claude.ai section above.
-
----
-
-## Reference files
-
-The agents/ directory contains instructions for specialized subagents. Read them when you need to spawn the relevant subagent.
-
-- `agents/grader.md` — How to evaluate assertions against outputs
-- `agents/comparator.md` — How to do blind A/B comparison between two outputs
-- `agents/analyzer.md` — How to analyze why one version beat another
-
-The references/ directory has additional documentation:
-- `references/schemas.md` — JSON structures for evals.json, grading.json, etc.
-
----
-
-Repeating one more time the core loop here for emphasis:
-
-- Figure out what the skill is about
-- Draft or edit the skill
-- Run claude-with-access-to-the-skill on test prompts
-- With the user, evaluate the outputs:
-  - Create benchmark.json and run `eval-viewer/generate_review.py` to help the user review them
-  - Run quantitative evals
-- Repeat until you and the user are satisfied
-- Package the final skill and return it to the user.
-
-Please add steps to your TodoList, if you have such a thing, to make sure you don't forget. If you're in Cowork, please specifically put "Create evals JSON and run `eval-viewer/generate_review.py` so human can review test cases" in your TodoList to make sure it happens.
-
-Good luck!
+function updatePaymentUI() {
+  document.querySelectorAll('#payment-seg .seg-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.payment === currentPayment);
+  });
+}
+
+function selectPayment(method) {
+  // 檢查是否被強制匯款
+  if (wasForcedTransfer && method === '現場付款') return;
+  if (!isCashOptionEnabled() && method === '現場付款') return;
+  currentPayment = method;
+  updatePaymentUI();
+}
+
+/* ---- 主要重新渲染 ---- */
+function refreshAll() {
+  updateShipping();
+  renderAddons();
+  renderPromotions();
+  updateTotal();
+}
+
+/* ---- 商品數量 ---- */
+function changeQty(i, delta) {
+  const input = document.getElementById('qty_' + i);
+  const max = productsData[i].maxQty;
+  let val = Math.max(0, parseInt(input.value || 0) + delta);
+  if (max > 0) val = Math.min(val, max);
+  input.value = val;
+  refreshAll();
+}
+
+function onProductQtyChange(i) {
+  const input = document.getElementById('qty_' + i);
+  const max = productsData[i].maxQty;
+  let val = parseInt(input.value);
+  if (isNaN(val) || val < 0) val = 0;
+  if (max > 0 && val > max) val = max;
+  input.value = val;
+  refreshAll();
+}
+
+/* ---- 加購（贈品）邏輯 ---- */
+function parseGiftRules(rulesStr) {
+  if (!rulesStr) return [];
+  return rulesStr.split(',').map(r => {
+    const parts = r.split(':').map(s => s.trim());
+    if (parts.length < 3) return null;
+    return { type: parts[0], mode: parts[1], n: parseInt(parts[2]) || 1 };
+  }).filter(r => r);
+}
+
+function calcAddonForProduct(addon) {
+  const rules = parseGiftRules(addon.giftRules);
+  let autoGifted = 0, maxSelectable = 0;
+  const autoTypes = [], selectTypes = [];
+
+  rules.forEach(rule => {
+    let matchingQty = 0;
+    productsData.forEach((p, i) => {
+      if (p.type === rule.type) {
+        const qty = parseInt(document.getElementById('qty_' + i)?.value || 0);
+        if (qty > 0) matchingQty += qty;
+      }
+    });
+    if (rule.mode === 'auto') {
+      const gift = Math.floor(matchingQty / rule.n);
+      autoGifted += gift;
+      if (gift > 0) autoTypes.push({ type: rule.type, qty: matchingQty, gift, n: rule.n });
+    } else if (rule.mode === '選擇') {
+      const maxSel = Math.floor(matchingQty / rule.n);
+      maxSelectable += maxSel;
+      if (maxSel > 0) selectTypes.push({ type: rule.type, qty: matchingQty, max: maxSel });
+    }
+  });
+
+  let userSelected = addonSelections[addon.name] || 0;
+  userSelected = Math.max(0, Math.min(userSelected, maxSelectable));
+  if (addon.maxQty) userSelected = Math.min(userSelected, addon.maxQty);
+  addonSelections[addon.name] = userSelected;
+
+  return { autoGifted, maxSelectable, userSelected, totalGifted: autoGifted + userSelected, autoTypes, selectTypes };
+}
+
+function shouldShowAddon(addon) {
+  const cond = (addon.showCondition || 'always').trim();
+  if (cond === 'always') return true;
+  if (cond.startsWith('有')) {
+    const type = cond.substring(1);
+    return productsData.some((p, i) =>
+      p.type === type && parseInt(document.getElementById('qty_' + i)?.value || 0) > 0
+    );
+  }
+  return true;
+}
+
+function renderAddons() {
+  const grid = document.getElementById('addon-grid');
+  const label = document.getElementById('addon-section-label');
+
+  const anySelected = productsData.some((p, i) =>
+    parseInt(document.getElementById('qty_' + i)?.value || 0) > 0
+  );
+  if (!anySelected || addonsData.length === 0) {
+    grid.innerHTML = '';
+    label.style.display = 'none';
+    return;
+  }
+
+  let html = '', anyShown = false;
+  addonsData.forEach(addon => {
+    if (!shouldShowAddon(addon)) return;
+    const calc = calcAddonForProduct(addon);
+    const hasAuto = calc.autoGifted > 0;
+    const hasSelectable = calc.maxSelectable > 0;
+    if (!hasAuto && !hasSelectable) return;
+
+    anyShown = true;
+    let item = '<div class="addon-item"><div class="addon-head"><div class="addon-body">';
+    item += `<div class="addon-name">📦 ${addon.name}</div>`;
+    if (addon.description) item += `<div class="addon-desc">${addon.description}</div>`;
+    if (hasAuto) {
+      const autoDesc = calc.autoTypes.map(t => `${t.type} ${t.qty} 個贈 ${t.gift} 個`).join('、');
+      item += `<div class="addon-auto">✨ 自動贈送：${calc.autoGifted} 個（${autoDesc}）</div>`;
+    }
+    if (hasSelectable) {
+      const selectDesc = calc.selectTypes.map(t => t.type).join('、');
+      item += `
+        <div class="addon-selectable">
+          <div class="addon-selectable-prompt">有送禮需求嗎？選擇 ${selectDesc} 需要的紙袋數量</div>
+          <button class="q-btn" onclick="changeAddonQty('${addon.name}', -1)">－</button>
+          <input class="q-num" id="addon_${addon.name}" type="number" value="${calc.userSelected}" min="0" max="${calc.maxSelectable}" onchange="onAddonInputChange('${addon.name}')">
+          <button class="q-btn" onclick="changeAddonQty('${addon.name}', 1)">＋</button>
+          <span class="addon-limit-hint">最多 ${calc.maxSelectable} 個</span>
+        </div>`;
+    }
+    item += '</div></div></div>';
+    html += item;
+  });
+
+  grid.innerHTML = html;
+  label.style.display = anyShown ? 'flex' : 'none';
+}
+
+function changeAddonQty(addonName, delta) {
+  const input = document.getElementById('addon_' + addonName);
+  if (!input) return;
+  const max = parseInt(input.max) || 0;
+  let val = Math.max(0, parseInt(input.value || 0) + delta);
+  val = Math.min(val, max);
+  addonSelections[addonName] = val;
+  refreshAll();
+}
+
+function onAddonInputChange(addonName) {
+  const input = document.getElementById('addon_' + addonName);
+  if (!input) return;
+  const max = parseInt(input.max) || 0;
+  let val = parseInt(input.value);
+  if (isNaN(val) || val < 0) val = 0;
+  val = Math.min(val, max);
+  addonSelections[addonName] = val;
+  refreshAll();
+}
+
+/* ---- 優惠計算 ---- */
+function calcPromotions() {
+  const items = getSelectedItems();
+  const results = [];
+
+  promotionsData.forEach(promo => {
+    let qualifyQty = 0, qualifyAmount = 0, giftQty = 0, triggered = false;
+    let remaining = 0;
+
+    if (promo.conditionType === '滿件') {
+      const cps = promo.conditionProduct ? promo.conditionProduct.split(',').map(s => s.trim()) : [];
+      let matched = 0;
+      items.forEach(item => {
+        if (cps.length === 0 || cps.indexOf(item.name) >= 0) matched += item.qty;
+      });
+      qualifyQty = matched;
+      if (matched >= promo.conditionQty && promo.conditionQty > 0) {
+        triggered = true;
+        giftQty = promo.multipleTrigger
+          ? Math.floor(matched / promo.conditionQty) * promo.giftQty
+          : promo.giftQty;
+      } else {
+        remaining = promo.conditionQty - matched;
+      }
+    } else if (promo.conditionType === '滿額') {
+      const cps = promo.conditionProduct ? promo.conditionProduct.split(',').map(s => s.trim()) : [];
+      let matched = 0;
+      items.forEach(item => {
+        if (cps.length === 0 || cps.indexOf(item.name) >= 0) matched += (item.price || 0) * item.qty;
+      });
+      qualifyAmount = matched;
+      if (matched >= promo.conditionAmount && promo.conditionAmount > 0) {
+        triggered = true;
+        giftQty = promo.multipleTrigger
+          ? Math.floor(matched / promo.conditionAmount) * promo.giftQty
+          : promo.giftQty;
+      } else {
+        remaining = promo.conditionAmount - matched;
+      }
+    }
+
+    results.push({ promo, qualifyQty, qualifyAmount, giftQty, triggered, remaining });
+  });
+
+  return results;
+}
+
+function renderPromotions() {
+  const strip = document.getElementById('promo-strip');
+  const results = calcPromotions();
+
+  // 優先顯示已達標的優惠，其次接近門檻的
+  const triggered = results.find(r => r.triggered);
+  if (triggered) {
+    document.getElementById('promo-main').innerText = `🎉 ${triggered.promo.name} 已達標`;
+    document.getElementById('promo-sub').innerText = `贈送 ${triggered.promo.giftName} x ${triggered.giftQty}`;
+    strip.classList.add('show');
+    return;
+  }
+
+  let closeOne = null;
+  results.forEach(r => {
+    if (r.triggered) return;
+    const threshold = r.promo.progressThreshold || 0;
+    if (threshold > 0 && r.remaining > 0 && r.remaining <= threshold) {
+      if (!closeOne || r.remaining < closeOne.remaining) closeOne = r;
+    }
+  });
+
+  if (closeOne) {
+    const unit = closeOne.promo.conditionType === '滿額' ? '元' : '個';
+    document.getElementById('promo-main').innerText = `再買 ${closeOne.remaining} ${unit}就達優惠`;
+    document.getElementById('promo-sub').innerText = closeOne.promo.name;
+    strip.classList.add('show');
+  } else {
+    strip.classList.remove('show');
+  }
+}
+
+/* ---- 運送方式（依商品動態） ---- */
+function updateShipping() {
+  const methods = new Set();
+  productsData.forEach((p, i) => {
+    if (parseInt(document.getElementById('qty_' + i)?.value || 0) > 0) {
+      (p.shipping || '').split(',').forEach(m => methods.add(m.trim()));
+    }
+  });
+  if (methods.size === 0) {
+    productsData.forEach(p => (p.shipping || '').split(',').forEach(m => methods.add(m.trim())));
+  }
+  const select = document.getElementById('f-pickup');
+  const prev = select.value;
+  select.innerHTML = '';
+  let foundPrev = false;
+  methods.forEach(m => {
+    if (!m) return;
+    const opt = document.createElement('option');
+    opt.value = m;
+    opt.innerText = m;
+    if (m === prev) { opt.selected = true; foundPrev = true; }
+    select.appendChild(opt);
+  });
+  if (!foundPrev && select.options.length > 0) select.selectedIndex = 0;
+  onShippingChange();
+}
+
+function onShippingChange() {
+  const v = document.getElementById('f-pickup').value;
+  const show = v && v !== '現場取貨';
+  document.getElementById('address-group').style.display = show ? 'block' : 'none';
+}
+
+function getSelectedItems() {
+  return productsData.map((p, i) => ({
+    name: p.name, price: p.price, type: p.type,
+    qty: parseInt(document.getElementById('qty_' + i)?.value || 0)
+  })).filter(it => it.qty > 0);
+}
+
+/* ---- 訂單摘要 ---- */
+function updateTotal() {
+  let subtotal = 0, itemsHtml = '', hasItem = false;
+  productsData.forEach((p, i) => {
+    const qty = parseInt(document.getElementById('qty_' + i)?.value || 0);
+    if (qty > 0) {
+      hasItem = true;
+      const sub = p.price * qty;
+      subtotal += sub;
+      itemsHtml += `<div class="sum-row"><span class="label">${p.name} x${qty}</span><span class="val">$${sub}</span></div>`;
+    }
+  });
+
+  const giftsHtml = buildGiftRowsHtml();
+
+  document.getElementById('summary-block').style.display = hasItem ? 'block' : 'none';
+  document.getElementById('summary-items').innerHTML = itemsHtml;
+  document.getElementById('summary-gifts').innerHTML = giftsHtml;
+  document.getElementById('sum-total').innerText = '$' + subtotal;
+
+  // 付款方式顯示判斷
+  const paymentBlock = document.getElementById('payment-block');
+  paymentBlock.style.display = hasItem ? 'block' : 'none';
+
+  // 強制匯款邏輯
+  const threshold = parseInt(settingsData['強制匯款門檻']) || 0;
+  const shouldForce = !isCashOptionEnabled() || (threshold > 0 && subtotal >= threshold);
+
+  if (shouldForce) {
+    currentPayment = '匯款';
+    wasForcedTransfer = true;
+    document.getElementById('payment-hint').style.display = isCashOptionEnabled() ? 'block' : 'none';
+  } else {
+    if (wasForcedTransfer) {
+      currentPayment = '現場付款';
+      wasForcedTransfer = false;
+    }
+    document.getElementById('payment-hint').style.display = 'none';
+  }
+  updatePaymentUI();
+
+  // 強制匯款時讓現場付款按鈕看起來 disable
+  document.querySelectorAll('#payment-seg .seg-btn').forEach(btn => {
+    if (btn.dataset.payment === '現場付款') {
+      btn.style.opacity = shouldForce ? '0.4' : '1';
+      btn.style.cursor = shouldForce ? 'not-allowed' : 'pointer';
+    }
+  });
+}
+
+function buildGiftRowsHtml() {
+  let html = '';
+  addonsData.forEach(addon => {
+    if (!shouldShowAddon(addon)) return;
+    const calc = calcAddonForProduct(addon);
+    if (calc.totalGifted > 0) {
+      html += `<div class="sum-row gift"><span class="label">🎁 ${addon.name} x${calc.totalGifted}（贈品）</span><span class="val">—</span></div>`;
+    }
+  });
+  calcPromotions().forEach(r => {
+    if (r.triggered && r.giftQty > 0) {
+      html += `<div class="sum-row gift"><span class="label">🎁 ${r.promo.giftName} x${r.giftQty}（${r.promo.name}）</span><span class="val">—</span></div>`;
+    }
+  });
+  return html;
+}
+
+/* ---- 確認 + 送出 ---- */
+function showConfirm() {
+  const name = document.getElementById('f-name').value.trim();
+  const tel = document.getElementById('f-tel').value.trim();
+  if (!name) { alert('請填寫姓名'); return; }
+  if (!/^09\d{8}$/.test(tel)) { alert('手機號碼格式不正確，請輸入 09 開頭的 10 位數字'); return; }
+  const items = getSelectedItems();
+  if (items.length === 0) { alert('請至少選擇一項商品'); return; }
+
+  const shipping = document.getElementById('f-pickup').value;
+  const address = document.getElementById('f-address').value.trim();
+  const needAddress = shipping && shipping !== '現場取貨';
+  if (needAddress && !address) { alert('請填寫收件地址'); return; }
+
+  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+  const note = document.getElementById('f-note').value.trim();
+
+  const giftLines = [];
+  addonsData.forEach(addon => {
+    if (!shouldShowAddon(addon)) return;
+    const calc = calcAddonForProduct(addon);
+    if (calc.totalGifted > 0) giftLines.push(`${addon.name} x${calc.totalGifted}（贈品）`);
+  });
+  calcPromotions().forEach(r => {
+    if (r.triggered && r.giftQty > 0) giftLines.push(`${r.promo.giftName} x${r.giftQty}（${r.promo.name}）`);
+  });
+
+  const itemsDisplay = items.map(i => i.name + ' x' + i.qty).join(' / ');
+  const giftsDisplay = giftLines.length > 0 ? ' + 🎁 ' + giftLines.join('、') : '';
+
+  let html = '';
+  html += `<div class="confirm-line"><span class="lbl">姓名</span><span class="val">${name}</span></div>`;
+  html += `<div class="confirm-line"><span class="lbl">電話</span><span class="val">${tel}</span></div>`;
+  html += `<div class="confirm-line"><span class="lbl">商品</span><span class="val">${itemsDisplay}${giftsDisplay}</span></div>`;
+  html += `<div class="confirm-line"><span class="lbl">合計</span><span class="val" style="color:var(--orange);font-weight:700">$${subtotal}</span></div>`;
+  html += `<div class="confirm-line"><span class="lbl">取貨方式</span><span class="val">${shipping}</span></div>`;
+  if (address) html += `<div class="confirm-line"><span class="lbl">地址</span><span class="val">${address}</span></div>`;
+  html += `<div class="confirm-line"><span class="lbl">付款方式</span><span class="val">${currentPayment}</span></div>`;
+  if (note) html += `<div class="confirm-line"><span class="lbl">備註</span><span class="val">${note}</span></div>`;
+
+  document.getElementById('conf-icon').innerText = '📝';
+  document.getElementById('conf-title').innerText = '訂單確認';
+  document.getElementById('conf-sub').innerText = '請確認以下資料後送出';
+  document.getElementById('conf-lines').innerHTML = html;
+  document.getElementById('conf-orderid').innerText = '';
+  document.getElementById('conf-submit-btn').style.display = 'block';
+  document.getElementById('conf-submit-btn').disabled = false;
+  document.getElementById('conf-submit-btn').innerText = '確認並送出';
+  document.getElementById('conf-back-btn').style.display = 'block';
+  document.getElementById('confirm-overlay').classList.add('show');
+}
+
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('show');
+}
+
+async function submitOrder() {
+  const btn = document.getElementById('conf-submit-btn');
+  btn.disabled = true;
+  btn.innerText = '傳送中...';
+
+  const items = getSelectedItems();
+  let dynStr = '';
+  fieldsData.forEach(f => {
+    const v = f.type === 'text'
+      ? (document.getElementsByName(f.name)[0]?.value || '')
+      : Array.from(document.querySelectorAll(`input[name="${f.name}"]:checked`)).map(el => el.value).join(', ');
+    dynStr += `${f.name}: ${v}\n`;
+  });
+
+  const payload = {
+    action: 'submitOrder',
+    name: document.getElementById('f-name').value.trim(),
+    tel: document.getElementById('f-tel').value.trim(),
+    items,
+    payment: currentPayment,
+    shipping: document.getElementById('f-pickup').value,
+    address: document.getElementById('f-address').value.trim(),
+    dyn: dynStr,
+    note: document.getElementById('f-note').value.trim(),
+    addonSelections,
+    lineUserId,
+    appVersion: APP_VERSION
+  };
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    if (result.status === 'OK') {
+      document.getElementById('conf-icon').innerText = '🎉';
+      document.getElementById('conf-title').innerText = '訂單已送出！';
+      document.getElementById('conf-sub').innerHTML = '將透過 LINE 收到確認通知<br>感謝支持，期待與您相見 🍪';
+      if (result.orderId) {
+        document.getElementById('conf-orderid').innerText = '訂單編號 ' + result.orderId;
+      }
+      document.getElementById('conf-submit-btn').style.display = 'none';
+      document.getElementById('conf-back-btn').innerText = '關閉視窗';
+      document.getElementById('conf-back-btn').style.background = 'var(--orange)';
+      document.getElementById('conf-back-btn').style.color = '#fff';
+      document.getElementById('conf-back-btn').onclick = () => liff.closeWindow();
+      setTimeout(() => liff.closeWindow(), 4000);
+    } else {
+      throw new Error(result.message || '未知錯誤');
+    }
+  } catch (e) {
+    alert('送出失敗：' + e.message);
+    btn.disabled = false;
+    btn.innerText = '確認並送出';
+  }
+}
+
+window.onload = init;
+</script>
+
+</body>
+</html>
