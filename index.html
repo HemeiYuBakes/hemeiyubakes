@@ -352,36 +352,15 @@ body{font-family:'LINE Seed Sans TW',-apple-system,'PingFang TC','Microsoft Jhen
   <!-- 訂購須知頁 -->
   <div id="page-notice" class="scroll-body page">
     <div class="page-hero">
-      <div class="page-title">訂購須知</div>
-      <div class="page-sub">下單前請詳細閱讀</div>
+      <div class="page-title" id="notice-title">訂購須知</div>
+      <div class="page-sub" id="notice-sub">下單前請詳細閱讀</div>
     </div>
     <div class="highlight-card">
-      <div class="hc-label">⏰ 重要時間</div>
-      <div class="hc-body">每週製作有限<br>建議提早下單避免向隅</div>
+      <div class="hc-label" id="notice-hl-label">⏰ 重要時間</div>
+      <div class="hc-body" id="notice-hl-body">每週製作有限<br>建議提早下單避免向隅</div>
     </div>
-    <div class="accordion-stack">
-      <div class="acc-item">
-        <div class="acc-head" onclick="tog(this)"><span class="acc-head-title">🚚 取貨方式</span><span class="acc-icon">＋</span></div>
-        <div class="acc-body">現場取貨：彰化縣和美鎮，詳細地址於確認訊息提供。<br>宅配到府：黑貓宅急便，運費依重量計算。</div>
-      </div>
-      <div class="acc-item">
-        <div class="acc-head" onclick="tog(this)"><span class="acc-head-title">💳 付款方式</span><span class="acc-icon">＋</span></div>
-        <div class="acc-body">現場取貨：取貨時現場付款或事前匯款均可。<br>宅配到府：請於收到訂單確認訊息後完成匯款，匯款帳號將於確認訊息中提供。</div>
-      </div>
-      <div class="acc-item">
-        <div class="acc-head" onclick="tog(this)"><span class="acc-head-title">⚠️ 過敏原標示</span><span class="acc-icon">＋</span></div>
-        <div class="acc-body">本產品含：蛋、奶、杏仁、麥（麩質）。於同一環境製作，無法保證完全無交叉污染，對堅果嚴重過敏者請謹慎。</div>
-      </div>
-      <div class="acc-item">
-        <div class="acc-head" onclick="tog(this)"><span class="acc-head-title">🔄 退換貨說明</span><span class="acc-icon">＋</span></div>
-        <div class="acc-body">食品類商品一經拆封恕不接受退換。若收到商品有明顯瑕疵，請於收貨當日拍照聯繫客服處理。</div>
-      </div>
-      <div class="acc-item">
-        <div class="acc-head" onclick="tog(this)"><span class="acc-head-title">📦 保存方式</span><span class="acc-icon">＋</span></div>
-        <div class="acc-body">請置於陰涼乾燥處，避免陽光直射。開封後請盡速食用，以密封袋保存。賞味期限為製造日起 30 天。</div>
-      </div>
-    </div>
-    <div class="no-additive">餅乾無添加防腐劑，請注意保存期限喔。</div>
+    <div class="accordion-stack" id="notice-accordion"></div>
+    <div class="no-additive" id="notice-footer">餅乾無添加防腐劑，請注意保存期限喔。</div>
   </div>
 
   <!-- 品牌故事頁 -->
@@ -606,6 +585,9 @@ async function init() {
       document.getElementById('conf-icon').style.display = 'none';
     }
 
+    // 訂購須知頁內容
+    renderNoticePage();
+
     // 故事頁內容
     renderStoryPage();
 
@@ -644,6 +626,37 @@ async function init() {
   } catch (e) {
     showError('錯誤：' + e.message);
   }
+}
+
+function renderNoticePage() {
+  const s = settingsData;
+  const get = (key, fallback) => (s[key] && String(s[key]).trim()) || fallback;
+  
+  document.getElementById('notice-title').innerText = get('訂購須知_頁標題', '訂購須知');
+  document.getElementById('notice-sub').innerText = get('訂購須知_頁副標', '下單前請詳細閱讀');
+  document.getElementById('notice-hl-label').innerText = get('訂購須知_重點標', '⏰ 重要時間');
+  document.getElementById('notice-hl-body').innerHTML = get('訂購須知_重點文', '每週製作有限<br>建議提早下單避免向隅');
+  document.getElementById('notice-footer').innerText = get('訂購須知_結尾', '餅乾無添加防腐劑，請注意保存期限喔。');
+  
+  const defaults = [
+    { t: '🚚 取貨方式', b: '現場取貨：彰化縣和美鎮，詳細地址於確認訊息提供。<br>宅配到府：黑貓宅急便，運費依重量計算。' },
+    { t: '💳 付款方式', b: '現場取貨：取貨時現場付款或事前匯款均可。<br>宅配到府：請於收到訂單確認訊息後完成匯款，匯款帳號將於確認訊息中提供。' },
+    { t: '⚠️ 過敏原標示', b: '本產品含：蛋、奶、杏仁、麥（麩質）。於同一環境製作，無法保證完全無交叉污染，對堅果嚴重過敏者請謹慎。' },
+    { t: '🔄 退換貨說明', b: '食品類商品一經拆封恕不接受退換。若收到商品有明顯瑕疵，請於收貨當日拍照聯繫客服處理。' },
+    { t: '📦 保存方式', b: '請置於陰涼乾燥處，避免陽光直射。開封後請盡速食用，以密封袋保存。賞味期限為製造日起 30 天。' }
+  ];
+  
+  let html = '';
+  for (let i = 1; i <= 5; i++) {
+    const title = get('訂購須知_FAQ' + i + '_標', defaults[i-1].t);
+    const body = get('訂購須知_FAQ' + i + '_文', defaults[i-1].b);
+    html += `
+      <div class="acc-item">
+        <div class="acc-head" onclick="tog(this)"><span class="acc-head-title">${title}</span><span class="acc-icon">＋</span></div>
+        <div class="acc-body">${body}</div>
+      </div>`;
+  }
+  document.getElementById('notice-accordion').innerHTML = html;
 }
 
 function renderStoryPage() {
