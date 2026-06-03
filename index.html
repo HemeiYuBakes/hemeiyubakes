@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>和美小玉家</title>
 
-<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js" async></script>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js" defer></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -320,7 +320,7 @@ body{font-family:-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;bac
 <div class="version-tag" id="version-tag"></div>
 
 <script>
-const APP_VERSION='3.3.0';
+const APP_VERSION='3.4.0';
 const LIFF_ID='2009988690-V5uuqIVX';
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
 let pageData=null,lineUserId='',qtys={},addonSelections={};
@@ -538,7 +538,7 @@ function sw(p){
   document.getElementById('page-'+p).scrollTop=0;
 }
 function tog(el){const b=el.nextElementSibling,ic=el.querySelector('.acc-icon');b.classList.toggle('open');ic.classList.toggle('open');ic.textContent=b.classList.contains('open')?'－':'＋';}
-window.addEventListener('load', init);
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
