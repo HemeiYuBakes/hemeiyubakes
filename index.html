@@ -209,7 +209,7 @@ body{font-family:'LINE Seed Sans TW',-apple-system,'PingFang TC','Microsoft Jhen
 .story-num{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--orange);margin-bottom:6px}
 .story-text{font-size:12px;color:var(--text);line-height:1.8;font-weight:300}
 .story-text strong{font-weight:500}
-.story-illus{width:90px;flex-shrink:0}
+.story-illus{width:var(--story-illus-w,90px);flex-shrink:0}
 .story-illus img{width:100%;height:auto;display:block}
 .story-footer{margin:0 20px 24px;text-align:center}
 .story-footer-title{font-size:13px;font-weight:700;color:var(--orange);margin-bottom:3px}
@@ -673,6 +673,10 @@ function renderStoryPage() {
   document.getElementById('story-section-label').innerText = get('故事頁_章節標題', '小玉家的故事');
   document.getElementById('story-footer-title').innerText = get('故事頁_結尾標', '用心製作，無添加防腐劑');
   document.getElementById('story-footer-sub').innerText = get('故事頁_結尾副', '每一片都是媽媽味道的延續');
+
+  // 插圖大小(預設 90px)
+  const illusW = parseInt(get('故事頁_插圖寬度', '90')) || 90;
+  document.documentElement.style.setProperty('--story-illus-w', illusW + 'px');
 
   const defaults = [
     { num: '01 — 起點', text: '2005 年，為了做點心給孩子們吃，一台小烤箱出現在<strong>小玉媽媽的廚房</strong>。這台充滿愛的小烤箱，烤出了我們記憶中的香氣。', img: 'https://hemeiyubakes.github.io/hemeiyubakes/assets/%E5%B0%8F%E6%99%82%E5%80%99%E5%AA%BD%E5%AA%BD%E7%83%A4%E9%A4%85%E4%B9%BE%E7%B5%A6%E6%88%91%E5%80%91%E5%90%83.svg' },
