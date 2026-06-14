@@ -148,9 +148,10 @@
     <div class="card">
       <h2>客戶資料</h2>
       <div class="row">
-        <label>📞 電話 <span style="color:#c33">*</span></label>
+        <label>📞 電話 <span style="color:#888;font-weight:normal;font-size:11px">（選填）</span></label>
         <div class="row-flex">
           <input type="tel" id="phone" placeholder="0912-345-678" style="flex:1">
+          <button class="small outline" onclick="fillFriend()" style="flex:0 0 auto" title="一鍵填入「熟客」">熟客</button>
           <button class="small" onclick="lookupCustomer()" style="flex:0 0 auto">查歷史</button>
         </div>
         <div id="customerInfo"></div>
@@ -491,6 +492,11 @@ function updateTotal() {
   document.getElementById('subtotalGifts').innerHTML = buildGiftRowsHtml();
   document.getElementById('totalAmt').innerText = subtotal + ' 元';
 }
+function fillFriend() {
+  document.getElementById('phone').value = '熟客';
+  document.getElementById('customerInfo').innerHTML = '<div class="hint" style="color:#888;font-size:12px;margin-top:4px">已標記為熟客</div>';
+}
+
 async function lookupCustomer() {
   const phone = document.getElementById('phone').value.trim();
   const box = document.getElementById('customerInfo');
@@ -518,7 +524,7 @@ async function submitOrder() {
   const shipping = document.getElementById('shippingSelect').value;
   const payment = document.getElementById('paymentSelect').value;
   const note = document.getElementById('note').value.trim();
-  if (!name || !phone) { msg.textContent = '姓名與電話為必填'; return; }
+  if (!name) { msg.textContent = '姓名為必填'; return; }
   if (!orderSource) { msg.textContent = '請選擇訂單來源'; return; }
   if (shipping !== '現場取貨' && !address) { msg.textContent = '宅配需要填寫地址'; return; }
   const items = getSelectedItems();
