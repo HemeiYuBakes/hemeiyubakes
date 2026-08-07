@@ -82,7 +82,9 @@
   .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 4px; }
   .calendar-weekdays > div { text-align: center; padding: 6px 2px; background: #f0f0f0; font-size: 12px; font-weight: bold; color: #666; border-radius: 4px; }
   .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
-  .day-cell { min-height: 80px; background: #fafafa; border-radius: 4px; padding: 4px; font-size: 12px; cursor: pointer; transition: background 0.15s; border: 1px solid transparent; }
+  .day-cell { min-height: 100px; background: #fafafa; border-radius: 4px; padding: 4px; font-size: 12px; cursor: pointer; transition: background 0.15s; border: 1px solid transparent; display: flex; flex-direction: column; }
+  .day-capacity { margin-top: auto; padding-top: 3px; border-top: 1px dashed #ddd; }
+  .cap-line { font-size: 9px; line-height: 1.3; font-weight: bold; }
   .day-cell.other-month { opacity: 0.35; }
   .day-cell.today { background: #fff3e0; border-color: #ff9800; }
   .day-cell.target-mode { background: #e3f2fd; border-color: #1976d2; cursor: cell; }
@@ -289,9 +291,28 @@ async function loadData() {
     productsData = data.products || [];
     addonsData = data.addons || [];
     promotionsData = data.promotions || [];
+    if (data.settings) applyInitSettings(data.settings);
     renderProducts();
     refreshAll();
   } catch (e) { alert('載入失敗：' + e.message); }
+}
+
+function applyInitSettings(s) {
+  // 訂單來源選項動態化
+  var sourceStr = s['訂單來源選項'];
+  if (sourceStr) {
+    var sources = String(sourceStr).split(',').map(x => x.trim()).filter(x => x);
+    const sel = document.getElementById('orderSource');
+    if (sel) {
+      sel.innerHTML = '<option value="">請選擇</option>';
+      sources.forEach(src => {
+        const opt = document.createElement('option');
+        opt.value = src;
+        opt.textContent = src;
+        sel.appendChild(opt);
+      });
+    }
+  }
 }
 function renderProducts() {
   const grid = document.getElementById('productGrid');
@@ -634,7 +655,27 @@ function renderCalendar() {
       if (o.pickupConfirmed) chipCls = ' confirmed';
       chips += `<div class="day-order-chip${chipCls}" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}">${idShort} ${o.name}</div>`;
     });
-    html += `<div class="${classes.join(' ')}" onclick="onDayClick('${dateStr}')"><div class="day-number">${dayNum}</div><div class="day-orders">${chips}</div></div>`;
+          // 產量顯示
+      let capacityHtml = '';
+      const load = (scheduleData.dailyLoad && scheduleData.dailyLoad[dateStr]) || {};
+      const caps = scheduleData.dailyCapacity || {};
+      const totalCap = scheduleData.totalCapacity || 0;
+      let totalCur = 0;
+      Object.keys(load).forEach(f => { totalCur += load[f] || 0; });
+      Object.keys(caps).forEach(flavor => {
+        const cur = load[flavor] || 0;
+        const max = caps[flavor];
+        if (!max) return;
+        const percent = Math.round(cur / max * 100);
+        const color = percent > 100 ? '#c00' : percent > 85 ? '#c33' : percent > 60 ? '#f80' : '#4a4';
+        capacityHtml += `<div class="cap-line" style="color:${color}">${flavor} ${cur}/${max}</div>`;
+      });
+      if (totalCap) {
+        const tPercent = Math.round(totalCur / totalCap * 100);
+        const tColor = tPercent > 100 ? '#c00' : tPercent > 85 ? '#c33' : tPercent > 60 ? '#f80' : '#4a4';
+        capacityHtml += `<div class="cap-line" style="color:${tColor};border-top:1px dotted #ccc;padding-top:2px;margin-top:2px">總 ${totalCur}/${totalCap}</div>`;
+      }
+      html += `<div class="${classes.join(' ')}" onclick="onDayClick('${dateStr}')"><div class="day-number">${dayNum}</div><div class="day-orders">${chips}</div><div class="day-capacity">${capacityHtml}</div></div>`;
   }
   grid.innerHTML = html;
 }
@@ -667,7 +708,8 @@ function renderUnscheduled() {
     const idShort = o.orderId.slice(-3);
     const shipTag = o.shipping === '現場取貨' ? `<span class="order-card-tag pickup">${o.shipping}</span>` : `<span class="order-card-tag ship">${o.shipping}</span>`;
     const sel = (selectedOrderId === o.orderId) ? ' selected' : '';
-    return `<div class="order-card${sel}" onclick="selectOrder('${o.orderId}')"><div class="order-card-header"><span class="order-card-id">#${idShort}</span><span style="display:flex;gap:6px;align-items:center">${shipTag}<span class="info-btn-sm" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')">ⓘ</span></span></div><div class="order-card-name">${o.name}</div><div class="order-card-items">${o.items.split('\\n').slice(0, 2).join('｜')}</div></div>`;
+    const noteBadge = o.scheduleNote ? `<div style="font-size:11px;color:#D32F2F;background:#fff5f5;padding:4px 8px;border-radius:4px;margin-top:4px">📝 ${o.scheduleNote}</div>` : '';
+    return `<div class="order-card${sel}" onclick="selectOrder('${o.orderId}')"><div class="order-card-header"><span class="order-card-id">#${idShort}</span><span style="display:flex;gap:6px;align-items:center">${shipTag}<span class="info-btn-sm" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')">ⓘ</span></span></div><div class="order-card-name">${o.name}</div><div class="order-card-items">${o.items.split('\\n').slice(0, 2).join('｜')}</div>${noteBadge}</div>`;
   }).join('');
 }
 function selectOrder(orderId) {
