@@ -89,6 +89,10 @@
   .day-cell.today { background: #fff3e0; border-color: #ff9800; }
   .day-cell.target-mode { background: #e3f2fd; border-color: #1976d2; cursor: cell; }
   .day-cell.target-mode:hover { background: #bbdefb; }
+  .day-cell.load-low { background: #eef7ee; }
+  .day-cell.load-mid { background: #fdf6e3; }
+  .day-cell.load-high { background: #fdeceb; }
+  .day-cell.load-over { background: #fbdedb; }
   .day-number { font-weight: bold; color: #555; }
   .day-cell.today .day-number { color: #e65100; }
   .day-orders { margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }
@@ -228,6 +232,15 @@
       <button style="flex:1" onclick="confirmSchedule()">確定排定</button>
     </div>
     <div id="periodModalMsg" class="error"></div>
+  </div>
+</div>
+
+<!-- 當日訂單瀏覽 modal -->
+<div id="dayDetailModal" class="modal-overlay" onclick="closeDayDetail(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeDayDetail()">✕</button>
+    <h2 id="dayDetailTitle" style="margin-bottom:12px"></h2>
+    <div class="order-list" id="dayDetailList"></div>
   </div>
 </div>
 
@@ -655,27 +668,29 @@ function renderCalendar() {
       if (o.pickupConfirmed) chipCls = ' confirmed';
       chips += `<div class="day-order-chip${chipCls}" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}">${idShort} ${o.name}</div>`;
     });
-          // 產量顯示
-      let capacityHtml = '';
-      const load = (scheduleData.dailyLoad && scheduleData.dailyLoad[dateStr]) || {};
-      const caps = scheduleData.dailyCapacity || {};
-      const totalCap = scheduleData.totalCapacity || 0;
-      let totalCur = 0;
-      Object.keys(load).forEach(f => { totalCur += load[f] || 0; });
-      Object.keys(caps).forEach(flavor => {
-        const cur = load[flavor] || 0;
-        const max = caps[flavor];
-        if (!max) return;
-        const percent = Math.round(cur / max * 100);
-        const color = percent > 100 ? '#c00' : percent > 85 ? '#c33' : percent > 60 ? '#f80' : '#4a4';
-        capacityHtml += `<div class="cap-line" style="color:${color}">${flavor} ${cur}/${max}</div>`;
-      });
-      if (totalCap) {
-        const tPercent = Math.round(totalCur / totalCap * 100);
-        const tColor = tPercent > 100 ? '#c00' : tPercent > 85 ? '#c33' : tPercent > 60 ? '#f80' : '#4a4';
-        capacityHtml += `<div class="cap-line" style="color:${tColor};border-top:1px dotted #ccc;padding-top:2px;margin-top:2px">總 ${totalCur}/${totalCap}</div>`;
-      }
-      html += `<div class="${classes.join(' ')}" onclick="onDayClick('${dateStr}')"><div class="day-number">${dayNum}</div><div class="day-orders">${chips}</div><div class="day-capacity">${capacityHtml}</div></div>`;
+    // 產量 -> 百分比決定淡色背景(不顯示文字數字,避免畫面混亂)
+    const load = (scheduleData.dailyLoad && scheduleData.dailyLoad[dateStr]) || {};
+    const caps = scheduleData.dailyCapacity || {};
+    const totalCap = scheduleData.totalCapacity || 0;
+    let totalCur = 0;
+    Object.keys(load).forEach(f => { totalCur += load[f] || 0; });
+    let maxPercent = 0;
+    Object.keys(caps).forEach(flavor => {
+      const cur = load[flavor] || 0;
+      const max = caps[flavor];
+      if (!max) return;
+      const percent = cur / max * 100;
+      if (percent > maxPercent) maxPercent = percent;
+    });
+    if (totalCap) {
+      const tPercent = totalCur / totalCap * 100;
+      if (tPercent > maxPercent) maxPercent = tPercent;
+    }
+    if (maxPercent > 100) classes.push('load-over');
+    else if (maxPercent > 85) classes.push('load-high');
+    else if (maxPercent > 60) classes.push('load-mid');
+    else if (maxPercent > 0) classes.push('load-low');
+    html += `<div class="${classes.join(' ')}" onclick="onDayClick('${dateStr}')"><div class="day-number">${dayNum}</div><div class="day-orders">${chips}</div></div>`;
   }
   grid.innerHTML = html;
 }
@@ -686,13 +701,64 @@ function formatDateStr(d) {
   return `${y}-${m}-${dd}`;
 }
 function onDayClick(dateStr) {
-  if (!selectedOrderId) return;
-  const order = findOrder(selectedOrderId);
-  if (!order) return;
-  pendingDate = dateStr;
-  document.getElementById('periodModalInfo').innerHTML = `將「${order.name}」（${order.orderId.slice(-3)}）<br>排定到 <b>${dateStr}</b>`;
-  document.getElementById('periodModalMsg').textContent = '';
-  document.getElementById('periodModal').classList.add('show');
+  if (selectedOrderId) {
+    const order = findOrder(selectedOrderId);
+    if (!order) return;
+    pendingDate = dateStr;
+    document.getElementById('periodModalInfo').innerHTML = `將「${order.name}」（${order.orderId.slice(-3)}）<br>排定到 <b>${dateStr}</b>`;
+    document.getElementById('periodModalMsg').textContent = '';
+    document.getElementById('periodModal').classList.add('show');
+    return;
+  }
+  openDayDetail(dateStr);
+}
+
+function openDayDetail(dateStr) {
+  const orders = (scheduleData.scheduled || []).filter(o => o.pickupDate === dateStr);
+  document.getElementById('dayDetailTitle').innerText = dateStr + ' 排定訂單';
+
+  if (orders.length === 0) {
+    document.getElementById('dayDetailList').innerHTML = '<div class="hint" style="padding:10px 0">這天還沒有排定的訂單</div>';
+  } else {
+    let html = orders.map(o => {
+      const idShort = o.orderId.slice(-3);
+      const shipTag = o.shipping === '現場取貨' ? `<span class="order-card-tag pickup">${o.shipping}</span>` : `<span class="order-card-tag ship">${o.shipping}</span>`;
+      const confirmedTag = o.pickupConfirmed ? `<span class="order-card-tag" style="background:#e8f5e9;color:#4caf50">已確認</span>` : '';
+      const noteBadge = o.scheduleNote ? `<div style="font-size:11px;color:#D32F2F;background:#fff5f5;padding:4px 8px;border-radius:4px;margin-top:4px">📝 ${o.scheduleNote}</div>` : '';
+      return `<div class="order-card" onclick="closeDayDetail();openOrderDetail('${o.orderId}')"><div class="order-card-header"><span class="order-card-id">#${idShort}</span><span style="display:flex;gap:6px;align-items:center">${shipTag}${confirmedTag}</span></div><div class="order-card-name">${o.name}${o.pickupPeriod ? '　' + o.pickupPeriod : ''}</div><div class="order-card-items">${o.items.split('\n').join('｜')}</div>${noteBadge}</div>`;
+    }).join('');
+
+    // 當日產量統計
+    const load = (scheduleData.dailyLoad && scheduleData.dailyLoad[dateStr]) || {};
+    const caps = scheduleData.dailyCapacity || {};
+    const totalCap = scheduleData.totalCapacity || 0;
+    let totalCur = 0;
+    Object.keys(load).forEach(f => { totalCur += load[f] || 0; });
+    let capLines = '';
+    Object.keys(caps).forEach(flavor => {
+      const cur = load[flavor] || 0;
+      const max = caps[flavor];
+      if (!max) return;
+      const percent = Math.round(cur / max * 100);
+      const color = percent > 100 ? '#c00' : percent > 85 ? '#c33' : percent > 60 ? '#f80' : '#4a4';
+      capLines += `<div style="color:${color};font-size:12px;font-weight:bold">${flavor}　${cur} / ${max}</div>`;
+    });
+    if (totalCap) {
+      const tPercent = Math.round(totalCur / totalCap * 100);
+      const tColor = tPercent > 100 ? '#c00' : tPercent > 85 ? '#c33' : tPercent > 60 ? '#f80' : '#4a4';
+      capLines += `<div style="color:${tColor};font-size:12px;font-weight:bold;border-top:1px dashed #ddd;margin-top:4px;padding-top:4px">總計　${totalCur} / ${totalCap}</div>`;
+    }
+    if (capLines) {
+      html = `<div style="background:#fafafa;border-radius:8px;padding:10px 12px;margin-bottom:10px">${capLines}</div>` + html;
+    }
+
+    document.getElementById('dayDetailList').innerHTML = html;
+  }
+  document.getElementById('dayDetailModal').classList.add('show');
+}
+
+function closeDayDetail(event) {
+  document.getElementById('dayDetailModal').classList.remove('show');
 }
 function findOrder(orderId) {
   let o = (scheduleData.unscheduled || []).find(x => x.orderId === orderId);
