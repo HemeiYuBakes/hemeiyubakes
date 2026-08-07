@@ -1,349 +1,790 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>和美小玉家｜內部系統</title>
-<link rel="apple-touch-icon" href="https://hemeiyubakes.github.io/hemeiyubakes/assets/apple-touch-icon-internal.png">
-<link rel="icon" type="image/png" href="https://hemeiyubakes.github.io/hemeiyubakes/assets/apple-touch-icon-internal.png">
-<meta name="apple-mobile-web-app-title" content="和美內部">
-<link rel="manifest" href="manifest-internal.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#D32F2F">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>和美小玉家</title>
+<link rel="apple-touch-icon" href="https://hemeiyubakes.github.io/hemeiyubakes/assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="https://hemeiyubakes.github.io/hemeiyubakes/assets/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="和美小玉家">
 
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
-    background: #f4f4f4; color: #333; padding: 15px;
-    max-width: 900px; margin: 0 auto;
-  }
-  h1 { font-size: 20px; margin-bottom: 12px; color: #D32F2F; text-align: center; }
-  h2 { font-size: 16px; margin: 0 0 10px; color: #D32F2F; }
-  h3 { font-size: 14px; color: #D32F2F; margin: 0 0 10px; }
-  .card { background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 12px; }
-  label { display: block; font-weight: bold; margin-bottom: 6px; color: #D32F2F; font-size: 14px; }
-  input, select, textarea {
-    width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;
-    font-size: 16px; font-family: inherit;
-  }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: #D32F2F; }
-  .row { margin-bottom: 12px; }
-  .row-flex { display: flex; gap: 8px; }
-  button {
-    background: #D32F2F; color: #fff; border: none; padding: 10px 16px;
-    border-radius: 8px; font-size: 15px; cursor: pointer; font-family: inherit;
-  }
-  button.small { padding: 6px 12px; font-size: 13px; }
-  button.outline { background: #fff; color: #D32F2F; border: 1px solid #D32F2F; }
-  button.gray { background: #888; }
-  .hint { font-size: 12px; color: #888; margin-top: 4px; }
-  .customer-info { background: #fff8f8; border-left: 3px solid #D32F2F; padding: 8px 12px; margin-top: 8px; font-size: 13px; border-radius: 4px; }
-  .tab-nav { display: flex; gap: 6px; margin-bottom: 12px; }
-  .tab-btn { flex: 1; background: #eee; color: #666; border-radius: 10px 10px 0 0; padding: 12px 8px; font-weight: bold; font-size: 14px; }
-  .tab-btn.active { background: #D32F2F; color: #fff; }
-  .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .product-card { border: 2px solid #eee; border-radius: 10px; overflow: hidden; }
-  .product-card.selected { border-color: #D32F2F; }
-  .product-card img { width: 100%; height: 100px; object-fit: cover; background: #eee; display: block; }
-  .product-info { padding: 8px; }
-  .product-name { font-size: 13px; font-weight: bold; color: #333; margin-bottom: 4px; }
-  .product-price { font-size: 13px; color: #D32F2F; margin-bottom: 6px; }
-  .product-limit { font-size: 11px; color: #888; margin-bottom: 6px; }
-  .qty-row { display: flex; align-items: center; gap: 6px; }
-  .qty-btn { width: 28px; height: 28px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5; font-size: 16px; cursor: pointer; color: #333; padding: 0; }
-  .qty-input { width: 40px; text-align: center; padding: 4px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-  .promo-section { background: #fffae6; border-radius: 10px; padding: 14px; border: 1px solid #ffe082; }
-  .promo-title { font-weight: bold; color: #f57c00; margin-bottom: 10px; font-size: 14px; }
-  .promo-item { background: #fff; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 13px; color: #f57c00; }
-  .addon-section { background: #fff8f0; border-radius: 10px; padding: 14px; border: 1px solid #ffe0c0; }
-  .addon-title { font-weight: bold; color: #D32F2F; margin-bottom: 10px; font-size: 14px; }
-  .addon-item { margin-bottom: 12px; }
-  .addon-name { font-weight: bold; color: #333; font-size: 14px; margin-bottom: 4px; }
-  .addon-desc { font-size: 12px; color: #888; margin-bottom: 6px; }
-  .addon-auto-info { font-size: 13px; color: #4caf50; background: #f0f9f0; padding: 6px 10px; border-radius: 6px; margin-bottom: 6px; }
-  .addon-selectable { background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #eee; }
-  .addon-selectable-prompt { font-size: 13px; color: #555; margin-bottom: 6px; }
-  .addon-selectable-row { display: flex; align-items: center; gap: 8px; }
-  .addon-limit-hint { font-size: 12px; color: #888; }
-  .subtotal-box { background: #fff8f8; border-radius: 10px; padding: 12px; font-size: 14px; }
-  .subtotal-row { display: flex; justify-content: space-between; padding: 4px 8px; border-radius: 4px; }
-  .subtotal-row.gift-row { background: #fff5f5; color: #D32F2F; }
-  .gift-source { color: #888; font-size: 12px; font-weight: normal; }
-  .subtotal-total { font-weight: bold; font-size: 16px; color: #D32F2F; border-top: 1px solid #eee; padding-top: 6px; margin-top: 6px; }
-  .btn-submit { width: 100%; padding: 14px; font-size: 16px; border-radius: 25px; font-weight: bold; }
-  .prep-alert { background: #ffebee; border: 2px solid #D32F2F; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; color: #D32F2F; font-weight: bold; display: flex; align-items: center; gap: 8px; }
-  .prep-alert.hidden { display: none; }
-  .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
-  .calendar-header button { padding: 6px 12px; }
-  .calendar-title { flex: 1; text-align: center; font-weight: bold; font-size: 16px; color: #D32F2F; }
-  .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 4px; }
-  .calendar-weekdays > div { text-align: center; padding: 6px 2px; background: #f0f0f0; font-size: 12px; font-weight: bold; color: #666; border-radius: 4px; }
-  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
-  .day-cell { min-height: 100px; background: #fafafa; border-radius: 4px; padding: 4px; font-size: 12px; cursor: pointer; transition: background 0.15s; border: 1px solid transparent; display: flex; flex-direction: column; }
-  .day-capacity { margin-top: auto; padding-top: 3px; border-top: 1px dashed #ddd; }
-  .cap-line { font-size: 9px; line-height: 1.3; font-weight: bold; }
-  .day-cell.other-month { opacity: 0.35; }
-  .day-cell.today { background: #fff3e0; border-color: #ff9800; }
-  .day-cell.target-mode { background: #e3f2fd; border-color: #1976d2; cursor: cell; }
-  .day-cell.target-mode:hover { background: #bbdefb; }
-  .day-number { font-weight: bold; color: #555; }
-  .day-cell.today .day-number { color: #e65100; }
-  .day-orders { margin-top: 4px; display: flex; flex-direction: column; gap: 2px; }
-  .day-order-chip { background: #fff; padding: 3px 5px; border-radius: 3px; font-size: 10px; border-left: 3px solid #D32F2F; line-height: 1.3; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .day-order-chip.confirmed { border-left-color: #4caf50; }
-  .day-order-chip:hover { background: #fff8f8; }
-  .order-list { display: flex; flex-direction: column; gap: 8px; }
-  .order-card { background: #fafafa; border: 2px solid #eee; border-radius: 8px; padding: 10px 12px; cursor: pointer; transition: all 0.15s; }
-  .order-card:hover { border-color: #ccc; }
-  .order-card.selected { border-color: #D32F2F; background: #fff5f5; }
-  .order-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 13px; }
-  .order-card-id { color: #888; font-weight: bold; }
-  .order-card-tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #e0e0e0; color: #555; }
-  .order-card-tag.ship { background: #e3f2fd; color: #1976d2; }
-  .order-card-tag.pickup { background: #f3e5f5; color: #7b1fa2; }
-  .order-card-name { font-weight: bold; font-size: 14px; color: #333; }
-  .order-card-items { font-size: 12px; color: #666; margin-top: 2px; white-space: pre-line; }
-  .info-btn-sm { width: 22px; height: 22px; line-height: 22px; border-radius: 50%; background: #e0e0e0; color: #666; text-align: center; font-size: 12px; cursor: pointer; display: inline-block; }
-  .info-btn-sm:hover { background: #ccc; }
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
-  .modal-overlay.show { display: flex; }
-  .modal-box { background: #fff; border-radius: 15px; padding: 20px; max-width: min(460px, 92vw); width: 100%; max-height: 88vh; overflow-y: auto; position: relative; }
-  .modal-close { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; border: none; background: #f0f0f0; cursor: pointer; font-size: 15px; color: #666; }
-  .detail-section { background: #fafafa; padding: 10px 12px; border-radius: 8px; margin: 10px 0; font-size: 13px; line-height: 1.7; color: #555; }
-  .pickup-display { background: #fff8e7; padding: 10px 12px; border-radius: 8px; margin: 10px 0; font-size: 13px; }
-  .status-section { border-top: 1px solid #eee; margin-top: 14px; padding-top: 14px; }
-  .status-checkbox { display: flex; align-items: center; gap: 10px; padding: 8px 0; cursor: pointer; font-size: 14px; }
-  .status-checkbox input { width: auto; margin: 0; transform: scale(1.2); cursor: pointer; }
-  .status-tracking { margin: 8px 0 8px 30px; }
-  .status-tracking input { padding: 6px 10px; font-size: 14px; }
-  .msg-tpl-btn { width: 100%; margin-bottom: 6px; text-align: left; padding: 10px 12px; font-size: 13px; }
-  .msg-tpl-with-date { background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 6px; }
-  .msg-tpl-with-date .label { font-size: 12px; color: #666; margin-bottom: 6px; }
-  .msg-tpl-with-date .row-flex { gap: 6px; align-items: center; }
-  .msg-tpl-with-date input { font-size: 13px; padding: 6px 8px; flex: 1; }
-  #loginScreen, #mainForm { display: none; }
-  .error { color: #c33; font-size: 13px; margin-top: 6px; }
-  .success { color: #2a7; font-size: 13px; margin-top: 6px; }
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F2EDE6;--surface:#EDEAE3;--white:#FAFAF8;
+  --orange:#E8732A;--text:#1A1410;--muted:#9A8E82;--faint:#D8D2C8;
+}
+@font-face{font-family:'LINE Seed Sans TW';src:url('https://cdn.jsdelivr.net/gh/line/LineSeed@main/build/web/LINESeedSansTW_W_Rg.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'LINE Seed Sans TW';src:url('https://cdn.jsdelivr.net/gh/line/LineSeed@main/build/web/LINESeedSansTW_W_Bd.woff2') format('woff2');font-weight:700;font-display:swap}
+body{font-family:'LINE Seed Sans TW',-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;background:var(--bg);margin:0;padding:0}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:rgba(242,237,230,0.97);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:16px}
+#loading .spinner{width:48px;height:48px;border:4px solid rgba(232,115,42,0.2);border-top-color:#E8732A;border-radius:50%;animation:spin 1s linear infinite}
+#loading p{font-size:14px;color:var(--muted);font-weight:300}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ERROR / MAINT */
+#errMsg{display:none;padding:40px 24px;text-align:center;color:var(--orange);font-size:14px;line-height:1.7}
+#maintPage{display:none;padding:48px 24px;text-align:center}
+#maintPage img{width:100%;max-width:320px;border-radius:16px;margin-bottom:20px}
+#maintPage p{color:var(--muted);font-size:14px}
+
+/* APP SHELL */
+#appShell{display:none}
+.phone{max-width:480px;margin:0 auto;width:100%;position:relative;min-height:100vh;display:flex;flex-direction:column}
+
+/* CONFIRM OVERLAY */
+.confirm-overlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:100;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center;overflow-y:auto}
+.confirm-overlay.show{display:flex}
+.confirm-icon{font-size:52px;margin-bottom:20px}
+.confirm-img{width:80px;height:80px;border-radius:14px;object-fit:cover;margin-bottom:20px;background:var(--surface)}
+.confirm-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:8px}
+.confirm-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px}
+.confirm-line{width:100%;max-width:360px;background:var(--white);border-radius:12px;padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;font-size:12px;gap:12px;align-items:flex-start}
+.confirm-line .lbl{color:var(--muted);flex-shrink:0}
+.confirm-line .val{color:var(--text);font-weight:500;text-align:right;word-break:break-all;line-height:1.7}
+.confirm-orderid{font-size:11px;color:var(--orange);font-weight:700;margin:16px 0 8px;letter-spacing:1px}
+.confirm-back{width:100%;max-width:360px;background:var(--orange);color:#fff;border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:8px}
+.confirm-back:disabled{opacity:0.6;cursor:not-allowed}
+
+/* STATUS BAR */
+.status{height:44px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;background:var(--bg)}
+.status-time{font-size:14px;font-weight:500;color:var(--text)}
+
+/* FONT SIZE CONTROL */
+.fs-control{display:flex;gap:2px;background:var(--white);border-radius:14px;padding:3px}
+.fs-btn{width:26px;height:24px;border:none;background:transparent;font-family:inherit;font-size:11px;color:var(--muted);cursor:pointer;border-radius:11px;font-weight:500;padding:0;display:flex;align-items:center;justify-content:center}
+.fs-btn.active{background:var(--orange);color:#fff;font-weight:700}
+
+/* MARQUEE */
+.marquee-bar{background:rgba(232,115,42,0.08);padding:8px 20px;overflow:hidden}
+.marquee-inner{display:inline-block;white-space:nowrap;animation:marquee 14s linear infinite;color:var(--orange);font-size:12px;font-weight:500}
+@keyframes marquee{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
+
+/* SCROLL PAGES */
+.scroll-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:80px}
+.scroll-body::-webkit-scrollbar{display:none}
+.page{display:none}.page.active{display:block}
+
+/* HERO */
+.hero{padding:20px 24px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.hero-left{flex:1}
+.shop-badge{display:inline-flex;align-items:center;background:var(--orange);color:#fff;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:4px 12px;border-radius:20px;margin-bottom:10px}
+.hero-title{font-size:26px;font-weight:700;color:var(--text);line-height:1.2;letter-spacing:-0.5px}
+.hero-title span{color:var(--orange)}
+.hero-sub{font-size:11px;color:var(--muted);margin-top:4px;font-weight:300}
+.hero-mascot{width:95px;flex-shrink:0}
+
+/* NOTICE BAR */
+.notice-bar{margin:0 20px 14px;background:var(--white);border-radius:14px;padding:10px 16px;display:flex;align-items:center;gap:10px}
+.ndot{width:7px;height:7px;background:var(--orange);border-radius:50%;flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.ntext{font-size:12px;color:var(--muted);line-height:1.4}
+.ntext strong{color:var(--text);font-weight:500}
+
+/* PROMO STRIP */
+.promo-strip{margin:0 20px 14px;background:var(--orange);border-radius:14px;padding:12px 18px;align-items:center;justify-content:space-between;display:none;gap:10px}
+.promo-strip.show{display:flex}
+.promo-text{color:#fff;font-size:13px;font-weight:500;line-height:1.4}
+.promo-text small{font-size:10px;opacity:0.85;display:block;margin-top:2px}
+.promo-pill{background:rgba(255,255,255,0.22);color:#fff;font-size:10px;font-weight:700;padding:5px 12px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+
+/* SECTION HEAD */
+.sec-head{padding:0 24px 10px;display:flex;align-items:baseline;justify-content:space-between}
+.sec-title{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted)}
+.sec-cnt{font-size:10px;color:var(--orange);font-weight:500}
+
+/* PRODUCT */
+.product-stack{display:flex;flex-direction:column;gap:2px;padding:0 20px}
+.product-row{background:var(--white);padding:13px;display:flex;align-items:center;gap:12px;border-radius:0}
+.product-row:first-child{border-radius:16px 16px 0 0}
+.product-row:last-child{border-radius:0 0 16px 16px}
+.product-row:only-child{border-radius:16px}
+.p-img{width:62px;height:62px;border-radius:12px;object-fit:cover;flex-shrink:0;background:var(--surface);cursor:pointer}
+.p-info{flex:1;min-width:0}
+.p-name{font-size:13px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:6px;cursor:pointer}
+.p-name .info-dot{width:14px;height:14px;border-radius:50%;background:var(--surface);color:var(--muted);font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-style:normal;flex-shrink:0}
+.p-tag{font-size:10px;color:var(--muted);margin-top:2px;font-weight:300}
+.p-price{font-size:14px;font-weight:700;color:var(--orange);margin-top:3px}
+.qty-ctrl{display:flex;align-items:center;flex-shrink:0}
+.q-btn{width:30px;height:30px;border-radius:50%;background:var(--surface);border:none;color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:300;font-family:inherit;padding:0}
+.q-btn.on{background:var(--orange);color:#fff}
+.q-btn:disabled{opacity:0.3;cursor:not-allowed}
+.q-num{width:26px;text-align:center;font-size:13px;font-weight:500;color:var(--text);border:none;background:transparent;font-family:inherit;-moz-appearance:textfield}
+.q-num::-webkit-outer-spin-button,.q-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+/* DIVIDER */
+.div-label{padding:18px 24px 10px;display:flex;align-items:center;gap:10px}
+.div-label::before,.div-label::after{content:'';flex:1;height:1px;background:var(--faint)}
+.div-label span{font-size:10px;letter-spacing:2px;color:var(--muted);font-weight:700;white-space:nowrap}
+
+/* ADDONS */
+.addon-grid{display:flex;flex-direction:column;gap:2px;padding:0 20px 4px}
+.addon-item{background:var(--white);padding:12px 14px}
+.addon-item:first-child{border-radius:16px 16px 0 0}
+.addon-item:last-child{border-radius:0 0 16px 16px}
+.addon-item:only-child{border-radius:16px}
+.addon-head{display:flex;align-items:flex-start;gap:10px}
+.addon-body{flex:1;min-width:0}
+.addon-name{font-size:13px;color:var(--text);font-weight:500}
+.addon-desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5}
+.addon-auto{font-size:11px;color:var(--orange);background:rgba(232,115,42,0.08);padding:6px 10px;border-radius:8px;margin-top:8px;line-height:1.5}
+.addon-selectable{margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.addon-selectable-prompt{font-size:11px;color:var(--muted);width:100%;line-height:1.5}
+.addon-limit-hint{font-size:10px;color:var(--muted);margin-left:4px}
+
+/* FORM */
+.form-block{padding:4px 20px 14px}
+.f-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px;margin-top:12px;display:block}
+.f-input,.f-select,.f-note{width:100%;background:var(--white);border:none;border-radius:12px;padding:12px 14px;font-size:14px;color:var(--text);font-family:inherit;outline:none;display:block}
+.f-input::placeholder,.f-note::placeholder{color:var(--faint)}
+.f-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239A8E82'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-color:var(--white)}
+.f-note{height:48px;resize:none}
+
+/* PAYMENT DISPLAY */
+.payment-display{background:var(--white);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--text);font-weight:500}
+
+/* SEGMENTED CONTROL (payment, unused now) */
+.segmented{display:flex;background:var(--white);border-radius:12px;padding:4px;gap:4px}
+.seg-btn{flex:1;border:none;background:transparent;padding:10px 8px;font-size:13px;color:var(--muted);font-family:inherit;cursor:pointer;border-radius:9px;font-weight:500;transition:all .15s}
+.seg-btn.active{background:var(--orange);color:#fff;font-weight:700}
+.payment-hint{font-size:11px;color:var(--orange);margin-top:6px;line-height:1.5}
+
+/* DYNAMIC FIELDS */
+.dyn-field{margin-top:12px}
+.dyn-opt{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.dyn-opt label{display:inline-flex;align-items:center;gap:5px;background:var(--white);padding:8px 12px;border-radius:10px;font-size:13px;color:var(--text);cursor:pointer}
+.dyn-opt input{margin:0}
+
+/* SUMMARY */
+.summary{margin:0 20px 14px;background:var(--white);border-radius:14px;padding:12px 16px}
+.sum-row{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;color:var(--muted);align-items:flex-start;gap:10px}
+.sum-row .label{flex:1;line-height:1.5}
+.sum-row .val{flex-shrink:0;text-align:right;font-weight:500;color:var(--text)}
+.sum-row.gift{color:var(--orange)}
+.sum-divider{height:1px;background:var(--faint);margin:8px 0}
+.sum-total{display:flex;justify-content:space-between;align-items:center;padding-top:4px}
+.sum-total-label{font-size:14px;font-weight:700;color:var(--text)}
+.sum-total-val{font-size:18px;font-weight:700;color:var(--orange)}
+
+/* CTA */
+.cta-zone{padding:0 20px 24px}
+.cta{width:100%;background:var(--orange);color:#fff;border:none;border-radius:16px;padding:15px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:0.5px}
+.cta:disabled{opacity:0.6;cursor:not-allowed}
+.cta-note{text-align:center;font-size:10px;color:var(--muted);margin-top:8px}
+
+/* NOTICE PAGE */
+.page-hero{padding:28px 28px 18px}
+.page-title{font-size:26px;font-weight:700;color:var(--text);letter-spacing:-0.5px}
+.page-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.highlight-card{margin:0 20px 14px;background:var(--orange);border-radius:16px;padding:14px 18px;color:#fff}
+.hc-label{font-size:10px;font-weight:700;letter-spacing:1.5px;opacity:0.8;margin-bottom:6px}
+.hc-body{font-size:14px;font-weight:500;line-height:1.6}
+.accordion-stack{display:flex;flex-direction:column;gap:2px;padding:0 20px 16px}
+.acc-item{background:var(--white)}
+.acc-item:first-child{border-radius:16px 16px 0 0}
+.acc-item:last-child{border-radius:0 0 16px 16px}
+.acc-head{padding:13px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.acc-head-title{font-size:13px;font-weight:500;color:var(--text)}
+.acc-icon{font-size:16px;color:var(--muted);transition:transform .2s}
+.acc-icon.open{transform:rotate(45deg)}
+.acc-body{font-size:12px;color:var(--muted);line-height:1.7;padding:0 16px 13px;display:none}
+.acc-body.open{display:block}
+.no-additive{margin:0 20px 24px;text-align:center;font-size:11px;color:var(--muted);font-weight:500;padding:10px 0}
+
+/* STORY PAGE */
+.story-header{background:var(--orange);padding:18px 28px 60px;position:relative;overflow:hidden}
+.story-header::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,0.06) 0,rgba(255,255,255,0.06) 1px,transparent 1px,transparent 18px),repeating-linear-gradient(90deg,rgba(255,255,255,0.06) 0,rgba(255,255,255,0.06) 1px,transparent 1px,transparent 18px)}
+.story-header-fade{position:absolute;bottom:0;left:0;right:0;height:100px;background:linear-gradient(to bottom,transparent 0%,rgba(242,237,230,0.25) 35%,rgba(242,237,230,0.7) 65%,var(--bg) 100%)}
+.story-brand{position:relative;z-index:1;color:#fff;font-size:26px;font-weight:700;letter-spacing:2px}
+.story-brand-en{color:rgba(255,255,255,0.7);font-size:11px;letter-spacing:2px;margin-top:3px;font-weight:300}
+.story-year{color:rgba(255,255,255,0.5);font-size:10px;margin-top:10px;letter-spacing:1px}
+.story-section-label{text-align:center;font-size:12px;font-weight:700;letter-spacing:2px;padding:0 0 10px;color:rgba(232,115,42,0.6);margin-top:-30px;position:relative;z-index:2}
+.story-blocks{padding:0 20px;display:flex;flex-direction:column;gap:2px}
+.story-block{background:var(--white);padding:16px;display:flex;gap:14px;align-items:center}
+.story-block:first-child{border-radius:16px 16px 0 0}
+.story-block:last-child{border-radius:0 0 16px 16px;margin-bottom:20px}
+.story-block-left{flex:1}
+.story-num{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--orange);margin-bottom:6px}
+.story-text{font-size:12px;color:var(--text);line-height:1.8;font-weight:300}
+.story-text strong{font-weight:500}
+.story-illus{width:var(--story-illus-w,90px);flex-shrink:0}
+.story-illus img{width:100%;height:auto;display:block}
+.story-footer{margin:0 20px 24px;text-align:center}
+.story-footer-title{font-size:13px;font-weight:700;color:var(--orange);margin-bottom:3px}
+.story-footer-sub{font-size:11px;color:var(--muted)}
+
+/* PRODUCT INFO MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:300;padding:20px}
+.modal-overlay.show{display:flex}
+.modal-box{background:var(--white);border-radius:16px;padding:20px;max-width:380px;width:100%;max-height:85vh;overflow-y:auto;position:relative}
+.modal-close{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;border:none;background:var(--surface);color:var(--muted);font-size:14px;cursor:pointer}
+.modal-img{width:100%;border-radius:12px;margin-bottom:14px;background:var(--surface)}
+.modal-name{font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px}
+.modal-price{font-size:16px;color:var(--orange);font-weight:700;margin-bottom:12px}
+.modal-desc{font-size:13px;color:var(--muted);line-height:1.7;white-space:pre-wrap}
+
+/* NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--white);padding:10px 0 18px;border-top:1px solid var(--faint);z-index:50;max-width:480px;margin:0 auto}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;letter-spacing:1px;color:var(--muted);font-weight:700;cursor:pointer;padding:4px 0}
+.nav-item.active{color:var(--orange)}
+.nav-icon{font-size:18px;line-height:1}
+.nav-bar{width:18px;height:3px;background:var(--orange);border-radius:2px;display:none}
+.nav-item.active .nav-bar{display:block}
+.version-tag{position:fixed;bottom:4px;right:8px;font-size:9px;color:var(--faint);z-index:51;pointer-events:none}
 </style>
 </head>
 <body>
 
-<h1>🍪 和美小玉家｜內部系統</h1>
-
-<div id="loginScreen" class="card">
-  <h2>請輸入密碼</h2>
-  <div class="row"><input type="password" id="pwInput" placeholder="內部填單密碼" autocomplete="off"></div>
-  <button onclick="doLogin()">進入</button>
-  <div id="loginMsg" class="error"></div>
+<div id="loading">
+  <div class="spinner"></div>
+  <p>系統連線中…</p>
+</div>
+<div id="errMsg"></div>
+<div id="maintPage">
+  <img id="maintImg" src="" alt="" onerror="this.style.display='none'">
+  <p id="maintMsg">系統維護中，請稍後再試。</p>
 </div>
 
-<div id="mainForm">
-  <div class="tab-nav">
-    <button class="tab-btn active" id="tab-btn-form" onclick="switchTab('form')">📝 內部填單</button>
-    <button class="tab-btn" id="tab-btn-schedule" onclick="switchTab('schedule')">📅 排單系統</button>
+<div id="appShell">
+<div class="phone">
+
+  <!-- 訂單成功 overlay -->
+  <div class="confirm-overlay" id="confirm-overlay">
+    <img class="confirm-img" id="conf-img" style="display:none" alt=""><div class="confirm-icon" id="conf-icon">📝</div>
+    <div class="confirm-title" id="conf-title">訂單確認</div>
+    <div class="confirm-sub" id="conf-sub">請確認以下資料後送出</div>
+    <div id="conf-lines"></div>
+    <div class="confirm-orderid" id="conf-orderid"></div>
+    <button class="confirm-back" id="conf-submit-btn" onclick="submitOrder()">確認並送出</button>
+    <button class="confirm-back" id="conf-back-btn" onclick="closeConfirm()" style="background:transparent;color:var(--muted);margin-top:6px">返回修改</button>
   </div>
 
-  <div id="tab-form">
-    <div class="card">
-      <h2>客戶資料</h2>
-      <div class="row">
-        <label>📞 電話 <span style="color:#888;font-weight:normal;font-size:11px">（選填）</span></label>
-        <div class="row-flex">
-          <input type="tel" id="phone" placeholder="0912-345-678" style="flex:1">
-          <button class="small outline" onclick="fillFriend()" style="flex:0 0 auto" title="一鍵填入「熟客」">熟客</button>
-          <button class="small" onclick="lookupCustomer()" style="flex:0 0 auto">查歷史</button>
-        </div>
-        <div id="customerInfo"></div>
-      </div>
-      <div class="row"><label>👤 姓名 <span style="color:#c33">*</span></label><input type="text" id="name"></div>
-      <div class="row"><label>📍 地址</label><input type="text" id="address"></div>
-      <div class="row"><label>LINE User ID（選填，填了才發通知）</label><input type="text" id="lineUserId" placeholder="U xxxxxxxxxxxx..."></div>
-      <div class="row">
-        <label>📌 訂單來源 <span style="color:#c33">*</span></label>
-        <select id="orderSource">
-          <option value="">請選擇</option>
-          <option value="電話訂購">電話訂購</option>
-          <option value="現場下單">現場下單</option>
-          <option value="LINE 私訊">LINE 私訊</option>
-          <option value="FB 私訊">FB 私訊</option>
-          <option value="親友介紹">親友介紹</option>
-          <option value="市集現場">市集現場</option>
-          <option value="其他">其他</option>
-        </select>
-      </div>
+  <!-- 狀態列 -->
+  <div class="status">
+    <span class="status-time" id="status-time">9:41</span>
+    <div class="fs-control">
+      <button class="fs-btn" id="fs-small" onclick="setFontSize('small')">小</button>
+      <button class="fs-btn" id="fs-medium" onclick="setFontSize('medium')">中</button>
+      <button class="fs-btn" id="fs-large" onclick="setFontSize('large')">大</button>
     </div>
-    <div class="card"><h2>🛍 商品</h2><div class="product-grid" id="productGrid">載入中...</div></div>
-    <div class="card" id="promoSection" style="display:none"><div class="promo-section"><div class="promo-title">🎉 優惠進度</div><div id="promoItems"></div></div></div>
-    <div class="card" id="addonSection" style="display:none"><div class="addon-section"><div class="addon-title">🎁 贈品</div><div id="addonItems"></div></div></div>
-    <div class="card" id="subtotalBox" style="display:none">
-      <h2>💰 訂單明細</h2>
-      <div class="subtotal-box">
-        <div id="subtotalItems"></div>
-        <div id="subtotalGifts"></div>
-        <div class="subtotal-row subtotal-total"><span>總金額</span><span id="totalAmt">0 元</span></div>
-      </div>
-      <div class="hint">⚠️ 最終金額以後端寫入 Orders 表為準</div>
-    </div>
-    <div class="card">
-      <h2>🚚 運送與付款</h2>
-      <div class="row"><label>運送方式</label><select id="shippingSelect"><option value="現場取貨">現場取貨</option><option value="黑貓宅配">黑貓宅配</option></select></div>
-      <div class="row"><label>付款方式</label><select id="paymentSelect"><option value="現場付款">現場付款</option><option value="匯款">匯款</option></select></div>
-    </div>
-    <div class="card"><h2>✍️ 備註</h2><textarea id="note" rows="2" placeholder="（選填）"></textarea></div>
-    <div class="card"><button class="btn-submit" onclick="submitOrder()">送出訂單</button><div id="submitMsg" class="error"></div></div>
   </div>
 
-  <div id="tab-schedule" style="display:none">
-    <div id="prepAlert" class="prep-alert hidden"></div>
-    <div class="card">
-      <div class="calendar-header">
-        <button class="small outline" onclick="prevMonth()">‹ 上月</button>
-        <div class="calendar-title" id="calendarTitle"></div>
-        <button class="small outline" onclick="nextMonth()">下月 ›</button>
+  <!-- 跑馬燈 -->
+  <div id="marquee-bar" class="marquee-bar" style="display:none">
+    <span class="marquee-inner" id="marquee-text"></span>
+  </div>
+
+  <!-- 訂購頁 -->
+  <div id="page-order" class="scroll-body page active">
+    <div class="hero">
+      <div class="hero-left">
+        <div class="shop-badge">HEMEI YU'S BAKES</div>
+        <div class="hero-title">手工餅乾<br><span>線上訂購</span></div>
+        <div class="hero-sub" id="hero-sub">熱銷 20 年 · 和美在地製作</div>
       </div>
-      <div class="calendar-weekdays"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
-      <div class="calendar-grid" id="calendarGrid"></div>
+      <div class="hero-mascot">
+        <img src="https://hemeiyubakes.github.io/hemeiyubakes/assets/%E7%9C%A8%E7%9C%BC%E9%A4%85%E4%B9%BE.svg" alt="吉祥物" style="width:100%;height:auto;display:block" onerror="this.style.display='none'">
+      </div>
     </div>
-    <div class="card">
-      <h2>📋 待排定訂單 <span id="unscheduledCount" style="color:#888;font-size:13px;font-weight:normal"></span></h2>
-      <div class="hint" id="scheduleHint">點訂單卡片，再點月曆日期即可排定（點 ⓘ 看詳情）</div>
-      <div class="order-list" id="unscheduledList" style="margin-top:10px"></div>
+
+    <div class="notice-bar" id="notice-bar" style="display:none">
+      <div class="ndot"></div>
+      <div class="ntext" id="deadline-text"></div>
     </div>
-    <div class="card"><button class="outline" onclick="loadSchedule()">🔄 重新整理</button></div>
+
+    <div class="promo-strip" id="promo-strip">
+      <div class="promo-text"><span id="promo-main"></span><small id="promo-sub"></small></div>
+      <div class="promo-pill">優惠</div>
+    </div>
+
+    <div class="sec-head">
+      <span class="sec-title">選擇商品</span>
+      <span class="sec-cnt" id="sec-cnt">載入中…</span>
+    </div>
+    <div class="product-stack" id="product-stack">
+      <div class="product-row" style="border-radius:16px;justify-content:center;color:var(--muted);font-size:13px;padding:20px">載入商品中…</div>
+    </div>
+
+    <div class="div-label" id="addon-section-label" style="display:none"><span>加購選項</span></div>
+    <div class="addon-grid" id="addon-grid"></div>
+
+    <div class="div-label"><span>訂購資訊</span></div>
+    <div class="form-block">
+      <span class="f-label">姓名</span>
+      <input class="f-input" id="f-name" type="text" placeholder="請輸入姓名">
+
+      <span class="f-label">手機號碼</span>
+      <input class="f-input" id="f-tel" type="tel" inputmode="tel" placeholder="09xxxxxxxx">
+
+      <span class="f-label">取貨方式</span>
+      <select class="f-select" id="f-pickup" onchange="onShippingChange()"></select>
+
+      <div id="address-group" style="display:none">
+        <span class="f-label">收件地址</span>
+        <input class="f-input" id="f-address" placeholder="請輸入完整地址">
+      </div>
+
+      <div id="payment-block" style="display:none">
+        <span class="f-label">付款方式</span>
+        <div class="payment-display">匯款</div>
+      </div>
+
+      <div id="dynZone"></div>
+
+      <span class="f-label">備註</span>
+      <textarea class="f-note" id="f-note" placeholder="口味喜好、過敏資訊…"></textarea>
+    </div>
+
+    <div class="summary" id="summary-block" style="display:none">
+      <div id="summary-items"></div>
+      <div id="summary-gifts"></div>
+      <div class="sum-divider"></div>
+      <div class="sum-total">
+        <span class="sum-total-label">合計</span>
+        <span class="sum-total-val" id="sum-total">$0</span>
+      </div>
+    </div>
+
+    <div class="cta-zone">
+      <button class="cta" id="cta-btn" onclick="showConfirm()">確認訂單</button>
+      <div class="cta-note">送出後將透過 LINE 收到確認通知</div>
+    </div>
+  </div>
+
+  <!-- 訂購須知頁 -->
+  <div id="page-notice" class="scroll-body page">
+    <div class="page-hero">
+      <div class="page-title" id="notice-title">訂購須知</div>
+      <div class="page-sub" id="notice-sub">下單前請詳細閱讀</div>
+    </div>
+    <div class="highlight-card">
+      <div class="hc-label" id="notice-hl-label">⏰ 重要時間</div>
+      <div class="hc-body" id="notice-hl-body">每週製作有限<br>建議提早下單避免向隅</div>
+    </div>
+    <div class="accordion-stack" id="notice-accordion"></div>
+    <div class="no-additive" id="notice-footer">餅乾無添加防腐劑，請注意保存期限喔。</div>
+  </div>
+
+  <!-- 品牌故事頁 -->
+  <div id="page-story" class="scroll-body page">
+    <div class="story-header">
+      <div class="story-brand" id="story-brand">和美小玉家</div>
+      <div class="story-brand-en" id="story-brand-en">Hemei Yu's Bakes</div>
+      <div class="story-year" id="story-year">SINCE 2005 · 彰化和美</div>
+      <div class="story-header-fade"></div>
+    </div>
+    <div class="story-section-label" id="story-section-label">小玉家的故事</div>
+    <div class="story-blocks" id="story-blocks"></div>
+    <div class="story-footer">
+      <div class="story-footer-title" id="story-footer-title">用心製作，無添加防腐劑</div>
+      <div class="story-footer-sub" id="story-footer-sub">每一片都是媽媽味道的延續</div>
+    </div>
+    <div style="height:24px"></div>
+  </div>
+
+  <!-- 底部導航 -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-order" onclick="sw('order')">
+      <div class="nav-icon">🛒</div><span>訂購</span><div class="nav-bar"></div>
+    </div>
+    <div class="nav-item" id="nav-notice" onclick="sw('notice')">
+      <div class="nav-icon">📌</div><span>訂購須知</span><div class="nav-bar"></div>
+    </div>
+    <div class="nav-item" id="nav-story" onclick="sw('story')">
+      <div class="nav-icon">🫶</div><span>品牌故事</span><div class="nav-bar"></div>
+    </div>
   </div>
 </div>
+</div>
 
-<!-- 時段選擇 modal -->
-<div id="periodModal" class="modal-overlay" onclick="closePeriodModal(event)">
+<!-- 商品資訊 modal -->
+<div class="modal-overlay" id="productModal" onclick="closeProductInfo(event)">
   <div class="modal-box" onclick="event.stopPropagation()">
-    <button class="modal-close" onclick="closePeriodModal()">✕</button>
-    <h2 style="margin-bottom:12px">📅 設定取貨日期</h2>
-    <div id="periodModalInfo" style="background:#fafafa;padding:10px;border-radius:6px;margin-bottom:12px;font-size:14px"></div>
-    <div class="row"><label>取貨時段</label><select id="periodSelect"></select></div>
-    <div style="display:flex;gap:8px">
-      <button class="outline" style="flex:1" onclick="closePeriodModal()">取消</button>
-      <button style="flex:1" onclick="confirmSchedule()">確定排定</button>
-    </div>
-    <div id="periodModalMsg" class="error"></div>
+    <button class="modal-close" onclick="closeProductInfo()">✕</button>
+    <img class="modal-img" id="modal-img" src="" alt="" style="display:none">
+    <div class="modal-name" id="modal-name"></div>
+    <div class="modal-price" id="modal-price"></div>
+    <div class="modal-desc" id="modal-desc"></div>
   </div>
 </div>
 
-<!-- 訂單詳情 modal -->
-<div id="orderDetailModal" class="modal-overlay" onclick="closeOrderDetail(event)">
-  <div class="modal-box" onclick="event.stopPropagation()">
-    <button class="modal-close" onclick="closeOrderDetail()">✕</button>
-    <h2 id="detailTitle" style="margin-bottom:8px"></h2>
-    <div id="detailInfo" class="detail-section"></div>
-    <div id="detailPickup"></div>
-    <div class="status-section">
-      <h3>📋 狀態管理（勾選即儲存）</h3>
-      <div id="statusControls"></div>
-    </div>
-    <div class="status-section">
-      <h3>💬 複製訊息給客人</h3>
-      <div id="messageTemplateBtns"></div>
-    </div>
-    <div id="detailMsg" class="hint" style="margin-top:8px;min-height:18px"></div>
-  </div>
-</div>
+<div class="version-tag" id="version-tag"></div>
 
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
+// ============================================================
+// ⚠️ 改完這個檔案：
+//   1. APP_VERSION 改成新版本號
+//   2. 同步 Settings 工作表「目前版本」=同版本號
+// ============================================================
+const APP_VERSION = '2.1.0';
+
+const LIFF_ID = '2009988690-V5uuqIVX';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
 
-let PASSWORD = '';
-let productsData = [], addonsData = [], promotionsData = [], addonSelections = {};
-let scheduleData = null, selectedOrderId = null, calendarYear, calendarMonth, pendingDate = null, detailOrder = null;
+let fieldsData = [], productsData = [], settingsData = {}, addonsData = [], promotionsData = [], lineUserId = '';
+let addonSelections = {};
+let wasForcedTransfer = false;
+let currentPayment = '匯款';
 
-document.getElementById('loginScreen').style.display = 'block';
-document.getElementById('pwInput').addEventListener('keypress', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('version-tag').innerText = 'v' + APP_VERSION;
 
-async function doLogin() {
-  const pw = document.getElementById('pwInput').value.trim();
-  if (!pw) return;
-  const msg = document.getElementById('loginMsg');
-  msg.textContent = '驗證中...';
-  try {
-    const res = await callServer('verifyInternalPassword', { password: pw });
-    if (res === true) {
-      PASSWORD = pw;
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('mainForm').style.display = 'block';
-      await loadData();
-    } else { msg.textContent = '密碼錯誤'; }
-  } catch (e) { msg.textContent = '連線失敗：' + e.message; }
-}
-
-function switchTab(tab) {
-  document.getElementById('tab-form').style.display = (tab === 'form') ? 'block' : 'none';
-  document.getElementById('tab-schedule').style.display = (tab === 'schedule') ? 'block' : 'none';
-  document.getElementById('tab-btn-form').classList.toggle('active', tab === 'form');
-  document.getElementById('tab-btn-schedule').classList.toggle('active', tab === 'schedule');
-  if (tab === 'schedule') loadSchedule();
-}
-
-/* ===== Tab 1: 內部填單 ===== */
-async function loadData() {
-  try {
-    const data = await callServer('getInitData', {});
-    productsData = data.products || [];
-    addonsData = data.addons || [];
-    promotionsData = data.promotions || [];
-    if (data.settings) applyInitSettings(data.settings);
-    renderProducts();
-    refreshAll();
-  } catch (e) { alert('載入失敗：' + e.message); }
-}
-
-function applyInitSettings(s) {
-  // 訂單來源選項動態化
-  var sourceStr = s['訂單來源選項'];
-  if (sourceStr) {
-    var sources = String(sourceStr).split(',').map(x => x.trim()).filter(x => x);
-    const sel = document.getElementById('orderSource');
-    if (sel) {
-      sel.innerHTML = '<option value="">請選擇</option>';
-      sources.forEach(src => {
-        const opt = document.createElement('option');
-        opt.value = src;
-        opt.textContent = src;
-        sel.appendChild(opt);
-      });
-    }
-  }
-}
-function renderProducts() {
-  const grid = document.getElementById('productGrid');
-  if (productsData.length === 0) { grid.innerHTML = '無商品'; return; }
-  grid.innerHTML = '';
-  productsData.forEach((p, i) => {
-    const limitText = p.maxQty > 0 ? `<div class="product-limit">限購 ${p.maxQty} 個</div>` : '';
-    const maxAttr = p.maxQty > 0 ? `max="${p.maxQty}"` : '';
-    grid.innerHTML += `<div class="product-card" id="card_${i}"><img src="${p.image || ''}" onerror="this.style.display='none'"><div class="product-info"><div class="product-name">${p.name}</div><div class="product-price">NT$ ${p.price}</div>${limitText}<div class="qty-row"><button class="qty-btn" onclick="changeQty(${i},-1)">－</button><input class="qty-input" id="qty_${i}" type="number" value="0" min="0" ${maxAttr} onchange="onQtyChange(${i})"><button class="qty-btn" onclick="changeQty(${i},1)">＋</button></div></div></div>`;
+/* ---- 字級調整 ---- */
+function setFontSize(level) {
+  const sizeMap = { small: 1, medium: 1.15, large: 1.3 };
+  document.body.style.zoom = sizeMap[level] || 1;
+  try { localStorage.setItem('hm_fontSize', level); } catch (e) {}
+  ['small','medium','large'].forEach(l => {
+    const btn = document.getElementById('fs-' + l);
+    if (btn) btn.classList.toggle('active', l === level);
   });
 }
+(function() {
+  let saved = 'small';
+  try { saved = localStorage.getItem('hm_fontSize') || 'small'; } catch (e) {}
+  setTimeout(() => setFontSize(saved), 0);
+})();
+
+/* ---- 狀態列時間 ---- */
+function updateClock() {
+  const d = new Date();
+  document.getElementById('status-time').innerText =
+    d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+updateClock();
+setInterval(updateClock, 30000);
+
+/* ---- 頁面切換 ---- */
+function sw(page) {
+  ['order','notice','story'].forEach(p => {
+    document.getElementById('page-' + p).classList.toggle('active', p === page);
+    document.getElementById('nav-' + p).classList.toggle('active', p === page);
+  });
+  window.scrollTo(0, 0);
+}
+
+/* ---- 手風琴 ---- */
+function tog(el) {
+  const body = el.nextElementSibling;
+  const icon = el.querySelector('.acc-icon');
+  body.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+
+/* ---- 商品資訊 modal ---- */
+function openProductInfo(i) {
+  const p = productsData[i];
+  if (!p) return;
+  const img = document.getElementById('modal-img');
+  if (p.image) { img.src = p.image; img.style.display = 'block'; }
+  else { img.style.display = 'none'; }
+  document.getElementById('modal-name').innerText = p.name;
+  document.getElementById('modal-price').innerText = 'NT$ ' + p.price;
+  document.getElementById('modal-desc').innerText = p.description || '暫無詳細說明';
+  document.getElementById('productModal').classList.add('show');
+}
+function closeProductInfo(event) {
+  document.getElementById('productModal').classList.remove('show');
+}
+
+/* ---- 工具 ---- */
+function showError(msg) {
+  document.getElementById('loading').style.display = 'none';
+  const e = document.getElementById('errMsg');
+  e.style.display = 'block';
+  e.innerHTML = '❌ ' + msg;
+}
+
+function loadJsonp(url) {
+  return new Promise((resolve, reject) => {
+    const cb = 'cb_' + Date.now();
+    const s = document.createElement('script');
+    window[cb] = d => { delete window[cb]; s.remove(); resolve(d); };
+    s.onerror = () => { delete window[cb]; s.remove(); reject(new Error('載入失敗')); };
+    const sep = url.includes('?') ? '&' : '?';
+    s.src = url + '&callback=' + cb + sep + '_t=' + Date.now();
+    document.head.appendChild(s);
+  });
+}
+
+function checkVersionAndReload(serverVersion) {
+  if (!serverVersion || serverVersion === APP_VERSION) return false;
+  const reloaded = sessionStorage.getItem('hm_reloaded');
+  if (reloaded === '1') return false;
+  sessionStorage.setItem('hm_reloaded', '1');
+  const url = new URL(window.location.href);
+  url.searchParams.set('_v', Date.now());
+  window.location.replace(url.toString());
+  return true;
+}
+
+function isCashOptionEnabled() {
+  var v = settingsData['LIFF顯示現場付款'];
+  if (v === undefined || v === null || v === '') return true;
+  var s = v.toString().trim();
+  return s === '是' || s === 'true' || s === '1' || s === 'Y';
+}
+
+/* ---- URL 預選商品 ---- */
+function applyPresetProduct() {
+  const params = new URLSearchParams(window.location.search);
+  const productName = params.get('p') || params.get('product');
+  if (!productName) return;
+  const decoded = decodeURIComponent(productName);
+  const idx = productsData.findIndex(p => p.name === decoded);
+  if (idx < 0) return;
+  const input = document.getElementById('qty_' + idx);
+  if (!input) return;
+  input.value = 1;
+  refreshAll();
+  setTimeout(() => {
+    document.getElementById('prow_' + idx)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 300);
+}
+
+/* ---- 初始化 ---- */
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    const profile = await liff.getProfile();
+    lineUserId = profile.userId;
+
+    const data = await loadJsonp(SCRIPT_URL + '?action=data');
+    if (data.error) { showError('讀取失敗：' + data.error); return; }
+
+    settingsData = data.settings || {};
+    productsData = data.products || [];
+    fieldsData = data.fields || [];
+    addonsData = data.addons || [];
+    promotionsData = data.promotions || [];
+
+    if (checkVersionAndReload(settingsData['目前版本'])) return;
+    sessionStorage.removeItem('hm_reloaded');
+
+    // 維護模式
+    if (settingsData['維護模式開關'] === true) {
+      document.getElementById('loading').style.display = 'none';
+      const maintImg = settingsData['維護模式'] || '';
+      if (maintImg) document.getElementById('maintImg').src = maintImg;
+      document.getElementById('maintPage').style.display = 'block';
+      return;
+    }
+
+    // 預填名字
+    document.getElementById('f-name').value = profile.displayName || '';
+
+    // 備註 placeholder
+    const notePh = settingsData['備註提示文字'];
+    if (notePh) document.getElementById('f-note').placeholder = notePh;
+
+    // 確認頁圖片
+    const confirmImg = settingsData['訂單確認圖片'];
+    if (confirmImg) {
+      const img = document.getElementById('conf-img');
+      img.src = confirmImg;
+      img.style.display = 'block';
+      document.getElementById('conf-icon').style.display = 'none';
+    }
+
+    // 訂購須知頁內容
+    renderNoticePage();
+
+    // 故事頁內容
+    renderStoryPage();
+
+    // 跑馬燈
+    if (settingsData['公告文字']) {
+      document.getElementById('marquee-text').innerText = settingsData['公告文字'];
+      document.getElementById('marquee-bar').style.display = 'block';
+    }
+
+    // 截單通知條（用公告文字當截單訊息，或自訂）
+    const deadlineMsg = settingsData['截單訊息'] || settingsData['公告文字'];
+    if (deadlineMsg) {
+      document.getElementById('deadline-text').innerHTML = deadlineMsg;
+      document.getElementById('notice-bar').style.display = 'flex';
+    }
+
+    // 商品列表
+    renderProducts();
+
+    // 動態欄位
+    renderDynFields();
+
+    // 取貨方式
+    updateShipping();
+
+    // 付款方式
+    initPaymentOptions();
+
+    refreshAll();
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('appShell').style.display = 'block';
+
+    // URL 預選商品
+    applyPresetProduct();
+  } catch (e) {
+    showError('錯誤：' + e.message);
+  }
+}
+
+function renderNoticePage() {
+  const s = settingsData;
+  const get = (key, fallback) => (s[key] && String(s[key]).trim()) || fallback;
+  
+  document.getElementById('notice-title').innerText = get('訂購須知_頁標題', '訂購須知');
+  document.getElementById('notice-sub').innerText = get('訂購須知_頁副標', '下單前請詳細閱讀');
+  document.getElementById('notice-hl-label').innerText = get('訂購須知_重點標', '⏰ 重要時間');
+  document.getElementById('notice-hl-body').innerHTML = get('訂購須知_重點文', '每週製作有限<br>建議提早下單避免向隅');
+  document.getElementById('notice-footer').innerText = get('訂購須知_結尾', '餅乾無添加防腐劑，請注意保存期限喔。');
+  
+  const defaults = [
+    { t: '🚚 取貨方式', b: '現場取貨：彰化縣和美鎮，詳細地址於確認訊息提供。<br>宅配到府：黑貓宅急便，運費依重量計算。' },
+    { t: '💳 付款方式', b: '現場取貨：取貨時現場付款或事前匯款均可。<br>宅配到府：請於收到訂單確認訊息後完成匯款，匯款帳號將於確認訊息中提供。' },
+    { t: '⚠️ 過敏原標示', b: '本產品含：蛋、奶、杏仁、麥（麩質）。於同一環境製作，無法保證完全無交叉污染，對堅果嚴重過敏者請謹慎。' },
+    { t: '🔄 退換貨說明', b: '食品類商品一經拆封恕不接受退換。若收到商品有明顯瑕疵，請於收貨當日拍照聯繫客服處理。' },
+    { t: '📦 保存方式', b: '請置於陰涼乾燥處，避免陽光直射。開封後請盡速食用，以密封袋保存。賞味期限為製造日起 30 天。' }
+  ];
+  
+  let html = '';
+  for (let i = 1; i <= 5; i++) {
+    const title = get('訂購須知_FAQ' + i + '_標', defaults[i-1].t);
+    const body = get('訂購須知_FAQ' + i + '_文', defaults[i-1].b);
+    html += `
+      <div class="acc-item">
+        <div class="acc-head" onclick="tog(this)"><span class="acc-head-title">${title}</span><span class="acc-icon">＋</span></div>
+        <div class="acc-body">${body}</div>
+      </div>`;
+  }
+  document.getElementById('notice-accordion').innerHTML = html;
+}
+
+function renderStoryPage() {
+  const s = settingsData;
+  const get = (key, fallback) => (s[key] && String(s[key]).trim()) || fallback;
+
+  document.getElementById('story-brand').innerText = get('故事頁_品牌名', '和美小玉家');
+  document.getElementById('story-brand-en').innerText = get('故事頁_品牌英文', "Hemei Yu's Bakes");
+  document.getElementById('story-year').innerText = get('故事頁_副標', 'SINCE 2005 · 彰化和美');
+  document.getElementById('story-section-label').innerText = get('故事頁_章節標題', '小玉家的故事');
+  document.getElementById('story-footer-title').innerText = get('故事頁_結尾標', '用心製作，無添加防腐劑');
+  document.getElementById('story-footer-sub').innerText = get('故事頁_結尾副', '每一片都是媽媽味道的延續');
+
+  // 插圖大小(預設 90px)
+  const illusW = parseInt(get('故事頁_插圖寬度', '90')) || 90;
+  document.documentElement.style.setProperty('--story-illus-w', illusW + 'px');
+
+  const defaults = [
+    { num: '01 — 起點', text: '2005 年，為了做點心給孩子們吃，一台小烤箱出現在<strong>小玉媽媽的廚房</strong>。這台充滿愛的小烤箱，烤出了我們記憶中的香氣。', img: 'https://hemeiyubakes.github.io/hemeiyubakes/assets/%E5%B0%8F%E6%99%82%E5%80%99%E5%AA%BD%E5%AA%BD%E7%83%A4%E9%A4%85%E4%B9%BE%E7%B5%A6%E6%88%91%E5%80%91%E5%90%83.svg' },
+    { num: '02 — 堅持', text: '那個在爐火旁忙碌穿梭的身影，與餅乾香氣交織成了家中的日常。因為喜歡這份味道的人越來越多，<strong>這份堅持，一守就是二十年</strong>。', img: 'https://hemeiyubakes.github.io/hemeiyubakes/assets/%E5%AA%BD%E5%AA%BD%E7%8D%A8%E8%87%AA%E5%BF%99%E7%A2%8C%E7%9A%84%E8%BA%AB%E5%BD%B1.svg' },
+    { num: '03 — 傳承', text: '如今，換孩子們回家接手，升級了設備、延續了手藝。我們是「<strong>和美小玉家</strong>」，想讓媽媽守護二十年的味道，飄往更遠的地方。', img: 'https://hemeiyubakes.github.io/hemeiyubakes/assets/%E6%88%91%E5%80%91%E8%A6%81%E5%BB%B6%E7%BA%8C%E5%AA%BD%E5%AA%BD%E7%9A%84%E5%A5%BD%E5%91%B3%E9%81%93.svg' }
+  ];
+
+  let html = '';
+  for (let i = 1; i <= 3; i++) {
+    const num = get('故事頁_段' + i + '_標', defaults[i-1].num);
+    const text = get('故事頁_段' + i + '_文', defaults[i-1].text);
+    const img = get('故事頁_段' + i + '_圖', defaults[i-1].img);
+    html += `
+      <div class="story-block">
+        <div class="story-block-left">
+          <div class="story-num">${num}</div>
+          <div class="story-text">${text}</div>
+        </div>
+        <div class="story-illus"><img src="${img}" alt="" onerror="this.style.display='none'"></div>
+      </div>`;
+  }
+  document.getElementById('story-blocks').innerHTML = html;
+}
+
+function renderProducts() {
+  const stack = document.getElementById('product-stack');
+  if (productsData.length === 0) {
+    stack.innerHTML = '<div class="product-row" style="border-radius:16px;justify-content:center;color:var(--muted);font-size:13px">目前沒有商品</div>';
+    document.getElementById('sec-cnt').innerText = '0 項';
+    return;
+  }
+  let html = '';
+  productsData.forEach((p, i) => {
+    const maxAttr = p.maxQty > 0 ? `max="${p.maxQty}"` : '';
+    const limitText = p.maxQty > 0 ? `<div class="p-tag">限購 ${p.maxQty} 個</div>` : '';
+    html += `
+      <div class="product-row" id="prow_${i}">
+        <img class="p-img" src="${p.image || ''}" onclick="openProductInfo(${i})" onerror="this.style.display='none'">
+        <div class="p-info">
+          <div class="p-name" onclick="openProductInfo(${i})">${p.name} <i class="info-dot">i</i></div>
+          ${limitText}
+          <div class="p-price">NT$ ${p.price}</div>
+        </div>
+        <div class="qty-ctrl">
+          <button class="q-btn" onclick="changeQty(${i},-1)">－</button>
+          <input class="q-num" id="qty_${i}" type="number" value="0" min="0" ${maxAttr} onchange="onProductQtyChange(${i})">
+          <button class="q-btn" id="qbtn_plus_${i}" onclick="changeQty(${i},1)">＋</button>
+        </div>
+      </div>`;
+  });
+  stack.innerHTML = html;
+  document.getElementById('sec-cnt').innerText = productsData.length + ' 項';
+}
+
+function renderDynFields() {
+  const zone = document.getElementById('dynZone');
+  zone.innerHTML = '';
+  if (!fieldsData || fieldsData.length === 0) return;
+  fieldsData.forEach(f => {
+    let html = `<div class="dyn-field"><span class="f-label">${f.name}${f.req ? ' *' : ''}</span>`;
+    if (f.type === 'text') {
+      html += `<input class="f-input" name="${f.name}" ${f.req ? 'required' : ''}>`;
+    } else {
+      html += '<div class="dyn-opt">';
+      f.options.forEach(o => {
+        html += `<label><input type="${f.type}" name="${f.name}" value="${o}"> ${o}</label>`;
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+    zone.innerHTML += html;
+  });
+}
+
+// 付款方式固定匯款,不需切換邏輯
+function initPaymentOptions() {
+  currentPayment = '匯款';
+}
+
+/* ---- 主要重新渲染 ---- */
+function refreshAll() {
+  updateShipping();
+  renderAddons();
+  renderPromotions();
+  updateTotal();
+}
+
+/* ---- 商品數量 ---- */
 function changeQty(i, delta) {
   const input = document.getElementById('qty_' + i);
   const max = productsData[i].maxQty;
   let val = Math.max(0, parseInt(input.value || 0) + delta);
   if (max > 0) val = Math.min(val, max);
   input.value = val;
-  document.getElementById('card_' + i).classList.toggle('selected', val > 0);
   refreshAll();
 }
-function onQtyChange(i) {
+
+function onProductQtyChange(i) {
   const input = document.getElementById('qty_' + i);
   const max = productsData[i].maxQty;
   let val = parseInt(input.value);
   if (isNaN(val) || val < 0) val = 0;
   if (max > 0 && val > max) val = max;
   input.value = val;
-  document.getElementById('card_' + i).classList.toggle('selected', val > 0);
   refreshAll();
 }
-function refreshAll() { renderAddons(); renderPromotions(); updateTotal(); }
+
+/* ---- 加購（贈品）邏輯 ---- */
 function parseGiftRules(rulesStr) {
   if (!rulesStr) return [];
   return rulesStr.split(',').map(r => {
@@ -352,10 +793,12 @@ function parseGiftRules(rulesStr) {
     return { type: parts[0], mode: parts[1], n: parseInt(parts[2]) || 1 };
   }).filter(r => r);
 }
+
 function calcAddonForProduct(addon) {
   const rules = parseGiftRules(addon.giftRules);
   let autoGifted = 0, maxSelectable = 0;
   const autoTypes = [], selectTypes = [];
+
   rules.forEach(rule => {
     let matchingQty = 0;
     productsData.forEach((p, i) => {
@@ -374,50 +817,75 @@ function calcAddonForProduct(addon) {
       if (maxSel > 0) selectTypes.push({ type: rule.type, qty: matchingQty, max: maxSel });
     }
   });
+
   let userSelected = addonSelections[addon.name] || 0;
   userSelected = Math.max(0, Math.min(userSelected, maxSelectable));
   if (addon.maxQty) userSelected = Math.min(userSelected, addon.maxQty);
   addonSelections[addon.name] = userSelected;
+
   return { autoGifted, maxSelectable, userSelected, totalGifted: autoGifted + userSelected, autoTypes, selectTypes };
 }
+
 function shouldShowAddon(addon) {
   const cond = (addon.showCondition || 'always').trim();
   if (cond === 'always') return true;
   if (cond.startsWith('有')) {
     const type = cond.substring(1);
-    return productsData.some((p, i) => p.type === type && parseInt(document.getElementById('qty_' + i)?.value || 0) > 0);
+    return productsData.some((p, i) =>
+      p.type === type && parseInt(document.getElementById('qty_' + i)?.value || 0) > 0
+    );
   }
   return true;
 }
+
 function renderAddons() {
-  const section = document.getElementById('addonSection');
-  const container = document.getElementById('addonItems');
-  const anySelected = productsData.some((p, i) => parseInt(document.getElementById('qty_' + i)?.value || 0) > 0);
-  if (!anySelected || addonsData.length === 0) { section.style.display = 'none'; return; }
-  let anyAddonShown = false, html = '';
+  const grid = document.getElementById('addon-grid');
+  const label = document.getElementById('addon-section-label');
+
+  const anySelected = productsData.some((p, i) =>
+    parseInt(document.getElementById('qty_' + i)?.value || 0) > 0
+  );
+  if (!anySelected || addonsData.length === 0) {
+    grid.innerHTML = '';
+    label.style.display = 'none';
+    return;
+  }
+
+  let html = '', anyShown = false;
   addonsData.forEach(addon => {
     if (!shouldShowAddon(addon)) return;
     const calc = calcAddonForProduct(addon);
-    const hasAuto = calc.autoGifted > 0, hasSelectable = calc.maxSelectable > 0;
+    const hasAuto = calc.autoGifted > 0;
+    const hasSelectable = calc.maxSelectable > 0;
     if (!hasAuto && !hasSelectable) return;
-    anyAddonShown = true;
-    let h = '<div class="addon-item">';
-    h += `<div class="addon-name">📦 ${addon.name}</div>`;
-    if (addon.description) h += `<div class="addon-desc">${addon.description}</div>`;
+
+    anyShown = true;
+    let item = '<div class="addon-item"><div class="addon-head"><div class="addon-body">';
+    item += `<div class="addon-name">📦 ${addon.name}</div>`;
+    if (addon.description) item += `<div class="addon-desc">${addon.description}</div>`;
     if (hasAuto) {
       const autoDesc = calc.autoTypes.map(t => `${t.type} ${t.qty} 個贈 ${t.gift} 個`).join('、');
-      h += `<div class="addon-auto-info">✨ 自動贈送：${calc.autoGifted} 個（${autoDesc}）</div>`;
+      item += `<div class="addon-auto">✨ 自動贈送：${calc.autoGifted} 個（${autoDesc}）</div>`;
     }
     if (hasSelectable) {
       const selectDesc = calc.selectTypes.map(t => t.type).join('、');
-      h += `<div class="addon-selectable"><div class="addon-selectable-prompt">有送禮需求嗎？選擇 ${selectDesc} 需要的紙袋數量</div><div class="addon-selectable-row"><button class="qty-btn" onclick="changeAddonQty('${addon.name}', -1)">－</button><input class="qty-input" id="addon_${addon.name}" type="number" value="${calc.userSelected}" min="0" max="${calc.maxSelectable}" onchange="onAddonInputChange('${addon.name}')"><button class="qty-btn" onclick="changeAddonQty('${addon.name}', 1)">＋</button><span class="addon-limit-hint">最多 ${calc.maxSelectable} 個</span></div></div>`;
+      item += `
+        <div class="addon-selectable">
+          <div class="addon-selectable-prompt">有送禮需求嗎？選擇 ${selectDesc} 需要的紙袋數量</div>
+          <button class="q-btn" onclick="changeAddonQty('${addon.name}', -1)">－</button>
+          <input class="q-num" id="addon_${addon.name}" type="number" value="${calc.userSelected}" min="0" max="${calc.maxSelectable}" onchange="onAddonInputChange('${addon.name}')">
+          <button class="q-btn" onclick="changeAddonQty('${addon.name}', 1)">＋</button>
+          <span class="addon-limit-hint">最多 ${calc.maxSelectable} 個</span>
+        </div>`;
     }
-    h += '</div>';
-    html += h;
+    item += '</div></div></div>';
+    html += item;
   });
-  section.style.display = anyAddonShown ? 'block' : 'none';
-  container.innerHTML = html;
+
+  grid.innerHTML = html;
+  label.style.display = anyShown ? 'flex' : 'none';
 }
+
 function changeAddonQty(addonName, delta) {
   const input = document.getElementById('addon_' + addonName);
   if (!input) return;
@@ -427,6 +895,7 @@ function changeAddonQty(addonName, delta) {
   addonSelections[addonName] = val;
   refreshAll();
 }
+
 function onAddonInputChange(addonName) {
   const input = document.getElementById('addon_' + addonName);
   if (!input) return;
@@ -437,66 +906,127 @@ function onAddonInputChange(addonName) {
   addonSelections[addonName] = val;
   refreshAll();
 }
+
+/* ---- 優惠計算 ---- */
 function calcPromotions() {
   const items = getSelectedItems();
   const results = [];
+
   promotionsData.forEach(promo => {
-    let qualifyQty = 0, qualifyAmount = 0, giftQty = 0, triggered = false, remaining = 0;
+    let qualifyQty = 0, qualifyAmount = 0, giftQty = 0, triggered = false;
+    let remaining = 0;
+
     if (promo.conditionType === '滿件') {
       const cps = promo.conditionProduct ? promo.conditionProduct.split(',').map(s => s.trim()) : [];
       let matched = 0;
-      items.forEach(item => { if (cps.length === 0 || cps.indexOf(item.name) >= 0) matched += item.qty; });
+      items.forEach(item => {
+        if (cps.length === 0 || cps.indexOf(item.name) >= 0) matched += item.qty;
+      });
       qualifyQty = matched;
       if (matched >= promo.conditionQty && promo.conditionQty > 0) {
         triggered = true;
-        giftQty = promo.multipleTrigger ? Math.floor(matched / promo.conditionQty) * promo.giftQty : promo.giftQty;
-      } else { remaining = promo.conditionQty - matched; }
+        giftQty = promo.multipleTrigger
+          ? Math.floor(matched / promo.conditionQty) * promo.giftQty
+          : promo.giftQty;
+      } else {
+        remaining = promo.conditionQty - matched;
+      }
     } else if (promo.conditionType === '滿額') {
       const cps = promo.conditionProduct ? promo.conditionProduct.split(',').map(s => s.trim()) : [];
       let matched = 0;
-      items.forEach(item => { if (cps.length === 0 || cps.indexOf(item.name) >= 0) matched += (item.price || 0) * item.qty; });
+      items.forEach(item => {
+        if (cps.length === 0 || cps.indexOf(item.name) >= 0) matched += (item.price || 0) * item.qty;
+      });
       qualifyAmount = matched;
       if (matched >= promo.conditionAmount && promo.conditionAmount > 0) {
         triggered = true;
-        giftQty = promo.multipleTrigger ? Math.floor(matched / promo.conditionAmount) * promo.giftQty : promo.giftQty;
-      } else { remaining = promo.conditionAmount - matched; }
+        giftQty = promo.multipleTrigger
+          ? Math.floor(matched / promo.conditionAmount) * promo.giftQty
+          : promo.giftQty;
+      } else {
+        remaining = promo.conditionAmount - matched;
+      }
     }
+
     results.push({ promo, qualifyQty, qualifyAmount, giftQty, triggered, remaining });
   });
+
   return results;
 }
+
 function renderPromotions() {
-  const section = document.getElementById('promoSection');
-  const container = document.getElementById('promoItems');
+  const strip = document.getElementById('promo-strip');
   const results = calcPromotions();
-  let html = '', anyShown = false;
+
+  // 優先顯示已達標的優惠，其次接近門檻的
+  const triggered = results.find(r => r.triggered);
+  if (triggered) {
+    document.getElementById('promo-main').innerText = `🎉 ${triggered.promo.name} 已達標`;
+    document.getElementById('promo-sub').innerText = `贈送 ${triggered.promo.giftName} x ${triggered.giftQty}`;
+    strip.classList.add('show');
+    return;
+  }
+
+  let closeOne = null;
   results.forEach(r => {
     if (r.triggered) return;
     const threshold = r.promo.progressThreshold || 0;
     if (threshold > 0 && r.remaining > 0 && r.remaining <= threshold) {
-      const unit = r.promo.conditionType === '滿額' ? '元' : '個';
-      html += `<div class="promo-item">✨ 再買 ${r.remaining} ${unit}就達「${r.promo.name}」</div>`;
-      anyShown = true;
+      if (!closeOne || r.remaining < closeOne.remaining) closeOne = r;
     }
   });
-  section.style.display = anyShown ? 'block' : 'none';
-  container.innerHTML = html;
+
+  if (closeOne) {
+    const unit = closeOne.promo.conditionType === '滿額' ? '元' : '個';
+    document.getElementById('promo-main').innerText = `再買 ${closeOne.remaining} ${unit}就達優惠`;
+    document.getElementById('promo-sub').innerText = closeOne.promo.name;
+    strip.classList.add('show');
+  } else {
+    strip.classList.remove('show');
+  }
 }
-function buildGiftRowsHtml() {
-  let html = '';
-  addonsData.forEach(addon => {
-    if (!shouldShowAddon(addon)) return;
-    const calc = calcAddonForProduct(addon);
-    if (calc.totalGifted > 0) html += `<div class="subtotal-row gift-row"><span>🎁 ${addon.name} x${calc.totalGifted}<span class="gift-source">（贈品）</span></span><span>—</span></div>`;
+
+/* ---- 運送方式（依商品動態） ---- */
+function updateShipping() {
+  const methods = new Set();
+  productsData.forEach((p, i) => {
+    if (parseInt(document.getElementById('qty_' + i)?.value || 0) > 0) {
+      (p.shipping || '').split(',').forEach(m => methods.add(m.trim()));
+    }
   });
-  calcPromotions().forEach(r => {
-    if (r.triggered && r.giftQty > 0) html += `<div class="subtotal-row gift-row"><span>🎁 ${r.promo.giftName} x${r.giftQty}<span class="gift-source">（${r.promo.name}）</span></span><span>—</span></div>`;
+  if (methods.size === 0) {
+    productsData.forEach(p => (p.shipping || '').split(',').forEach(m => methods.add(m.trim())));
+  }
+  const select = document.getElementById('f-pickup');
+  const prev = select.value;
+  select.innerHTML = '';
+  let foundPrev = false;
+  methods.forEach(m => {
+    if (!m) return;
+    const opt = document.createElement('option');
+    opt.value = m;
+    opt.innerText = m;
+    if (m === prev) { opt.selected = true; foundPrev = true; }
+    select.appendChild(opt);
   });
-  return html;
+  if (!foundPrev && select.options.length > 0) select.selectedIndex = 0;
+  onShippingChange();
 }
+
+function onShippingChange() {
+  const v = document.getElementById('f-pickup').value;
+  const show = v && v !== '現場取貨';
+  document.getElementById('address-group').style.display = show ? 'block' : 'none';
+}
+
 function getSelectedItems() {
-  return productsData.map((p, i) => ({ name: p.name, price: p.price, type: p.type, qty: parseInt(document.getElementById('qty_' + i)?.value || 0) })).filter(it => it.qty > 0);
+  return productsData.map((p, i) => ({
+    name: p.name, price: p.price, type: p.type,
+    qty: parseInt(document.getElementById('qty_' + i)?.value || 0)
+  })).filter(it => it.qty > 0);
 }
+
+/* ---- 訂單摘要 ---- */
 function updateTotal() {
   let subtotal = 0, itemsHtml = '', hasItem = false;
   productsData.forEach((p, i) => {
@@ -505,431 +1035,158 @@ function updateTotal() {
       hasItem = true;
       const sub = p.price * qty;
       subtotal += sub;
-      itemsHtml += `<div class="subtotal-row"><span>${p.name} x${qty}</span><span>${sub} 元</span></div>`;
+      itemsHtml += `<div class="sum-row"><span class="label">${p.name} x${qty}</span><span class="val">$${sub}</span></div>`;
     }
   });
-  document.getElementById('subtotalBox').style.display = hasItem ? 'block' : 'none';
-  document.getElementById('subtotalItems').innerHTML = itemsHtml;
-  document.getElementById('subtotalGifts').innerHTML = buildGiftRowsHtml();
-  document.getElementById('totalAmt').innerText = subtotal + ' 元';
-}
-function fillFriend() {
-  document.getElementById('phone').value = '熟客';
-  document.getElementById('customerInfo').innerHTML = '<div class="hint" style="color:#888;font-size:12px;margin-top:4px">已標記為熟客</div>';
+
+  const giftsHtml = buildGiftRowsHtml();
+
+  document.getElementById('summary-block').style.display = hasItem ? 'block' : 'none';
+  document.getElementById('summary-items').innerHTML = itemsHtml;
+  document.getElementById('summary-gifts').innerHTML = giftsHtml;
+  document.getElementById('sum-total').innerText = '$' + subtotal;
+
+  // 付款方式顯示判斷
+  const paymentBlock = document.getElementById('payment-block');
+  paymentBlock.style.display = hasItem ? 'block' : 'none';
+
+  // 付款方式固定為匯款(不再需要強制邏輯)
+  currentPayment = '匯款';
 }
 
-async function lookupCustomer() {
-  const phone = document.getElementById('phone').value.trim();
-  const box = document.getElementById('customerInfo');
-  if (!phone) { box.innerHTML = ''; return; }
-  box.innerHTML = '<div class="hint">查詢中...</div>';
-  try {
-    const res = await callServer('lookupCustomer', { phone });
-    if (res && res.found) {
-      if (!document.getElementById('name').value) document.getElementById('name').value = res.name;
-      if (!document.getElementById('address').value) document.getElementById('address').value = res.address;
-      box.innerHTML = `<div class="customer-info">✅ 老客戶｜上次：${res.lastOrderDate}｜累計 ${res.orderCount} 筆</div>`;
-    } else {
-      box.innerHTML = '<div class="customer-info">🆕 新客戶</div>';
+function buildGiftRowsHtml() {
+  let html = '';
+  addonsData.forEach(addon => {
+    if (!shouldShowAddon(addon)) return;
+    const calc = calcAddonForProduct(addon);
+    if (calc.totalGifted > 0) {
+      html += `<div class="sum-row gift"><span class="label">🎁 ${addon.name} x${calc.totalGifted}（贈品）</span><span class="val">—</span></div>`;
     }
-  } catch (e) { box.innerHTML = '<div class="error">查詢失敗：' + e.message + '</div>'; }
+  });
+  calcPromotions().forEach(r => {
+    if (r.triggered && r.giftQty > 0) {
+      html += `<div class="sum-row gift"><span class="label">🎁 ${r.promo.giftName} x${r.giftQty}（${r.promo.name}）</span><span class="val">—</span></div>`;
+    }
+  });
+  return html;
 }
-async function submitOrder() {
-  const msg = document.getElementById('submitMsg');
-  msg.className = 'error'; msg.textContent = '';
-  const name = document.getElementById('name').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  const address = document.getElementById('address').value.trim();
-  const lineUserId = document.getElementById('lineUserId').value.trim();
-  const orderSource = document.getElementById('orderSource').value;
-  const shipping = document.getElementById('shippingSelect').value;
-  const payment = document.getElementById('paymentSelect').value;
-  const note = document.getElementById('note').value.trim();
-  if (!name) { msg.textContent = '姓名為必填'; return; }
-  if (!orderSource) { msg.textContent = '請選擇訂單來源'; return; }
-  if (shipping !== '現場取貨' && !address) { msg.textContent = '宅配需要填寫地址'; return; }
+
+/* ---- 確認 + 送出 ---- */
+function showConfirm() {
+  const name = document.getElementById('f-name').value.trim();
+  const tel = document.getElementById('f-tel').value.trim();
+  if (!name) { alert('請填寫姓名'); return; }
+  if (!/^09\d{8}$/.test(tel)) { alert('手機號碼格式不正確，請輸入 09 開頭的 10 位數字'); return; }
   const items = getSelectedItems();
-  if (items.length === 0) { msg.textContent = '請至少選擇一項商品'; return; }
-  const payload = { password: PASSWORD, name, tel: phone, address, lineUserId, items, addonSelections, shipping, payment, orderSource, note };
-  msg.textContent = '送出中...';
-  try {
-    const res = await callServer('submitInternalOrder', payload);
-    if (res && res.success) {
-      msg.className = 'success';
-      msg.textContent = '✅ 訂單已建立：' + res.orderId;
-      setTimeout(() => { if (confirm('訂單 ' + res.orderId + ' 已建立，要繼續填下一筆嗎？')) resetForm(); }, 300);
-    } else { msg.textContent = '失敗：' + (res.error || '未知錯誤'); }
-  } catch (e) { msg.textContent = '送出失敗：' + e.message; }
-}
-function resetForm() {
-  ['name','phone','address','lineUserId','note'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('orderSource').value = '';
-  document.getElementById('shippingSelect').value = '現場取貨';
-  document.getElementById('paymentSelect').value = '現場付款';
-  document.getElementById('customerInfo').innerHTML = '';
-  addonSelections = {};
-  productsData.forEach((p, i) => {
-    const input = document.getElementById('qty_' + i);
-    if (input) input.value = 0;
-    const card = document.getElementById('card_' + i);
-    if (card) card.classList.remove('selected');
+  if (items.length === 0) { alert('請至少選擇一項商品'); return; }
+
+  const shipping = document.getElementById('f-pickup').value;
+  const address = document.getElementById('f-address').value.trim();
+  const needAddress = shipping && shipping !== '現場取貨';
+  if (needAddress && !address) { alert('請填寫收件地址'); return; }
+
+  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+  const note = document.getElementById('f-note').value.trim();
+
+  const giftLines = [];
+  addonsData.forEach(addon => {
+    if (!shouldShowAddon(addon)) return;
+    const calc = calcAddonForProduct(addon);
+    if (calc.totalGifted > 0) giftLines.push(`${addon.name} x${calc.totalGifted}（贈品）`);
   });
-  refreshAll();
-  document.getElementById('submitMsg').textContent = '';
-  window.scrollTo(0, 0);
+  calcPromotions().forEach(r => {
+    if (r.triggered && r.giftQty > 0) giftLines.push(`${r.promo.giftName} x${r.giftQty}（${r.promo.name}）`);
+  });
+
+  const itemsDisplay = items.map(i => i.name + ' x' + i.qty).join('<br>');
+  const giftsDisplay = giftLines.length > 0 ? '<br>🎁 ' + giftLines.join('<br>🎁 ') : '';
+
+  let html = '';
+  html += `<div class="confirm-line"><span class="lbl">姓名</span><span class="val">${name}</span></div>`;
+  html += `<div class="confirm-line"><span class="lbl">電話</span><span class="val">${tel}</span></div>`;
+  html += `<div class="confirm-line"><span class="lbl">商品</span><span class="val">${itemsDisplay}${giftsDisplay}</span></div>`;
+  html += `<div class="confirm-line"><span class="lbl">合計</span><span class="val" style="color:var(--orange);font-weight:700">$${subtotal}</span></div>`;
+  html += `<div class="confirm-line"><span class="lbl">取貨方式</span><span class="val">${shipping}</span></div>`;
+  if (address) html += `<div class="confirm-line"><span class="lbl">地址</span><span class="val">${address}</span></div>`;
+  html += `<div class="confirm-line"><span class="lbl">付款方式</span><span class="val">${currentPayment}</span></div>`;
+  if (note) html += `<div class="confirm-line"><span class="lbl">備註</span><span class="val">${note}</span></div>`;
+
+  document.getElementById('conf-icon').innerText = '📝';
+  document.getElementById('conf-title').innerText = '訂單確認';
+  document.getElementById('conf-sub').innerText = '請確認以下資料後送出';
+  document.getElementById('conf-lines').innerHTML = html;
+  document.getElementById('conf-orderid').innerText = '';
+  document.getElementById('conf-submit-btn').style.display = 'block';
+  document.getElementById('conf-submit-btn').disabled = false;
+  document.getElementById('conf-submit-btn').innerText = '確認並送出';
+  document.getElementById('conf-back-btn').style.display = 'block';
+  document.getElementById('confirm-overlay').classList.add('show');
 }
 
-/* ===== Tab 2: 排單系統 ===== */
-async function loadSchedule() {
-  try {
-    scheduleData = await callServer('getScheduleData', {});
-    if (scheduleData.error) { alert('載入失敗：' + scheduleData.error); return; }
-    if (calendarYear === undefined) {
-      const today = new Date();
-      calendarYear = today.getFullYear();
-      calendarMonth = today.getMonth();
-    }
-    renderPrepAlert();
-    renderCalendar();
-    renderUnscheduled();
-    fillPeriodSelect();
-  } catch (e) { alert('排單載入失敗：' + e.message); }
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('show');
 }
-function renderPrepAlert() {
-  const el = document.getElementById('prepAlert');
-  const t = scheduleData.prepAlertToday || 0;
-  const tm = scheduleData.prepAlertTomorrow || 0;
-  if (t === 0 && tm === 0) { el.classList.add('hidden'); return; }
-  let parts = [];
-  if (t > 0) parts.push(`今天有 <b>${t}</b> 筆要備料`);
-  if (tm > 0) parts.push(`明天有 <b>${tm}</b> 筆要備料`);
-  el.innerHTML = '⚠️ ' + parts.join('、');
-  el.classList.remove('hidden');
-}
-function fillPeriodSelect() {
-  document.getElementById('periodSelect').innerHTML = (scheduleData.periods || []).map(p => `<option value="${p}">${p}</option>`).join('');
-}
-function prevMonth() { calendarMonth--; if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; } renderCalendar(); }
-function nextMonth() { calendarMonth++; if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; } renderCalendar(); }
-function renderCalendar() {
-  document.getElementById('calendarTitle').innerText = `${calendarYear} 年 ${calendarMonth + 1} 月`;
-  const firstDay = new Date(calendarYear, calendarMonth, 1);
-  const lastDay = new Date(calendarYear, calendarMonth + 1, 0);
-  const startWeekday = firstDay.getDay();
-  const daysInMonth = lastDay.getDate();
-  const prevMonthLastDay = new Date(calendarYear, calendarMonth, 0).getDate();
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const scheduledByDate = {};
-  (scheduleData.scheduled || []).forEach(o => {
-    if (!scheduledByDate[o.pickupDate]) scheduledByDate[o.pickupDate] = [];
-    scheduledByDate[o.pickupDate].push(o);
+
+async function submitOrder() {
+  const btn = document.getElementById('conf-submit-btn');
+  btn.disabled = true;
+  btn.innerText = '傳送中...';
+
+  const items = getSelectedItems();
+  let dynStr = '';
+  fieldsData.forEach(f => {
+    const v = f.type === 'text'
+      ? (document.getElementsByName(f.name)[0]?.value || '')
+      : Array.from(document.querySelectorAll(`input[name="${f.name}"]:checked`)).map(el => el.value).join(', ');
+    dynStr += `${f.name}: ${v}\n`;
   });
-  const grid = document.getElementById('calendarGrid');
-  let html = '';
-  const totalCells = Math.ceil((startWeekday + daysInMonth) / 7) * 7;
-  for (let i = 0; i < totalCells; i++) {
-    let dayNum, isOtherMonth = false, dateObj;
-    if (i < startWeekday) {
-      dayNum = prevMonthLastDay - (startWeekday - 1 - i);
-      isOtherMonth = true;
-      dateObj = new Date(calendarYear, calendarMonth - 1, dayNum);
-    } else if (i >= startWeekday + daysInMonth) {
-      dayNum = i - startWeekday - daysInMonth + 1;
-      isOtherMonth = true;
-      dateObj = new Date(calendarYear, calendarMonth + 1, dayNum);
-    } else {
-      dayNum = i - startWeekday + 1;
-      dateObj = new Date(calendarYear, calendarMonth, dayNum);
-    }
-    const dateStr = formatDateStr(dateObj);
-    const isToday = dateObj.getTime() === today.getTime();
-    const ordersHere = scheduledByDate[dateStr] || [];
-    const classes = ['day-cell'];
-    if (isOtherMonth) classes.push('other-month');
-    if (isToday) classes.push('today');
-    if (selectedOrderId) classes.push('target-mode');
-    let chips = '';
-    ordersHere.forEach(o => {
-      const idShort = o.orderId.slice(-3);
-      let chipCls = '';
-      if (o.pickupConfirmed) chipCls = ' confirmed';
-      chips += `<div class="day-order-chip${chipCls}" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}">${idShort} ${o.name}</div>`;
+
+  const payload = {
+    action: 'submitOrder',
+    name: document.getElementById('f-name').value.trim(),
+    tel: document.getElementById('f-tel').value.trim(),
+    items,
+    payment: currentPayment,
+    shipping: document.getElementById('f-pickup').value,
+    address: document.getElementById('f-address').value.trim(),
+    dyn: dynStr,
+    note: document.getElementById('f-note').value.trim(),
+    addonSelections,
+    lineUserId,
+    appVersion: APP_VERSION
+  };
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
     });
-          // 產量顯示
-      let capacityHtml = '';
-      const load = (scheduleData.dailyLoad && scheduleData.dailyLoad[dateStr]) || {};
-      const caps = scheduleData.dailyCapacity || {};
-      const totalCap = scheduleData.totalCapacity || 0;
-      let totalCur = 0;
-      Object.keys(load).forEach(f => { totalCur += load[f] || 0; });
-      Object.keys(caps).forEach(flavor => {
-        const cur = load[flavor] || 0;
-        const max = caps[flavor];
-        if (!max) return;
-        const percent = Math.round(cur / max * 100);
-        const color = percent > 100 ? '#c00' : percent > 85 ? '#c33' : percent > 60 ? '#f80' : '#4a4';
-        capacityHtml += `<div class="cap-line" style="color:${color}">${flavor} ${cur}/${max}</div>`;
-      });
-      if (totalCap) {
-        const tPercent = Math.round(totalCur / totalCap * 100);
-        const tColor = tPercent > 100 ? '#c00' : tPercent > 85 ? '#c33' : tPercent > 60 ? '#f80' : '#4a4';
-        capacityHtml += `<div class="cap-line" style="color:${tColor};border-top:1px dotted #ccc;padding-top:2px;margin-top:2px">總 ${totalCur}/${totalCap}</div>`;
+    const result = await res.json();
+    if (result.status === 'OK') {
+      document.getElementById('conf-icon').innerText = '🎉';
+      document.getElementById('conf-title').innerText = '訂單已送出！';
+      document.getElementById('conf-sub').innerHTML = '將透過 LINE 收到確認通知<br>感謝支持，期待與您相見 🍪';
+      if (result.orderId) {
+        document.getElementById('conf-orderid').innerText = '訂單編號 ' + result.orderId;
       }
-      html += `<div class="${classes.join(' ')}" onclick="onDayClick('${dateStr}')"><div class="day-number">${dayNum}</div><div class="day-orders">${chips}</div><div class="day-capacity">${capacityHtml}</div></div>`;
-  }
-  grid.innerHTML = html;
-}
-function formatDateStr(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${dd}`;
-}
-function onDayClick(dateStr) {
-  if (!selectedOrderId) return;
-  const order = findOrder(selectedOrderId);
-  if (!order) return;
-  pendingDate = dateStr;
-  document.getElementById('periodModalInfo').innerHTML = `將「${order.name}」（${order.orderId.slice(-3)}）<br>排定到 <b>${dateStr}</b>`;
-  document.getElementById('periodModalMsg').textContent = '';
-  document.getElementById('periodModal').classList.add('show');
-}
-function findOrder(orderId) {
-  let o = (scheduleData.unscheduled || []).find(x => x.orderId === orderId);
-  if (o) return o;
-  return (scheduleData.scheduled || []).find(x => x.orderId === orderId);
-}
-function renderUnscheduled() {
-  const list = scheduleData.unscheduled || [];
-  document.getElementById('unscheduledCount').innerText = `（${list.length} 筆）`;
-  const box = document.getElementById('unscheduledList');
-  if (list.length === 0) { box.innerHTML = '<div class="hint">目前沒有待排定的訂單 ✨</div>'; return; }
-  box.innerHTML = list.map(o => {
-    const idShort = o.orderId.slice(-3);
-    const shipTag = o.shipping === '現場取貨' ? `<span class="order-card-tag pickup">${o.shipping}</span>` : `<span class="order-card-tag ship">${o.shipping}</span>`;
-    const sel = (selectedOrderId === o.orderId) ? ' selected' : '';
-    const noteBadge = o.scheduleNote ? `<div style="font-size:11px;color:#D32F2F;background:#fff5f5;padding:4px 8px;border-radius:4px;margin-top:4px">📝 ${o.scheduleNote}</div>` : '';
-    return `<div class="order-card${sel}" onclick="selectOrder('${o.orderId}')"><div class="order-card-header"><span class="order-card-id">#${idShort}</span><span style="display:flex;gap:6px;align-items:center">${shipTag}<span class="info-btn-sm" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')">ⓘ</span></span></div><div class="order-card-name">${o.name}</div><div class="order-card-items">${o.items.split('\\n').slice(0, 2).join('｜')}</div>${noteBadge}</div>`;
-  }).join('');
-}
-function selectOrder(orderId) {
-  selectedOrderId = (selectedOrderId === orderId) ? null : orderId;
-  document.getElementById('scheduleHint').innerText = selectedOrderId ? '👇 已選取訂單，請點月曆日期排定（再次點訂單可取消選擇）' : '點訂單卡片，再點月曆日期即可排定（點 ⓘ 看詳情）';
-  renderUnscheduled();
-  renderCalendar();
-}
-function closePeriodModal(event) {
-  document.getElementById('periodModal').classList.remove('show');
-  pendingDate = null;
-}
-async function confirmSchedule() {
-  if (!selectedOrderId || !pendingDate) return;
-  const period = document.getElementById('periodSelect').value;
-  const msg = document.getElementById('periodModalMsg');
-  msg.textContent = '處理中...';
-  try {
-    const res = await callServer('setOrderPickupDate', { password: PASSWORD, orderId: selectedOrderId, pickupDate: pendingDate, pickupPeriod: period });
-    if (res && res.success) {
-      closePeriodModal();
-      selectedOrderId = null;
-      await loadSchedule();
-    } else { msg.textContent = '失敗：' + (res.error || '未知錯誤'); }
-  } catch (e) { msg.textContent = '失敗：' + e.message; }
-}
-
-/* ===== 訂單詳情 + 狀態管理 + 訊息範本 ===== */
-function openOrderDetail(orderId) {
-  const o = findOrder(orderId);
-  if (!o) return;
-  detailOrder = o;
-  document.getElementById('detailTitle').innerText = `#${o.orderId.slice(-3)}｜${o.name}`;
-  const lines = [];
-  lines.push(`<b>訂單編號：</b>${o.orderId}`);
-  lines.push(`<b>電話：</b>${o.tel}`);
-  lines.push(`<b>運送：</b>${o.shipping}`);
-  if (o.address) lines.push(`<b>地址：</b>${o.address}`);
-  lines.push(`<b>付款方式：</b>${o.payment}`);
-  lines.push(`<b>總額：</b>${o.total} 元`);
-  lines.push(`<b>商品：</b><br>${o.items.split('\\n').join('<br>')}`);
-  if (o.addons) lines.push(`<b>贈品/加購：</b><br>${o.addons.split('\\n').join('<br>')}`);
-  if (o.note) lines.push(`<b>備註：</b>${o.note}`);
-  if (!o.hasLineUserId) lines.push('<span style="color:#888;font-size:12px">⚠️ 無 LINE userId</span>');
-  document.getElementById('detailInfo').innerHTML = lines.join('<br>');
-  const pickupHtml = o.pickupDate
-    ? `<div class="pickup-display">📅 <b>${o.pickupDate}</b> ${o.pickupPeriod || ''}<div style="margin-top:6px;display:flex;gap:6px"><button class="small outline" onclick="reschedule()">改日期</button><button class="small gray" onclick="cancelSchedule()">取消排定</button></div></div>`
-    : `<div class="pickup-display" style="background:#fafafa;color:#888">尚未排定取貨日期</div>`;
-  document.getElementById('detailPickup').innerHTML = pickupHtml;
-  renderStatusControls(o);
-  renderMessageTemplates(o);
-  document.getElementById('detailMsg').textContent = '';
-  document.getElementById('orderDetailModal').classList.add('show');
-}
-
-function renderStatusControls(o) {
-  let html = [];
-  if (o.payment === '匯款') html.push(checkboxHtml('paid', '💰 已收匯款', o.paid));
-  if (o.pickupDate) html.push(checkboxHtml('pickupConfirmed', '✅ 客人已確認取貨時間', o.pickupConfirmed));
-  if (o.shipping !== '現場取貨') {
-    html.push(`<div class="status-tracking"><label style="font-size:12px;color:#666;margin-bottom:4px">📦 貨運單號</label><input type="text" id="ts_trackingNum" value="${o.trackingNum || ''}" onchange="saveStatus('trackingNum', this.value)" placeholder="（填了才會在通知訊息附上）"></div>`);
-  }
-  html.push(checkboxHtml('shipped', '🚚 已出貨', o.shipped));
-  html.push(checkboxHtml('done', '🎉 訂單完成', o.done));
-  document.getElementById('statusControls').innerHTML = html.join('');
-}
-
-function checkboxHtml(key, label, checked) {
-  return `<label class="status-checkbox"><input type="checkbox" id="ts_${key}" ${checked ? 'checked' : ''} onchange="saveStatus('${key}', this.checked)"><span>${label}</span></label>`;
-}
-
-async function saveStatus(key, value) {
-  if (!detailOrder) return;
-  const msg = document.getElementById('detailMsg');
-  msg.className = 'hint';
-  msg.textContent = '儲存中...';
-  const updates = {};
-  updates[key] = value;
-  try {
-    const res = await callServer('updateOrderStatus', { password: PASSWORD, orderId: detailOrder.orderId, updates });
-    if (res && res.success) {
-      msg.className = 'success';
-      // 已收匯款特別提示
-      msg.textContent = (key === 'paid' && value === true)
-        ? '✅ 已儲存｜⚠️ 下方按鈕複製訊息給客人'
-        : '✅ 已儲存';
-      const refreshed = await callServer('getScheduleData', {});
-      if (refreshed && !refreshed.error) {
-        scheduleData = refreshed;
-        renderPrepAlert();
-        renderCalendar();
-        renderUnscheduled();
-        const updated = findOrder(detailOrder.orderId);
-        if (updated) {
-          detailOrder = updated;
-          renderMessageTemplates(updated);  // 重新渲染按鈕(因為狀態變了)
-        }
-      }
-      setTimeout(() => { if (document.getElementById('detailMsg').textContent.indexOf('✅ 已儲存') === 0) document.getElementById('detailMsg').textContent = ''; }, 3500);
+      document.getElementById('conf-submit-btn').style.display = 'none';
+      document.getElementById('conf-back-btn').innerText = '關閉視窗';
+      document.getElementById('conf-back-btn').style.background = 'var(--orange)';
+      document.getElementById('conf-back-btn').style.color = '#fff';
+      document.getElementById('conf-back-btn').onclick = () => liff.closeWindow();
+      setTimeout(() => liff.closeWindow(), 4000);
     } else {
-      msg.className = 'error';
-      msg.textContent = '失敗：' + (res.error || '未知錯誤');
+      throw new Error(result.message || '未知錯誤');
     }
   } catch (e) {
-    msg.className = 'error';
-    msg.textContent = '失敗：' + e.message;
+    alert('送出失敗：' + e.message);
+    btn.disabled = false;
+    btn.innerText = '確認並送出';
   }
 }
 
-/* ===== 訊息範本 ===== */
-const TEMPLATES = {
-  paidPickup: (o) => `您好 ${o.name}，\n\n已收到您的匯款，謝謝您 ❤️\n訂單編號：${o.orderId}\n\n我們會盡快開始準備，並與您聯絡確認取貨時間 :)\n\n和美小玉家`,
-  paidShipping: (o, date) => `您好 ${o.name}，\n\n已收到您的匯款，謝謝您 ❤️\n訂單編號：${o.orderId}\n\n預計 ${date} 出貨，\n出貨當天會傳貨運單號給您追蹤 :)\n\n和美小玉家`,
-  pickupProposal: (o) => `您好 ${o.name}，\n\n幫您安排的取貨時間：\n📅 ${o.pickupDate} ${o.pickupPeriod || ''}\n\n訂單編號：${o.orderId}\n方便嗎？如需調整請告訴我們～\n\n和美小玉家`,
-  pickupProposalAdjusted: (o) => `您好 ${o.name}，\n\n確認一下調整後的取貨時間：\n📅 ${o.pickupDate} ${o.pickupPeriod || ''}\n\n訂單編號：${o.orderId}\n這個時間 OK 嗎？\n\n和美小玉家`,
-  pickupReminder: (o) => `您好 ${o.name}，\n\n提醒您～明天就要來取貨囉！\n📅 ${o.pickupDate} ${o.pickupPeriod || ''}\n訂單編號：${o.orderId}\n\n我們會準備好等您 :)\n\n和美小玉家`,
-};
-
-function renderMessageTemplates(o) {
-  const box = document.getElementById('messageTemplateBtns');
-  let html = '';
-
-  // 1. 已收匯款 (現場取貨)
-  if (o.payment === '匯款' && o.paid && o.shipping === '現場取貨' && !o.pickupDate) {
-    html += `<button class="outline msg-tpl-btn" onclick="copyByKey('paidPickup')">📋 已收匯款訊息</button>`;
-  }
-
-  // 2. 已收匯款 + 預計出貨 (宅配,需選日期)
-  if (o.payment === '匯款' && o.paid && o.shipping !== '現場取貨' && !o.shipped) {
-    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
-    html += `
-      <div class="msg-tpl-with-date">
-        <div class="label">📋 已收匯款 + 預計出貨（請選日期）</div>
-        <div class="row-flex">
-          <input type="date" id="shippingDateInput" value="${tomorrow}">
-          <button class="small" onclick="copyShippingByDate()">複製</button>
-        </div>
-      </div>
-    `;
-  }
-
-  // 3. 取貨時間提案 (現場取貨,已排定但未確認)
-  if (o.shipping === '現場取貨' && o.pickupDate && !o.pickupConfirmed) {
-    html += `<button class="outline msg-tpl-btn" onclick="copyByKey('pickupProposal')">📋 取貨時間提案（首次）</button>`;
-    html += `<button class="outline msg-tpl-btn" onclick="copyByKey('pickupProposalAdjusted')">📋 取貨時間提案（調整版）</button>`;
-  }
-
-  // 4. 取貨前提醒 (現場取貨,已確認)
-  if (o.shipping === '現場取貨' && o.pickupConfirmed && o.pickupDate) {
-    html += `<button class="outline msg-tpl-btn" onclick="copyByKey('pickupReminder')">📋 取貨前提醒</button>`;
-  }
-
-  if (!html) {
-    html = '<div class="hint" style="padding:6px 0">目前狀態暫無可發送的訊息範本</div>';
-  }
-  box.innerHTML = html;
-}
-
-function copyByKey(key) {
-  if (!detailOrder || !TEMPLATES[key]) return;
-  const text = TEMPLATES[key](detailOrder);
-  copyToClipboard(text);
-}
-
-function copyShippingByDate() {
-  if (!detailOrder) return;
-  const dateInput = document.getElementById('shippingDateInput');
-  if (!dateInput || !dateInput.value) { alert('請選擇預計出貨日期'); return; }
-  const text = TEMPLATES.paidShipping(detailOrder, dateInput.value);
-  copyToClipboard(text);
-}
-
-async function copyToClipboard(text) {
-  const msg = document.getElementById('detailMsg');
-  try {
-    await navigator.clipboard.writeText(text);
-    msg.className = 'success';
-    msg.textContent = '✅ 已複製，請貼到 LINE 給客人';
-    setTimeout(() => { if (msg.textContent === '✅ 已複製，請貼到 LINE 給客人') msg.textContent = ''; }, 3000);
-  } catch (e) {
-    // fallback：跳出視窗讓使用者手動複製
-    prompt('請手動複製訊息（Ctrl+C）：', text);
-  }
-}
-
-function closeOrderDetail(event) {
-  document.getElementById('orderDetailModal').classList.remove('show');
-  detailOrder = null;
-}
-function reschedule() {
-  if (!detailOrder) return;
-  selectedOrderId = detailOrder.orderId;
-  closeOrderDetail();
-  document.getElementById('scheduleHint').innerText = '👇 請點月曆日期重新排定';
-  renderUnscheduled();
-  renderCalendar();
-  alert('已選取訂單，請點月曆日期重新排定');
-}
-async function cancelSchedule() {
-  if (!detailOrder) return;
-  if (!confirm('確定取消「' + detailOrder.name + '」的排定？')) return;
-  const msg = document.getElementById('detailMsg');
-  msg.textContent = '處理中...';
-  try {
-    const res = await callServer('setOrderPickupDate', { password: PASSWORD, orderId: detailOrder.orderId, pickupDate: '', pickupPeriod: '' });
-    if (res && res.success) { closeOrderDetail(); await loadSchedule(); }
-    else { msg.textContent = '失敗：' + (res.error || '未知錯誤'); }
-  } catch (e) { msg.textContent = '失敗：' + e.message; }
-}
-
-async function callServer(action, params) {
-  const url = SCRIPT_URL + '?action=' + encodeURIComponent(action);
-  const res = await fetch(url, { method: 'POST', body: JSON.stringify(params || {}), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-  const text = await res.text();
-  let data;
-  try { data = JSON.parse(text); }
-  catch (e) { throw new Error('回應格式錯誤：' + text.slice(0, 200)); }
-  if (data.status === 'ERROR') throw new Error(data.message);
-  return data.result !== undefined ? data.result : data;
-}
+window.onload = init;
 </script>
 
 </body>
