@@ -233,6 +233,9 @@ body{font-family:'LINE Seed Sans TW',-apple-system,'PingFang TC','Microsoft Jhen
 .nav-bar{width:18px;height:3px;background:var(--orange);border-radius:2px;display:none}
 .nav-item.active .nav-bar{display:block}
 .version-tag{position:fixed;bottom:4px;right:8px;font-size:9px;color:var(--faint);z-index:51;pointer-events:none}
+
+/* MODE BADGE (現場取貨簡化版) */
+.mode-badge{display:inline-flex;align-items:center;background:rgba(232,115,42,0.1);color:var(--orange);font-size:10px;font-weight:700;letter-spacing:1px;padding:4px 10px;border-radius:20px;margin-top:6px}
 </style>
 </head>
 <body>
@@ -283,6 +286,7 @@ body{font-family:'LINE Seed Sans TW',-apple-system,'PingFang TC','Microsoft Jhen
         <div class="shop-badge">HEMEI YU'S BAKES</div>
         <div class="hero-title">手工餅乾<br><span>線上訂購</span></div>
         <div class="hero-sub" id="hero-sub">熱銷 20 年 · 和美在地製作</div>
+        <div class="mode-badge" id="mode-badge" style="display:none">🛍️ 現場取貨預訂</div>
       </div>
       <div class="hero-mascot">
         <img src="https://hemeiyubakes.github.io/hemeiyubakes/assets/%E7%9C%A8%E7%9C%BC%E9%A4%85%E4%B9%BE.svg" alt="吉祥物" style="width:100%;height:auto;display:block" onerror="this.style.display='none'">
@@ -318,8 +322,14 @@ body{font-family:'LINE Seed Sans TW',-apple-system,'PingFang TC','Microsoft Jhen
       <span class="f-label">手機號碼</span>
       <input class="f-input" id="f-tel" type="tel" inputmode="tel" placeholder="09xxxxxxxx">
 
-      <span class="f-label">取貨方式</span>
-      <select class="f-select" id="f-pickup" onchange="onShippingChange()"></select>
+      <div id="pickup-select-group">
+        <span class="f-label">取貨方式</span>
+        <select class="f-select" id="f-pickup" onchange="onShippingChange()"></select>
+      </div>
+      <div id="pickup-fixed-display" style="display:none">
+        <span class="f-label">取貨方式</span>
+        <div class="payment-display">現場取貨</div>
+      </div>
 
       <div id="address-group" style="display:none">
         <span class="f-label">收件地址</span>
@@ -419,17 +429,20 @@ body{font-family:'LINE Seed Sans TW',-apple-system,'PingFang TC','Microsoft Jhen
 //   1. APP_VERSION 改成新版本號
 //   2. 同步 Settings 工作表「目前版本」=同版本號
 // ============================================================
-const APP_VERSION = '2.1.0';
+const APP_VERSION = '2.2.0';
 
 const LIFF_ID = '2009988690-V5uuqIVX';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n0qFevQX63OItw-ehfCzqXuMI3qqdE75EeXFnO880KDKJCZW/exec';
+
+// ---- 現場取貨簡化版判斷（?mode=pickup） ----
+const PICKUP_MODE = new URLSearchParams(window.location.search).get('mode') === 'pickup';
 
 let fieldsData = [], productsData = [], settingsData = {}, addonsData = [], promotionsData = [], lineUserId = '';
 let addonSelections = {};
 let wasForcedTransfer = false;
 let currentPayment = '匯款';
 
-document.getElementById('version-tag').innerText = 'v' + APP_VERSION;
+document.getElementById('version-tag').innerText = 'v' + APP_VERSION + (PICKUP_MODE ? ' · 現場取貨' : '');
 
 /* ---- 字級調整 ---- */
 function setFontSize(level) {
@@ -561,8 +574,23 @@ async function init() {
     addonsData = data.addons || [];
     promotionsData = data.promotions || [];
 
+    // 現場取貨簡化版：只保留可現場取貨的商品
+    if (PICKUP_MODE) {
+      productsData = productsData.filter(p => (p.shipping || '').split(',').map(s => s.trim()).includes('現場取貨'));
+    }
+
     if (checkVersionAndReload(settingsData['目前版本'])) return;
     sessionStorage.removeItem('hm_reloaded');
+
+    // 現場取貨模式維護開關（獨立於一般維護模式）
+    if (PICKUP_MODE && settingsData['現場取貨維護模式開關'] === true) {
+      document.getElementById('loading').style.display = 'none';
+      const maintImg = settingsData['現場取貨維護模式'] || '';
+      if (maintImg) document.getElementById('maintImg').src = maintImg;
+      document.getElementById('maintMsg').innerText = '現場取貨線上預訂維護中，請稍後再試，或直接私訊我們安排 :)';
+      document.getElementById('maintPage').style.display = 'block';
+      return;
+    }
 
     // 維護模式
     if (settingsData['維護模式開關'] === true) {
@@ -606,6 +634,14 @@ async function init() {
     if (deadlineMsg) {
       document.getElementById('deadline-text').innerHTML = deadlineMsg;
       document.getElementById('notice-bar').style.display = 'flex';
+    }
+
+    // 現場取貨簡化版：切換取貨方式欄位為固定顯示、隱藏地址、顯示標籤
+    if (PICKUP_MODE) {
+      document.getElementById('pickup-select-group').style.display = 'none';
+      document.getElementById('pickup-fixed-display').style.display = 'block';
+      document.getElementById('address-group').style.display = 'none';
+      document.getElementById('mode-badge').style.display = 'inline-flex';
     }
 
     // 商品列表
@@ -988,6 +1024,7 @@ function renderPromotions() {
 
 /* ---- 運送方式（依商品動態） ---- */
 function updateShipping() {
+  if (PICKUP_MODE) return; // 現場取貨簡化版：運送方式固定，地址一律隱藏，不需動態邏輯
   const methods = new Set();
   productsData.forEach((p, i) => {
     if (parseInt(document.getElementById('qty_' + i)?.value || 0) > 0) {
@@ -1014,6 +1051,7 @@ function updateShipping() {
 }
 
 function onShippingChange() {
+  if (PICKUP_MODE) return;
   const v = document.getElementById('f-pickup').value;
   const show = v && v !== '現場取貨';
   document.getElementById('address-group').style.display = show ? 'block' : 'none';
@@ -1080,9 +1118,9 @@ function showConfirm() {
   const items = getSelectedItems();
   if (items.length === 0) { alert('請至少選擇一項商品'); return; }
 
-  const shipping = document.getElementById('f-pickup').value;
-  const address = document.getElementById('f-address').value.trim();
-  const needAddress = shipping && shipping !== '現場取貨';
+  const shipping = PICKUP_MODE ? '現場取貨' : document.getElementById('f-pickup').value;
+  const address = PICKUP_MODE ? '' : document.getElementById('f-address').value.trim();
+  const needAddress = !PICKUP_MODE && shipping && shipping !== '現場取貨';
   if (needAddress && !address) { alert('請填寫收件地址'); return; }
 
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
@@ -1147,8 +1185,8 @@ async function submitOrder() {
     tel: document.getElementById('f-tel').value.trim(),
     items,
     payment: currentPayment,
-    shipping: document.getElementById('f-pickup').value,
-    address: document.getElementById('f-address').value.trim(),
+    shipping: PICKUP_MODE ? '現場取貨' : document.getElementById('f-pickup').value,
+    address: PICKUP_MODE ? '' : document.getElementById('f-address').value.trim(),
     dyn: dynStr,
     note: document.getElementById('f-note').value.trim(),
     addonSelections,
