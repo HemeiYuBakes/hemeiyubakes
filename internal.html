@@ -250,6 +250,18 @@
     <button class="modal-close" onclick="closeOrderDetail()">✕</button>
     <h2 id="detailTitle" style="margin-bottom:8px"></h2>
     <div id="detailInfo" class="detail-section"></div>
+    <div style="margin:8px 0"><button class="small outline" onclick="toggleEditItems()">✏️ 編輯商品/數量/備註</button></div>
+    <div id="editItemsSection" style="display:none;background:#fafafa;border-radius:8px;padding:10px 12px;margin-bottom:10px">
+      <h3>✏️ 編輯商品/數量/備註</h3>
+      <div class="product-grid" id="editProductGrid"></div>
+      <div class="subtotal-box" id="editSubtotalBox" style="margin-top:10px"></div>
+      <div class="row" style="margin-top:10px"><label>備註</label><textarea id="editNote" rows="2"></textarea></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="outline" style="flex:1" onclick="cancelEditItems()">取消</button>
+        <button style="flex:1" onclick="saveEditItems()">儲存修改</button>
+      </div>
+      <div id="editItemsMsg" class="hint" style="margin-top:6px"></div>
+    </div>
     <div id="detailPickup"></div>
     <div class="status-section">
       <h3>📋 狀態管理（勾選即儲存）</h3>
@@ -821,6 +833,7 @@ function openOrderDetail(orderId) {
   if (o.note) lines.push(`<b>備註：</b>${o.note}`);
   if (!o.hasLineUserId) lines.push('<span style="color:#888;font-size:12px">⚠️ 無 LINE userId</span>');
   document.getElementById('detailInfo').innerHTML = lines.join('<br>');
+  document.getElementById('editItemsSection').style.display = 'none';
   const pickupHtml = o.pickupDate
     ? `<div class="pickup-display">📅 <b>${o.pickupDate}</b> ${o.pickupPeriod || ''}<div style="margin-top:6px;display:flex;gap:6px"><button class="small outline" onclick="reschedule()">改日期</button><button class="small gray" onclick="cancelSchedule()">取消排定</button></div></div>`
     : `<div class="pickup-display" style="background:#fafafa;color:#888">尚未排定取貨日期</div>`;
@@ -875,6 +888,111 @@ async function saveStatus(key, value) {
         }
       }
       setTimeout(() => { if (document.getElementById('detailMsg').textContent.indexOf('✅ 已儲存') === 0) document.getElementById('detailMsg').textContent = ''; }, 3500);
+    } else {
+      msg.className = 'error';
+      msg.textContent = '失敗：' + (res.error || '未知錯誤');
+    }
+  } catch (e) {
+    msg.className = 'error';
+    msg.textContent = '失敗：' + e.message;
+  }
+}
+
+/* ===== 訂單內容編輯（商品/數量/備註，金額自動重算） ===== */
+function toggleEditItems() {
+  if (!detailOrder) return;
+  const sec = document.getElementById('editItemsSection');
+  const show = sec.style.display === 'none';
+  sec.style.display = show ? 'block' : 'none';
+  if (show) openEditItems();
+}
+
+function parseOrderItemsForEdit(itemsStr) {
+  // 逐行解析「商品名 x數量 (金額元)」格式，取商品名與數量
+  const map = {};
+  (itemsStr || '').split('\n').forEach(line => {
+    const m = line.match(/^(.+?)\s+x(\d+)/);
+    if (m) map[m[1].trim()] = parseInt(m[2]) || 0;
+  });
+  return map;
+}
+
+function openEditItems() {
+  const qtyMap = parseOrderItemsForEdit(detailOrder.items);
+  const grid = document.getElementById('editProductGrid');
+  grid.innerHTML = '';
+  productsData.forEach((p, i) => {
+    const qty = qtyMap[p.name] || 0;
+    const maxAttr = p.maxQty > 0 ? `max="${p.maxQty}"` : '';
+    grid.innerHTML += `<div class="product-card${qty > 0 ? ' selected' : ''}" id="editCard_${i}"><img src="${p.image || ''}" onerror="this.style.display='none'"><div class="product-info"><div class="product-name">${p.name}</div><div class="product-price">NT$ ${p.price}</div><div class="qty-row"><button class="qty-btn" onclick="editChangeQty(${i},-1)">－</button><input class="qty-input" id="editQty_${i}" type="number" value="${qty}" min="0" ${maxAttr} onchange="editOnQtyChange(${i})"><button class="qty-btn" onclick="editChangeQty(${i},1)">＋</button></div></div></div>`;
+  });
+  document.getElementById('editNote').value = detailOrder.note || '';
+  document.getElementById('editItemsMsg').textContent = '';
+  updateEditTotal();
+}
+
+function editChangeQty(i, delta) {
+  const input = document.getElementById('editQty_' + i);
+  const max = productsData[i].maxQty;
+  let val = Math.max(0, parseInt(input.value || 0) + delta);
+  if (max > 0) val = Math.min(val, max);
+  input.value = val;
+  document.getElementById('editCard_' + i).classList.toggle('selected', val > 0);
+  updateEditTotal();
+}
+function editOnQtyChange(i) {
+  const input = document.getElementById('editQty_' + i);
+  const max = productsData[i].maxQty;
+  let val = parseInt(input.value);
+  if (isNaN(val) || val < 0) val = 0;
+  if (max > 0 && val > max) val = max;
+  input.value = val;
+  document.getElementById('editCard_' + i).classList.toggle('selected', val > 0);
+  updateEditTotal();
+}
+function getEditSelectedItems() {
+  return productsData.map((p, i) => ({ name: p.name, price: p.price, type: p.type, qty: parseInt(document.getElementById('editQty_' + i)?.value || 0) })).filter(it => it.qty > 0);
+}
+function updateEditTotal() {
+  const items = getEditSelectedItems();
+  let subtotal = 0, html = '';
+  items.forEach(it => {
+    const sub = it.price * it.qty;
+    subtotal += sub;
+    html += `<div class="subtotal-row"><span>${it.name} x${it.qty}</span><span>${sub} 元</span></div>`;
+  });
+  html += `<div class="subtotal-row subtotal-total"><span>新小計</span><span>${subtotal} 元</span></div>`;
+  html += `<div class="hint">⚠️ 贈品/優惠與運費將依新數量自動重算，儲存後於上方訂單詳情顯示最新結果</div>`;
+  document.getElementById('editSubtotalBox').innerHTML = html;
+}
+function cancelEditItems() {
+  document.getElementById('editItemsSection').style.display = 'none';
+}
+async function saveEditItems() {
+  if (!detailOrder) return;
+  const items = getEditSelectedItems();
+  const msg = document.getElementById('editItemsMsg');
+  if (items.length === 0) { msg.className = 'error'; msg.textContent = '請至少選擇一項商品'; return; }
+  msg.className = 'hint';
+  msg.textContent = '儲存中...';
+  try {
+    const res = await callServer('updateOrderItems', {
+      password: PASSWORD,
+      orderId: detailOrder.orderId,
+      items,
+      note: document.getElementById('editNote').value.trim()
+    });
+    if (res && res.success) {
+      msg.className = 'success';
+      msg.textContent = '✅ 已更新訂單內容';
+      const refreshed = await callServer('getScheduleData', {});
+      if (refreshed && !refreshed.error) {
+        scheduleData = refreshed;
+        renderPrepAlert();
+        renderCalendar();
+        renderUnscheduled();
+      }
+      setTimeout(() => { openOrderDetail(detailOrder.orderId); }, 400);
     } else {
       msg.className = 'error';
       msg.textContent = '失敗：' + (res.error || '未知錯誤');
@@ -963,6 +1081,7 @@ async function copyToClipboard(text) {
 
 function closeOrderDetail(event) {
   document.getElementById('orderDetailModal').classList.remove('show');
+  document.getElementById('editItemsSection').style.display = 'none';
   detailOrder = null;
 }
 function reschedule() {
