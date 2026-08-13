@@ -197,7 +197,7 @@
       <div class="row"><label>付款方式</label><select id="paymentSelect"><option value="現場付款">現場付款</option><option value="匯款">匯款</option></select></div>
     </div>
     <div class="card"><h2>✍️ 備註</h2><textarea id="note" rows="2" placeholder="（選填）"></textarea></div>
-    <div class="card"><button class="btn-submit" onclick="submitOrder()">送出訂單</button><div id="submitMsg" class="error"></div></div>
+    <div class="card"><button class="btn-submit" id="submitBtn" onclick="submitOrder()">送出訂單</button><div id="submitMsg" class="error"></div></div>
   </div>
 
   <div id="tab-schedule" style="display:none">
@@ -559,7 +559,9 @@ async function lookupCustomer() {
     }
   } catch (e) { box.innerHTML = '<div class="error">查詢失敗：' + e.message + '</div>'; }
 }
+let isSubmitting = false;
 async function submitOrder() {
+  if (isSubmitting) return; // 防止重複點擊送出多筆
   const msg = document.getElementById('submitMsg');
   msg.className = 'error'; msg.textContent = '';
   const name = document.getElementById('name').value.trim();
@@ -576,15 +578,27 @@ async function submitOrder() {
   const items = getSelectedItems();
   if (items.length === 0) { msg.textContent = '請至少選擇一項商品'; return; }
   const payload = { password: PASSWORD, name, tel: phone, address, lineUserId, items, addonSelections, shipping, payment, orderSource, note };
-  msg.textContent = '送出中...';
+  isSubmitting = true;
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerText = '送出中...';
+  msg.className = 'hint';
+  msg.textContent = '送出中，請稍候，不要重複點擊…';
   try {
     const res = await callServer('submitInternalOrder', payload);
     if (res && res.success) {
       msg.className = 'success';
       msg.textContent = '✅ 訂單已建立：' + res.orderId;
       setTimeout(() => { if (confirm('訂單 ' + res.orderId + ' 已建立，要繼續填下一筆嗎？')) resetForm(); }, 300);
-    } else { msg.textContent = '失敗：' + (res.error || '未知錯誤'); }
-  } catch (e) { msg.textContent = '送出失敗：' + e.message; }
+    } else { msg.className = 'error'; msg.textContent = '失敗：' + (res.error || '未知錯誤'); }
+  } catch (e) {
+    msg.className = 'error';
+    msg.textContent = '送出失敗：' + e.message;
+  } finally {
+    isSubmitting = false;
+    btn.disabled = false;
+    btn.innerText = '送出訂單';
+  }
 }
 function resetForm() {
   ['name','phone','address','lineUserId','note'].forEach(id => document.getElementById(id).value = '');
