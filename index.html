@@ -1165,6 +1165,29 @@ function closeConfirm() {
   document.getElementById('confirm-overlay').classList.remove('show');
 }
 
+/* ---- 送出請求（含自動重試：Google 端偶發異常流量驗證頁時，代表後端根本沒執行到，重試安全不會重複建單） ---- */
+async function postToServer(payload, retriesLeft) {
+  if (retriesLeft === undefined) retriesLeft = 2;
+  const res = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  });
+  const text = await res.text();
+  let result;
+  try {
+    result = JSON.parse(text);
+  } catch (e) {
+    const looksLikeGooglePage = text.indexOf('ppConfig') !== -1 || text.trim().indexOf('<!DOCTYPE html') === 0;
+    if (looksLikeGooglePage && retriesLeft > 0) {
+      await new Promise(r => setTimeout(r, 1200));
+      return postToServer(payload, retriesLeft - 1);
+    }
+    throw new Error('回應格式錯誤，請稍後再試一次');
+  }
+  return result;
+}
+
 async function submitOrder() {
   const btn = document.getElementById('conf-submit-btn');
   btn.disabled = true;
@@ -1195,12 +1218,7 @@ async function submitOrder() {
   };
 
   try {
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(payload)
-    });
-    const result = await res.json();
+    const result = await postToServer(payload);
     if (result.status === 'OK') {
       document.getElementById('conf-icon').innerText = '🎉';
       document.getElementById('conf-title').innerText = '訂單已送出！';
