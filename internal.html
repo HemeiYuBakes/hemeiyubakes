@@ -11,154 +11,202 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#D32F2F">
-<!-- internal.html v7：狀態管理簡化、移除訊息範本、口味底色、商品列格式｜v6：移除 LIFF 相關欄位與商品圖片、新增「未提供」電話、當日明細改為口味×盒型盒數 -->
+<meta name="theme-color" content="#E8732A">
+<!-- internal.html v8：介面改為 LIFF 暖色風格與 LINE Seed 字型、客人色塊依取貨方式分色｜v7：狀態管理簡化、移除訊息範本、口味底色、商品列格式｜v6：移除 LIFF 相關欄位與商品圖片、新增「未提供」電話、當日明細改為口味×盒型盒數 -->
 
 <style>
+  @font-face { font-family: 'LINE Seed Sans TW'; src: url('https://cdn.jsdelivr.net/gh/line/LineSeed@main/build/web/LINESeedSansTW_W_Rg.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'LINE Seed Sans TW'; src: url('https://cdn.jsdelivr.net/gh/line/LineSeed@main/build/web/LINESeedSansTW_W_Bd.woff2') format('woff2'); font-weight: 700; font-display: swap; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F2EDE6; --surface: #EDEAE3; --white: #FAFAF8;
+    --orange: #E8732A; --orange-soft: rgba(232,115,42,0.10);
+    --text: #1A1410; --muted: #9A8E82; --faint: #D8D2C8;
+    --danger: #C0392B; --ok: #3E8E41;
+    --chip-pickup: #F3E2C7; --chip-ship: #D6E6F5;
+  }
   body {
-    font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
-    background: #f4f4f4; color: #333; padding: 15px;
-    max-width: 900px; margin: 0 auto;
+    font-family: 'LINE Seed Sans TW', -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: var(--bg); color: var(--text); padding: 16px 14px 32px;
+    max-width: 900px; margin: 0 auto; -webkit-font-smoothing: antialiased;
   }
-  h1 { font-size: 20px; margin-bottom: 12px; color: #D32F2F; text-align: center; }
-  h2 { font-size: 16px; margin: 0 0 10px; color: #D32F2F; }
-  h3 { font-size: 14px; color: #D32F2F; margin: 0 0 10px; }
-  .card { background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 12px; }
-  label { display: block; font-weight: bold; margin-bottom: 6px; color: #D32F2F; font-size: 14px; }
+  .app-head { padding: 6px 6px 14px; }
+  .shop-badge { display: inline-flex; align-items: center; background: var(--orange); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; padding: 4px 12px; border-radius: 20px; margin-bottom: 8px; }
+  h1 { font-size: 24px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; line-height: 1.2; }
+  h1 span { color: var(--orange); }
+  h2 { font-size: 15px; font-weight: 700; margin: 0 0 12px; color: var(--text); }
+  h3 { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted); margin: 0 0 10px; }
+  .card { background: var(--white); padding: 16px; border-radius: 16px; margin-bottom: 12px; }
+  label { display: block; font-weight: 700; margin-bottom: 6px; color: var(--muted); font-size: 12px; letter-spacing: 1px; }
   input, select, textarea {
-    width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;
-    font-size: 16px; font-family: inherit;
+    width: 100%; padding: 12px 14px; border: 1.5px solid transparent; border-radius: 12px;
+    font-size: 16px; font-family: inherit; background: var(--bg); color: var(--text);
   }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: #D32F2F; }
-  .row { margin-bottom: 12px; }
+  input::placeholder, textarea::placeholder { color: #B9B0A4; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--orange); background: #fff; }
+  select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239A8E82'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 32px; }
+  .row { margin-bottom: 14px; }
   .row-flex { display: flex; gap: 8px; }
   button {
-    background: #D32F2F; color: #fff; border: none; padding: 10px 16px;
-    border-radius: 8px; font-size: 15px; cursor: pointer; font-family: inherit;
+    background: var(--orange); color: #fff; border: none; padding: 11px 16px;
+    border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit;
   }
-  button.small { padding: 6px 12px; font-size: 13px; }
-  button.outline { background: #fff; color: #D32F2F; border: 1px solid #D32F2F; }
-  button.gray { background: #888; }
-  .hint { font-size: 12px; color: #888; margin-top: 4px; }
-  .customer-info { background: #fff8f8; border-left: 3px solid #D32F2F; padding: 8px 12px; margin-top: 8px; font-size: 13px; border-radius: 4px; }
-  .tab-nav { display: flex; gap: 6px; margin-bottom: 12px; }
-  .tab-btn { flex: 1; background: #eee; color: #666; border-radius: 10px 10px 0 0; padding: 12px 8px; font-weight: bold; font-size: 14px; }
-  .tab-btn.active { background: #D32F2F; color: #fff; }
-  .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .product-card { border: 2px solid #eee; border-radius: 10px; overflow: hidden; }
-  .product-card.selected { border-color: #D32F2F; background: #fffafa; }
-  .product-info { padding: 10px; }
-  .product-name { font-size: 14px; font-weight: bold; color: #333; margin-bottom: 4px; }
-  .product-price { font-size: 13px; color: #D32F2F; margin-bottom: 6px; }
-  .product-limit { font-size: 11px; color: #888; margin-bottom: 6px; }
-  .qty-row { display: flex; align-items: center; gap: 6px; }
-  .qty-btn { width: 32px; height: 32px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5; font-size: 16px; cursor: pointer; color: #333; padding: 0; }
-  .qty-input { width: 46px; text-align: center; padding: 4px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; }
-  .promo-section { background: #fffae6; border-radius: 10px; padding: 14px; border: 1px solid #ffe082; }
-  .promo-title { font-weight: bold; color: #f57c00; margin-bottom: 10px; font-size: 14px; }
-  .promo-item { background: #fff; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 13px; color: #f57c00; }
-  .addon-section { background: #fff8f0; border-radius: 10px; padding: 14px; border: 1px solid #ffe0c0; }
-  .addon-title { font-weight: bold; color: #D32F2F; margin-bottom: 10px; font-size: 14px; }
+  button:disabled { opacity: 0.6; cursor: not-allowed; }
+  button.small { padding: 8px 12px; font-size: 13px; border-radius: 10px; }
+  button.outline { background: var(--orange-soft); color: var(--orange); }
+  button.gray { background: var(--surface); color: var(--muted); }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .customer-info { background: var(--orange-soft); color: var(--text); padding: 9px 12px; margin-top: 8px; font-size: 13px; border-radius: 10px; }
+
+  /* 分頁：分段控制 */
+  .tab-nav { display: flex; gap: 4px; margin-bottom: 12px; background: var(--white); border-radius: 14px; padding: 4px; }
+  .tab-btn { flex: 1; background: transparent; color: var(--muted); border-radius: 10px; padding: 11px 8px; font-weight: 500; font-size: 14px; transition: all .15s; }
+  .tab-btn.active { background: var(--orange); color: #fff; font-weight: 700; }
+
+  /* 商品 */
+  .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .product-card { background: var(--bg); border: 1.5px solid transparent; border-radius: 14px; overflow: hidden; transition: all .15s; }
+  .product-card.selected { border-color: var(--orange); background: #FFF6EE; }
+  .product-info { padding: 12px; }
+  .product-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; line-height: 1.4; }
+  .product-price { font-size: 14px; font-weight: 700; color: var(--orange); margin-bottom: 8px; }
+  .product-limit { font-size: 10px; color: var(--muted); margin-bottom: 6px; }
+  .qty-row { display: flex; align-items: center; gap: 4px; }
+  .qty-btn { width: 32px; height: 32px; border-radius: 50%; background: var(--white); border: none; font-size: 17px; font-weight: 400; cursor: pointer; color: var(--text); padding: 0; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+  .product-card.selected .qty-row .qty-btn:last-of-type { background: var(--orange); color: #fff; }
+  .qty-input { width: 42px; text-align: center; padding: 4px 0; border: none; background: transparent; border-radius: 6px; font-size: 16px; font-weight: 700; -moz-appearance: textfield; }
+  .qty-input:focus { background: #fff; }
+  .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+  .promo-section { background: var(--orange); border-radius: 14px; padding: 14px 16px; }
+  .promo-title { font-weight: 700; color: #fff; margin-bottom: 8px; font-size: 13px; }
+  .promo-item { background: rgba(255,255,255,0.22); padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; font-size: 13px; color: #fff; }
+  .addon-section { background: var(--bg); border-radius: 14px; padding: 14px; }
+  .addon-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 10px; }
   .addon-item { margin-bottom: 12px; }
-  .addon-name { font-weight: bold; color: #333; font-size: 14px; margin-bottom: 4px; }
-  .addon-desc { font-size: 12px; color: #888; margin-bottom: 6px; }
-  .addon-auto-info { font-size: 13px; color: #4caf50; background: #f0f9f0; padding: 6px 10px; border-radius: 6px; margin-bottom: 6px; }
-  .addon-selectable { background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #eee; }
-  .addon-selectable-prompt { font-size: 13px; color: #555; margin-bottom: 6px; }
-  .addon-selectable-row { display: flex; align-items: center; gap: 8px; }
-  .addon-limit-hint { font-size: 12px; color: #888; }
-  .subtotal-box { background: #fff8f8; border-radius: 10px; padding: 12px; font-size: 14px; }
-  .subtotal-row { display: flex; justify-content: space-between; padding: 4px 8px; border-radius: 4px; }
-  .subtotal-row.gift-row { background: #fff5f5; color: #D32F2F; }
-  .gift-source { color: #888; font-size: 12px; font-weight: normal; }
-  .subtotal-total { font-weight: bold; font-size: 16px; color: #D32F2F; border-top: 1px solid #eee; padding-top: 6px; margin-top: 6px; }
-  .btn-submit { width: 100%; padding: 14px; font-size: 16px; border-radius: 25px; font-weight: bold; }
-  .prep-alert { background: #ffebee; border: 2px solid #D32F2F; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; color: #D32F2F; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+  .addon-name { font-weight: 500; color: var(--text); font-size: 14px; margin-bottom: 4px; }
+  .addon-desc { font-size: 12px; color: var(--muted); margin-bottom: 6px; line-height: 1.5; }
+  .addon-auto-info { font-size: 12px; color: var(--orange); background: var(--orange-soft); padding: 7px 10px; border-radius: 8px; margin-bottom: 6px; }
+  .addon-selectable { background: var(--white); padding: 10px 12px; border-radius: 12px; }
+  .addon-selectable-prompt { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .addon-selectable-row { display: flex; align-items: center; gap: 6px; }
+  .addon-selectable .qty-btn { background: var(--bg); }
+  .addon-limit-hint { font-size: 11px; color: var(--muted); }
+
+  .subtotal-box { background: var(--bg); border-radius: 14px; padding: 12px 14px; font-size: 13px; }
+  .subtotal-row { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; color: var(--muted); }
+  .subtotal-row > span:last-child { color: var(--text); font-weight: 500; flex: 0 0 auto; }
+  .subtotal-row.gift-row, .subtotal-row.gift-row > span:last-child { color: var(--orange); }
+  .gift-source { color: var(--muted); font-size: 11px; font-weight: normal; }
+  .subtotal-row.subtotal-total { border-top: 1px solid var(--faint); padding-top: 10px; margin-top: 6px; align-items: center; }
+  .subtotal-row.subtotal-total > span:first-child { font-size: 14px; font-weight: 700; color: var(--text); }
+  .subtotal-row.subtotal-total > span:last-child { font-size: 18px; font-weight: 700; color: var(--orange); }
+  .btn-submit { width: 100%; padding: 15px; font-size: 15px; border-radius: 16px; font-weight: 700; letter-spacing: 0.5px; }
+
+  .prep-alert { background: var(--orange); border-radius: 14px; padding: 12px 16px; margin-bottom: 12px; color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
   .prep-alert.hidden { display: none; }
-  .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
-  .calendar-header button { padding: 6px 12px; }
-  .calendar-title { flex: 1; text-align: center; font-weight: bold; font-size: 16px; color: #D32F2F; }
-  .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 4px; }
-  .calendar-weekdays > div { text-align: center; padding: 6px 2px; background: #f0f0f0; font-size: 12px; font-weight: bold; color: #666; border-radius: 4px; }
-  .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; width: 100%; }
-  .day-cell { min-height: 100px; min-width: 0; background: #fafafa; border-radius: 4px; padding: 4px; font-size: 12px; cursor: pointer; transition: background 0.15s; border: 1px solid transparent; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* 月曆 */
+  .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
+  .calendar-title { flex: 1; text-align: center; font-weight: 700; font-size: 17px; color: var(--text); letter-spacing: -0.3px; }
+  .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 4px; }
+  .calendar-weekdays > div { text-align: center; padding: 4px 2px; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--muted); }
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; width: 100%; }
+  .day-cell { min-height: 100px; min-width: 0; background: var(--bg); border-radius: 10px; padding: 5px 4px; font-size: 12px; cursor: pointer; transition: background 0.15s; border: 1.5px solid transparent; display: flex; flex-direction: column; overflow: hidden; }
   .day-cell.other-month { opacity: 0.35; }
-  .day-cell.today { background: #fff3e0; border-color: #ff9800; }
-  .day-cell.target-mode { background: #e3f2fd; border-color: #1976d2; cursor: cell; }
-  .day-cell.target-mode:hover { background: #bbdefb; }
-  .day-cell.load-low { background: #eef7ee; }
-  .day-cell.load-mid { background: #fdf6e3; }
-  .day-cell.load-high { background: #fdeceb; }
-  .day-cell.load-over { background: #fbdedb; }
-  .day-number { font-weight: bold; color: #555; }
-  .day-cell.today .day-number { color: #e65100; }
+  .day-cell.load-low { background: #E7F0DF; }
+  .day-cell.load-mid { background: #FBEFD0; }
+  .day-cell.load-high { background: #F8DDCB; }
+  .day-cell.load-over { background: #F1C4BA; }
+  .day-cell.today { border-color: var(--orange); }
+  .day-cell.target-mode { border: 1.5px dashed var(--orange); cursor: cell; }
+  .day-cell.target-mode:hover { background: #FFE3CF; }
+  .day-number { font-weight: 700; color: var(--muted); padding-left: 2px; }
+  .day-cell.today .day-number { color: var(--orange); }
   .day-orders { margin-top: 4px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-  /* 月曆名字條：左邊色條與當日明細的圓點同一套顏色 */
-  .day-order-chip { background: #fff; padding: 3px 5px; border-radius: 3px; font-size: 10px; border-left: 3px solid #e6a417; line-height: 1.3; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  /* 月曆名字條：底色=取貨方式（米色自取、淺藍宅配），左側色條=付款狀態 */
+  .day-order-chip { background: var(--chip-pickup); color: var(--text); padding: 3px 5px; border-radius: 5px; font-size: 11px; border-left: 3px solid #e6a417; line-height: 1.3; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .day-order-chip.is-ship { background: var(--chip-ship); }
   .day-order-chip.paid { border-left-color: #6cbf4b; }
-  .day-order-chip.done { border-left-color: #9e9e9e; color: #999; }
-  .day-order-chip:hover { background: #fff8f8; }
+  .day-order-chip.done { border-left-color: #9e9e9e; color: var(--muted); }
+
+  /* 訂單卡片 */
   .order-list { display: flex; flex-direction: column; gap: 8px; }
-  .order-card { background: #fafafa; border: 2px solid #eee; border-radius: 8px; padding: 10px 12px; cursor: pointer; transition: all 0.15s; }
-  .order-card:hover { border-color: #ccc; }
-  .order-card.selected { border-color: #D32F2F; background: #fff5f5; }
-  .order-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 13px; }
-  .order-card-id { color: #888; font-weight: bold; }
-  .order-card-tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #e0e0e0; color: #555; }
-  .order-card-tag.ship { background: #e3f2fd; color: #1976d2; }
-  .order-card-tag.pickup { background: #f3e5f5; color: #7b1fa2; }
-  .order-card-name { font-weight: bold; font-size: 14px; color: #333; }
-  .order-card-items { font-size: 12px; color: #666; margin-top: 2px; white-space: pre-line; }
-  .info-btn-sm { width: 22px; height: 22px; line-height: 22px; border-radius: 50%; background: #e0e0e0; color: #666; text-align: center; font-size: 12px; cursor: pointer; display: inline-block; }
-  .info-btn-sm:hover { background: #ccc; }
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
+  .order-card { background: var(--bg); border: 1.5px solid transparent; border-radius: 14px; padding: 12px 14px; cursor: pointer; transition: all 0.15s; }
+  .order-card.selected { border-color: var(--orange); background: #FFF6EE; }
+  .order-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 12px; }
+  .order-card-id { color: var(--orange); font-weight: 700; letter-spacing: 0.5px; }
+  .order-card-tag { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: var(--surface); color: var(--muted); }
+  .order-card-tag.ship { background: var(--chip-ship); color: #2F6CA3; }
+  .order-card-tag.pickup { background: var(--chip-pickup); color: #8A6327; }
+  .order-card-tag.tag-paid { background: #E1F0DB; color: var(--ok); }
+  .order-card-tag.tag-unpaid { background: var(--orange-soft); color: var(--orange); }
+  .order-card-name { font-weight: 700; font-size: 15px; color: var(--text); }
+  .order-card-items { font-size: 12px; color: var(--muted); margin-top: 3px; white-space: pre-line; line-height: 1.5; }
+  .note-badge { font-size: 11px; color: var(--orange); background: var(--orange-soft); padding: 5px 9px; border-radius: 8px; margin-top: 6px; }
+  .info-btn-sm { width: 22px; height: 22px; line-height: 22px; border-radius: 50%; background: var(--white); color: var(--muted); text-align: center; font-size: 12px; cursor: pointer; display: inline-block; }
+
+  /* 彈出視窗 */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(26,20,16,0.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
   .modal-overlay.show { display: flex; }
-  .modal-box { background: #fff; border-radius: 15px; padding: 20px; max-width: min(460px, 92vw); width: 100%; max-height: 88vh; overflow-y: auto; position: relative; }
-  .modal-close { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; border: none; background: #f0f0f0; cursor: pointer; font-size: 15px; color: #666; }
-  .detail-section { background: #fafafa; padding: 10px 12px; border-radius: 8px; margin: 10px 0; font-size: 13px; line-height: 1.7; color: #555; }
-  .pickup-display { background: #fff8e7; padding: 10px 12px; border-radius: 8px; margin: 10px 0; font-size: 13px; }
-  .status-section { border-top: 1px solid #eee; margin-top: 14px; padding-top: 14px; }
-  .status-checkbox { display: flex; align-items: center; gap: 10px; padding: 8px 0; cursor: pointer; font-size: 14px; }
-  .status-checkbox input { width: auto; margin: 0; transform: scale(1.2); cursor: pointer; }
-  .status-tracking { margin: 8px 0 8px 30px; }
-  .status-tracking input { padding: 6px 10px; font-size: 14px; }
+  .modal-box { background: var(--white); border-radius: 20px; padding: 20px 18px; max-width: 460px; width: 100%; max-height: 88vh; overflow-y: auto; position: relative; }
+  .modal-box h2 { font-size: 18px; letter-spacing: -0.3px; padding-right: 36px; }
+  .modal-close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; padding: 0; border-radius: 50%; border: none; background: var(--surface); cursor: pointer; font-size: 14px; font-weight: 400; color: var(--muted); }
+  .modal-info { background: var(--bg); padding: 10px 12px; border-radius: 12px; margin-bottom: 12px; font-size: 14px; line-height: 1.6; }
+  .detail-section { background: var(--bg); padding: 12px 14px; border-radius: 14px; margin: 10px 0; font-size: 13px; line-height: 1.8; color: var(--text); }
+  .detail-section b { color: var(--muted); font-weight: 500; }
+  .edit-section { background: var(--bg); border-radius: 14px; padding: 12px; margin-bottom: 10px; }
+  .edit-section .product-card { background: var(--white); }
+  .edit-section .product-card.selected { background: #FFF6EE; }
+  .edit-section .qty-btn { background: var(--bg); }
+  .edit-section .subtotal-box { background: var(--white); }
+  .edit-section textarea { background: var(--white); }
+  .pickup-display { background: var(--orange-soft); padding: 12px 14px; border-radius: 14px; margin: 10px 0; font-size: 14px; }
+  .pickup-display button.outline { background: var(--white); }
+  .pickup-display button.gray { background: var(--white); }
+  .pickup-display.empty { background: var(--bg); color: var(--muted); font-size: 13px; }
+  .status-section { border-top: 1px solid var(--faint); margin-top: 16px; padding-top: 14px; }
+  .status-checkbox { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 6px; cursor: pointer; font-size: 15px; font-weight: 500; letter-spacing: 0; color: var(--text); background: var(--bg); border-radius: 12px; }
+  .status-checkbox input { width: 20px; height: 20px; flex: 0 0 auto; margin: 0; padding: 0; cursor: pointer; accent-color: var(--orange); }
+
   /* 訂單詳情：商品列 */
-  .item-list { margin: 4px 0 2px; display: flex; flex-direction: column; gap: 5px; }
-  .item-row { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 8px; padding: 6px 8px; line-height: 1.3; }
-  .flavor-pill { flex: 0 0 auto; padding: 2px 9px; border-radius: 10px; font-size: 13px; font-weight: bold; color: #333; }
-  .item-box { flex: 1; min-width: 0; font-size: 14px; color: #333; font-weight: bold; }
-  .item-qty { flex: 0 0 auto; font-size: 16px; font-weight: bold; color: #D32F2F; }
-  .item-amt { flex: 0 0 auto; font-size: 12px; color: #888; min-width: 62px; text-align: right; }
+  .item-list { margin: 4px 0 4px; display: flex; flex-direction: column; gap: 5px; }
+  .item-row { display: flex; align-items: center; gap: 8px; background: var(--white); border-radius: 10px; padding: 7px 10px; line-height: 1.3; }
+  .flavor-pill { flex: 0 0 auto; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; color: var(--text); }
+  .item-box { flex: 1; min-width: 0; font-size: 14px; color: var(--text); font-weight: 700; }
+  .item-qty { flex: 0 0 auto; font-size: 16px; font-weight: 700; color: var(--orange); }
+  .item-amt { flex: 0 0 auto; font-size: 12px; color: var(--muted); min-width: 62px; text-align: right; }
 
   /* ===== 當日明細：左客人、右口味卡片 ===== */
-  .day-summary { display: flex; gap: 10px; background: #fafafa; border-radius: 12px; padding: 10px; margin-bottom: 6px; align-items: flex-start; }
-  .day-sum-left { flex: 0 0 40%; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-  .cust-chip { background: #fbe0b5; border-radius: 8px; padding: 7px 9px; font-size: 13px; display: flex; align-items: center; gap: 7px; cursor: pointer; min-width: 0; }
-  .cust-chip:hover { background: #f8d49b; }
-  .cust-dot { width: 11px; height: 11px; border-radius: 50%; flex: 0 0 auto; }
+  .day-summary { display: flex; gap: 8px; background: var(--bg); border-radius: 16px; padding: 10px; margin-bottom: 8px; align-items: flex-start; }
+  .day-sum-left { flex: 0 0 40%; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+  .cust-chip { background: var(--chip-pickup); border-radius: 10px; padding: 8px 10px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 7px; cursor: pointer; min-width: 0; }
+  .cust-chip.ship { background: var(--chip-ship); }
+  .cust-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; box-shadow: 0 0 0 2px rgba(255,255,255,0.7); }
   .cust-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .day-sum-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
-  .flavor-card { background: #e6e8e8; border-radius: 12px; padding: 10px 12px; }
+  .day-sum-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .flavor-card { border-radius: 14px; padding: 10px 12px; }
   .flavor-main { display: flex; align-items: center; gap: 12px; }
-  .flavor-name { display: flex; flex-direction: column; align-items: center; font-size: 20px; line-height: 1.15; font-weight: bold; color: #222; flex: 0 0 auto; }
-  .flavor-boxes { font-size: 13px; font-weight: bold; color: #222; line-height: 1.6; min-width: 0; }
-  .flavor-boxes .box-row { display: flex; gap: 8px; }
-  .flavor-boxes .box-qty { font-size: 15px; }
-  .flavor-cap { font-size: 11px; font-weight: bold; margin-top: 6px; padding-top: 5px; border-top: 1px dashed #c4c7c7; }
-  .day-total-cap { font-size: 12px; font-weight: bold; text-align: right; padding: 2px 4px; }
-  .dot-legend { font-size: 11px; color: #888; display: flex; gap: 10px; flex-wrap: wrap; margin: 0 2px 10px; }
+  .flavor-name { display: flex; flex-direction: column; align-items: center; font-size: 20px; line-height: 1.15; font-weight: 700; color: var(--text); flex: 0 0 auto; }
+  .flavor-boxes { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.6; min-width: 0; }
+  .flavor-boxes .box-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .flavor-boxes .box-qty { font-size: 17px; font-weight: 700; }
+  .flavor-cap { font-size: 11px; font-weight: 700; margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(26,20,16,0.18); }
+  .day-total-cap { font-size: 12px; font-weight: 700; text-align: right; padding: 2px 4px; }
+  .dot-legend { font-size: 11px; color: var(--muted); display: flex; gap: 6px 10px; flex-wrap: wrap; margin: 0 4px 12px; }
   .dot-legend span { display: inline-flex; align-items: center; gap: 4px; }
   .dot-legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .dot-legend i.sw { width: 14px; height: 10px; border-radius: 3px; }
+  .dot-legend .sep { width: 1px; background: var(--faint); align-self: stretch; }
 
   #loginScreen, #mainForm { display: none; }
-  .error { color: #c33; font-size: 13px; margin-top: 6px; }
-  .success { color: #2a7; font-size: 13px; margin-top: 6px; }
+  .error { color: var(--danger); font-size: 13px; margin-top: 6px; }
+  .success { color: var(--ok); font-size: 13px; margin-top: 6px; }
 </style>
 </head>
 <body>
 
-<h1>🍪 和美小玉家｜內部系統</h1>
+<div class="app-head"><div class="shop-badge">內部系統</div><h1>和美<span>小玉家</span></h1></div>
 
 <div id="loginScreen" class="card">
   <h2>請輸入密碼</h2>
@@ -177,7 +225,7 @@
     <div class="card">
       <h2>客戶資料</h2>
       <div class="row">
-        <label>📞 電話 <span style="color:#888;font-weight:normal;font-size:11px">（選填）</span></label>
+        <label>📞 電話 <span style="font-weight:normal;font-size:11px;letter-spacing:0">（選填）</span></label>
         <div class="row-flex">
           <input type="tel" id="phone" placeholder="0912-345-678" style="flex:1;min-width:0">
           <button class="small outline" onclick="fillPhoneTag('熟客')" style="flex:0 0 auto" title="一鍵填入「熟客」">熟客</button>
@@ -186,10 +234,10 @@
         </div>
         <div id="customerInfo"></div>
       </div>
-      <div class="row"><label>👤 姓名 <span style="color:#c33">*</span></label><input type="text" id="name"></div>
+      <div class="row"><label>👤 姓名 <span style="color:var(--danger)">*</span></label><input type="text" id="name"></div>
       <div class="row"><label>📍 地址</label><input type="text" id="address"></div>
       <div class="row">
-        <label>📌 訂單來源 <span style="color:#c33">*</span></label>
+        <label>📌 訂單來源 <span style="color:var(--danger)">*</span></label>
         <select id="orderSource">
           <option value="">請選擇</option>
           <option value="LINE 私訊">LINE 私訊</option>
@@ -248,7 +296,7 @@
   <div class="modal-box" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closePeriodModal()">✕</button>
     <h2 style="margin-bottom:12px">📅 設定取貨日期</h2>
-    <div id="periodModalInfo" style="background:#fafafa;padding:10px;border-radius:6px;margin-bottom:12px;font-size:14px"></div>
+    <div id="periodModalInfo" class="modal-info"></div>
     <div class="row"><label>取貨時段</label><select id="periodSelect"></select></div>
     <div style="display:flex;gap:8px">
       <button class="outline" style="flex:1" onclick="closePeriodModal()">取消</button>
@@ -275,7 +323,7 @@
     <h2 id="detailTitle" style="margin-bottom:8px"></h2>
     <div id="detailInfo" class="detail-section"></div>
     <div style="margin:8px 0"><button class="small outline" onclick="toggleEditItems()">✏️ 編輯商品/數量/備註</button></div>
-    <div id="editItemsSection" style="display:none;background:#fafafa;border-radius:8px;padding:10px 12px;margin-bottom:10px">
+    <div id="editItemsSection" class="edit-section" style="display:none">
       <h3>✏️ 編輯商品/數量/備註</h3>
       <div class="product-grid" id="editProductGrid"></div>
       <div class="subtotal-box" id="editSubtotalBox" style="margin-top:10px"></div>
@@ -304,10 +352,10 @@ const PHONE_TAGS = ['熟客', '未提供'];
 const DOT_COLORS = { unpaid: '#e6a417', paid: '#6cbf4b', done: '#9e9e9e' };
 // 口味底色（用「包含」比對，所以「南瓜籽 / 南瓜子」都會對到）。新增口味在這裡加一行即可
 const FLAVOR_COLORS = [
-  { key: '杏仁', color: '#fde3c4' },  // 淺橘
-  { key: '南瓜', color: '#dcedc8' }   // 淺綠
+  { key: '杏仁', color: '#FBDDB9' },  // 淺橘
+  { key: '南瓜', color: '#D9E8C4' }   // 淺綠
 ];
-const FLAVOR_COLOR_DEFAULT = '#e6e8e8';
+const FLAVOR_COLOR_DEFAULT = '#E4DFD6';
 function flavorColor(flavor) {
   const f = String(flavor || '');
   for (let i = 0; i < FLAVOR_COLORS.length; i++) {
@@ -753,8 +801,8 @@ function renderCalendar() {
     ordersHere.forEach(o => {
       const idShort = o.orderId.slice(-3);
       const kind = orderDotKind(o);
-      const chipCls = kind === 'unpaid' ? '' : ' ' + kind;
-      chips += `<div class="day-order-chip${chipCls}" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}">${shipIcon(o)}${idShort} ${o.name}</div>`;
+      const chipCls = (kind === 'unpaid' ? '' : ' ' + kind) + (o.shipping !== '現場取貨' ? ' is-ship' : '');
+      chips += `<div class="day-order-chip${chipCls}" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}">${idShort} ${o.name}</div>`;
     });
     // 產量 -> 百分比決定淡色背景(不顯示文字數字,避免畫面混亂)
     const load = (scheduleData.dailyLoad && scheduleData.dailyLoad[dateStr]) || {};
@@ -812,7 +860,7 @@ function splitItemLines(s) {
   return String(s || '').split(/\n|\\n/);
 }
 function capColor(percent) {
-  return percent > 100 ? '#c00' : percent > 85 ? '#c33' : percent > 60 ? '#f80' : '#4a4';
+  return percent > 100 ? '#B3261E' : percent > 85 ? '#C0392B' : percent > 60 ? '#D9730D' : '#3E8E41';
 }
 
 // 回傳 { 口味: { 盒型: 盒數 } }，依訂單品項字串「商品名 x數量 (金額元)」加總
@@ -841,7 +889,8 @@ function buildDaySummaryHtml(dateStr, orders) {
   // 左：客人
   const leftHtml = orders.map(o => {
     const color = DOT_COLORS[orderDotKind(o)];
-    return `<div class="cust-chip" onclick="closeDayDetail();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}"><span class="cust-dot" style="background:${color}"></span><span class="cust-name">${shipIcon(o)}${o.name}</span></div>`;
+    const shipCls = o.shipping !== '現場取貨' ? ' ship' : '';
+    return `<div class="cust-chip${shipCls}" onclick="closeDayDetail();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}"><span class="cust-dot" style="background:${color}"></span><span class="cust-name">${o.name}</span></div>`;
   }).join('');
 
   // 右：口味卡片
@@ -881,7 +930,7 @@ function buildDaySummaryHtml(dateStr, orders) {
     totalHtml = `<div class="day-total-cap" style="color:${capColor(tPercent)}">總計　${totalCur} / ${totalCap} 片</div>`;
   }
 
-  const legend = `<div class="dot-legend"><span><i style="background:${DOT_COLORS.unpaid}"></i>未匯款</span><span><i style="background:${DOT_COLORS.paid}"></i>已匯款</span><span><i style="background:${DOT_COLORS.done}"></i>已完成</span><span>🚚 宅配</span></div>`;
+  const legend = `<div class="dot-legend"><span><i class="sw" style="background:var(--chip-pickup)"></i>現場取貨</span><span><i class="sw" style="background:var(--chip-ship)"></i>宅配</span><span class="sep"></span><span><i style="background:${DOT_COLORS.unpaid}"></i>未匯款</span><span><i style="background:${DOT_COLORS.paid}"></i>已匯款</span><span><i style="background:${DOT_COLORS.done}"></i>已完成</span></div>`;
 
   return `<div class="day-summary"><div class="day-sum-left">${leftHtml}</div><div class="day-sum-right">${rightHtml}${totalHtml}</div></div>${legend}`;
 }
@@ -901,8 +950,8 @@ function openDayDetail(dateStr) {
       const shipTag = o.shipping === '現場取貨' ? `<span class="order-card-tag pickup">${o.shipping}</span>` : `<span class="order-card-tag ship">${o.shipping}</span>`;
       const confirmedTag = o.done
         ? `<span class="order-card-tag">已完成</span>`
-        : (o.paid ? `<span class="order-card-tag" style="background:#e8f5e9;color:#4caf50">已匯款</span>` : `<span class="order-card-tag" style="background:#fff3e0;color:#e65100">未匯款</span>`);
-      const noteBadge = o.scheduleNote ? `<div style="font-size:11px;color:#D32F2F;background:#fff5f5;padding:4px 8px;border-radius:4px;margin-top:4px">📝 ${o.scheduleNote}</div>` : '';
+        : (o.paid ? `<span class="order-card-tag tag-paid">已匯款</span>` : `<span class="order-card-tag tag-unpaid">未匯款</span>`);
+      const noteBadge = o.scheduleNote ? `<div class="note-badge">📝 ${o.scheduleNote}</div>` : '';
       return `<div class="order-card" onclick="closeDayDetail();openOrderDetail('${o.orderId}')"><div class="order-card-header"><span class="order-card-id">#${idShort}</span><span style="display:flex;gap:6px;align-items:center">${shipTag}${confirmedTag}</span></div><div class="order-card-name">${o.name}${o.pickupPeriod ? '　' + o.pickupPeriod : ''}</div><div class="order-card-items">${o.items.split('\n').join('｜')}</div>${noteBadge}</div>`;
     }).join('');
     document.getElementById('dayDetailList').innerHTML = html;
@@ -927,7 +976,7 @@ function renderUnscheduled() {
     const idShort = o.orderId.slice(-3);
     const shipTag = o.shipping === '現場取貨' ? `<span class="order-card-tag pickup">${o.shipping}</span>` : `<span class="order-card-tag ship">${o.shipping}</span>`;
     const sel = (selectedOrderId === o.orderId) ? ' selected' : '';
-    const noteBadge = o.scheduleNote ? `<div style="font-size:11px;color:#D32F2F;background:#fff5f5;padding:4px 8px;border-radius:4px;margin-top:4px">📝 ${o.scheduleNote}</div>` : '';
+    const noteBadge = o.scheduleNote ? `<div class="note-badge">📝 ${o.scheduleNote}</div>` : '';
     return `<div class="order-card${sel}" onclick="selectOrder('${o.orderId}')"><div class="order-card-header"><span class="order-card-id">#${idShort}</span><span style="display:flex;gap:6px;align-items:center">${shipTag}<span class="info-btn-sm" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')">ⓘ</span></span></div><div class="order-card-name">${o.name}</div><div class="order-card-items">${o.items.split('\\n').slice(0, 2).join('｜')}</div>${noteBadge}</div>`;
   }).join('');
 }
@@ -976,7 +1025,7 @@ function openOrderDetail(orderId) {
   document.getElementById('editItemsSection').style.display = 'none';
   const pickupHtml = o.pickupDate
     ? `<div class="pickup-display">📅 <b>${o.pickupDate}</b> ${o.pickupPeriod || ''}<div style="margin-top:6px;display:flex;gap:6px"><button class="small outline" onclick="reschedule()">改日期</button><button class="small gray" onclick="cancelSchedule()">取消排定</button></div></div>`
-    : `<div class="pickup-display" style="background:#fafafa;color:#888">尚未排定取貨日期</div>`;
+    : `<div class="pickup-display empty">尚未排定取貨日期</div>`;
   document.getElementById('detailPickup').innerHTML = pickupHtml;
   renderStatusControls(o);
   document.getElementById('detailMsg').textContent = '';
