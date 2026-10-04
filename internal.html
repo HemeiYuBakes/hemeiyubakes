@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#E8732A">
-<!-- internal.html v8：介面改為 LIFF 暖色風格與 LINE Seed 字型、客人色塊依取貨方式分色｜v7：狀態管理簡化、移除訊息範本、口味底色、商品列格式｜v6：移除 LIFF 相關欄位與商品圖片、新增「未提供」電話、當日明細改為口味×盒型盒數 -->
+<!-- internal.html v8.1：手機版月曆名字條顯示姓名｜v8：介面改為 LIFF 暖色風格與 LINE Seed 字型、客人色塊依取貨方式分色｜v7：狀態管理簡化、移除訊息範本、口味底色、商品列格式｜v6：移除 LIFF 相關欄位與商品圖片、新增「未提供」電話、當日明細改為口味×盒型盒數 -->
 
 <style>
   @font-face { font-family: 'LINE Seed Sans TW'; src: url('https://cdn.jsdelivr.net/gh/line/LineSeed@main/build/web/LINESeedSansTW_W_Rg.woff2') format('woff2'); font-weight: 400; font-display: swap; }
@@ -198,6 +198,18 @@
   .dot-legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
   .dot-legend i.sw { width: 14px; height: 10px; border-radius: 3px; }
   .dot-legend .sep { width: 1px; background: var(--faint); align-self: stretch; }
+
+  /* 手機：月曆格子變窄，名字條只顯示姓名（隱藏編號）、縮小留白，讓三個字放得下 */
+  @media (max-width: 600px) {
+    body { padding: 12px 8px 28px; }
+    #tab-schedule .card { padding: 14px 8px; }
+    .calendar-grid, .calendar-weekdays { gap: 2px; }
+    .day-cell { padding: 4px 2px; border-radius: 8px; min-height: 92px; }
+    .day-number { padding-left: 3px; }
+    .chip-id { display: none; }
+    .day-order-chip { padding: 3px 1px 3px 3px; border-left-width: 3px; border-radius: 4px; font-size: 11px; letter-spacing: -0.3px; text-overflow: clip; }
+    #tab-schedule h2, #tab-schedule .hint, #tab-schedule .order-list, #tab-schedule .calendar-header, #tab-schedule .card > button { margin-left: 6px; margin-right: 6px; }
+  }
 
   #loginScreen, #mainForm { display: none; }
   .error { color: var(--danger); font-size: 13px; margin-top: 6px; }
@@ -802,7 +814,7 @@ function renderCalendar() {
       const idShort = o.orderId.slice(-3);
       const kind = orderDotKind(o);
       const chipCls = (kind === 'unpaid' ? '' : ' ' + kind) + (o.shipping !== '現場取貨' ? ' is-ship' : '');
-      chips += `<div class="day-order-chip${chipCls}" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}">${idShort} ${o.name}</div>`;
+      chips += `<div class="day-order-chip${chipCls}" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}"><span class="chip-id">${idShort} </span>${o.name}</div>`;
     });
     // 產量 -> 百分比決定淡色背景(不顯示文字數字,避免畫面混亂)
     const load = (scheduleData.dailyLoad && scheduleData.dailyLoad[dateStr]) || {};
