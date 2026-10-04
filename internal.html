@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#D32F2F">
-<!-- internal.html v6：移除 LIFF 相關欄位與商品圖片、新增「未提供」電話、當日明細改為口味×盒型盒數 -->
+<!-- internal.html v7：狀態管理簡化、移除訊息範本、口味底色、商品列格式｜v6：移除 LIFF 相關欄位與商品圖片、新增「未提供」電話、當日明細改為口味×盒型盒數 -->
 
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -96,8 +96,8 @@
   .day-orders { margin-top: 4px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   /* 月曆名字條：左邊色條與當日明細的圓點同一套顏色 */
   .day-order-chip { background: #fff; padding: 3px 5px; border-radius: 3px; font-size: 10px; border-left: 3px solid #e6a417; line-height: 1.3; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-  .day-order-chip.confirmed { border-left-color: #6cbf4b; }
-  .day-order-chip.ship { border-left-color: #3b9ddd; }
+  .day-order-chip.paid { border-left-color: #6cbf4b; }
+  .day-order-chip.done { border-left-color: #9e9e9e; color: #999; }
   .day-order-chip:hover { background: #fff8f8; }
   .order-list { display: flex; flex-direction: column; gap: 8px; }
   .order-card { background: #fafafa; border: 2px solid #eee; border-radius: 8px; padding: 10px 12px; cursor: pointer; transition: all 0.15s; }
@@ -123,11 +123,13 @@
   .status-checkbox input { width: auto; margin: 0; transform: scale(1.2); cursor: pointer; }
   .status-tracking { margin: 8px 0 8px 30px; }
   .status-tracking input { padding: 6px 10px; font-size: 14px; }
-  .msg-tpl-btn { width: 100%; margin-bottom: 6px; text-align: left; padding: 10px 12px; font-size: 13px; }
-  .msg-tpl-with-date { background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 6px; }
-  .msg-tpl-with-date .label { font-size: 12px; color: #666; margin-bottom: 6px; }
-  .msg-tpl-with-date .row-flex { gap: 6px; align-items: center; }
-  .msg-tpl-with-date input { font-size: 13px; padding: 6px 8px; flex: 1; }
+  /* 訂單詳情：商品列 */
+  .item-list { margin: 4px 0 2px; display: flex; flex-direction: column; gap: 5px; }
+  .item-row { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 8px; padding: 6px 8px; line-height: 1.3; }
+  .flavor-pill { flex: 0 0 auto; padding: 2px 9px; border-radius: 10px; font-size: 13px; font-weight: bold; color: #333; }
+  .item-box { flex: 1; min-width: 0; font-size: 14px; color: #333; font-weight: bold; }
+  .item-qty { flex: 0 0 auto; font-size: 16px; font-weight: bold; color: #D32F2F; }
+  .item-amt { flex: 0 0 auto; font-size: 12px; color: #888; min-width: 62px; text-align: right; }
 
   /* ===== 當日明細：左客人、右口味卡片 ===== */
   .day-summary { display: flex; gap: 10px; background: #fafafa; border-radius: 12px; padding: 10px; margin-bottom: 6px; align-items: flex-start; }
@@ -139,7 +141,7 @@
   .day-sum-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
   .flavor-card { background: #e6e8e8; border-radius: 12px; padding: 10px 12px; }
   .flavor-main { display: flex; align-items: center; gap: 12px; }
-  .flavor-name { writing-mode: vertical-rl; text-orientation: upright; font-size: 20px; font-weight: bold; color: #222; letter-spacing: 2px; flex: 0 0 auto; }
+  .flavor-name { display: flex; flex-direction: column; align-items: center; font-size: 20px; line-height: 1.15; font-weight: bold; color: #222; flex: 0 0 auto; }
   .flavor-boxes { font-size: 13px; font-weight: bold; color: #222; line-height: 1.6; min-width: 0; }
   .flavor-boxes .box-row { display: flex; gap: 8px; }
   .flavor-boxes .box-qty { font-size: 15px; }
@@ -289,10 +291,6 @@
       <h3>📋 狀態管理（勾選即儲存）</h3>
       <div id="statusControls"></div>
     </div>
-    <div class="status-section">
-      <h3>💬 複製訊息給客人</h3>
-      <div id="messageTemplateBtns"></div>
-    </div>
     <div id="detailMsg" class="hint" style="margin-top:8px;min-height:18px"></div>
   </div>
 </div>
@@ -303,7 +301,20 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4v_VjIH_DXQl1ExU0n
 // 電話欄的特殊標記（不是真的電話）
 const PHONE_TAGS = ['熟客', '未提供'];
 // 圓點 / 月曆色條顏色
-const DOT_COLORS = { pending: '#e6a417', confirmed: '#6cbf4b', ship: '#3b9ddd' };
+const DOT_COLORS = { unpaid: '#e6a417', paid: '#6cbf4b', done: '#9e9e9e' };
+// 口味底色（用「包含」比對，所以「南瓜籽 / 南瓜子」都會對到）。新增口味在這裡加一行即可
+const FLAVOR_COLORS = [
+  { key: '杏仁', color: '#fde3c4' },  // 淺橘
+  { key: '南瓜', color: '#dcedc8' }   // 淺綠
+];
+const FLAVOR_COLOR_DEFAULT = '#e6e8e8';
+function flavorColor(flavor) {
+  const f = String(flavor || '');
+  for (let i = 0; i < FLAVOR_COLORS.length; i++) {
+    if (f.indexOf(FLAVOR_COLORS[i].key) >= 0) return FLAVOR_COLORS[i].color;
+  }
+  return FLAVOR_COLOR_DEFAULT;
+}
 
 let PASSWORD = '';
 let productsData = [], addonsData = [], promotionsData = [], addonSelections = {};
@@ -694,8 +705,11 @@ function nextMonth() { calendarMonth++; if (calendarMonth > 11) { calendarMonth 
 
 // 訂單狀態 → 顏色分類（圓點與月曆色條共用）
 function orderDotKind(o) {
-  if (o.shipping !== '現場取貨') return 'ship';
-  return o.pickupConfirmed ? 'confirmed' : 'pending';
+  if (o.done) return 'done';
+  return o.paid ? 'paid' : 'unpaid';
+}
+function shipIcon(o) {
+  return o.shipping !== '現場取貨' ? '🚚 ' : '';
 }
 
 function renderCalendar() {
@@ -739,8 +753,8 @@ function renderCalendar() {
     ordersHere.forEach(o => {
       const idShort = o.orderId.slice(-3);
       const kind = orderDotKind(o);
-      const chipCls = kind === 'pending' ? '' : ' ' + kind;
-      chips += `<div class="day-order-chip${chipCls}" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}">${idShort} ${o.name}</div>`;
+      const chipCls = kind === 'unpaid' ? '' : ' ' + kind;
+      chips += `<div class="day-order-chip${chipCls}" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}">${shipIcon(o)}${idShort} ${o.name}</div>`;
     });
     // 產量 -> 百分比決定淡色背景(不顯示文字數字,避免畫面混亂)
     const load = (scheduleData.dailyLoad && scheduleData.dailyLoad[dateStr]) || {};
@@ -827,7 +841,7 @@ function buildDaySummaryHtml(dateStr, orders) {
   // 左：客人
   const leftHtml = orders.map(o => {
     const color = DOT_COLORS[orderDotKind(o)];
-    return `<div class="cust-chip" onclick="closeDayDetail();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}"><span class="cust-dot" style="background:${color}"></span><span class="cust-name">${o.name}</span></div>`;
+    return `<div class="cust-chip" onclick="closeDayDetail();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}"><span class="cust-dot" style="background:${color}"></span><span class="cust-name">${shipIcon(o)}${o.name}</span></div>`;
   }).join('');
 
   // 右：口味卡片
@@ -855,7 +869,7 @@ function buildDaySummaryHtml(dateStr, orders) {
     } else if (cur > 0) {
       capHtml = `<div class="flavor-cap" style="color:#666">${cur} 片</div>`;
     }
-    rightHtml += `<div class="flavor-card"><div class="flavor-main"><div class="flavor-name">${flavor}</div><div class="flavor-boxes">${rows}</div></div>${capHtml}</div>`;
+    rightHtml += `<div class="flavor-card" style="background:${flavorColor(flavor)}"><div class="flavor-main"><div class="flavor-name">${Array.from(String(flavor)).map(c => `<span>${c}</span>`).join('')}</div><div class="flavor-boxes">${rows}</div></div>${capHtml}</div>`;
   });
 
   // 總計片數
@@ -867,7 +881,7 @@ function buildDaySummaryHtml(dateStr, orders) {
     totalHtml = `<div class="day-total-cap" style="color:${capColor(tPercent)}">總計　${totalCur} / ${totalCap} 片</div>`;
   }
 
-  const legend = `<div class="dot-legend"><span><i style="background:${DOT_COLORS.pending}"></i>待確認取貨時間</span><span><i style="background:${DOT_COLORS.confirmed}"></i>已確認</span><span><i style="background:${DOT_COLORS.ship}"></i>宅配</span></div>`;
+  const legend = `<div class="dot-legend"><span><i style="background:${DOT_COLORS.unpaid}"></i>未匯款</span><span><i style="background:${DOT_COLORS.paid}"></i>已匯款</span><span><i style="background:${DOT_COLORS.done}"></i>已完成</span><span>🚚 宅配</span></div>`;
 
   return `<div class="day-summary"><div class="day-sum-left">${leftHtml}</div><div class="day-sum-right">${rightHtml}${totalHtml}</div></div>${legend}`;
 }
@@ -885,7 +899,9 @@ function openDayDetail(dateStr) {
     const html = orders.map(o => {
       const idShort = o.orderId.slice(-3);
       const shipTag = o.shipping === '現場取貨' ? `<span class="order-card-tag pickup">${o.shipping}</span>` : `<span class="order-card-tag ship">${o.shipping}</span>`;
-      const confirmedTag = o.pickupConfirmed ? `<span class="order-card-tag" style="background:#e8f5e9;color:#4caf50">已確認</span>` : '';
+      const confirmedTag = o.done
+        ? `<span class="order-card-tag">已完成</span>`
+        : (o.paid ? `<span class="order-card-tag" style="background:#e8f5e9;color:#4caf50">已匯款</span>` : `<span class="order-card-tag" style="background:#fff3e0;color:#e65100">未匯款</span>`);
       const noteBadge = o.scheduleNote ? `<div style="font-size:11px;color:#D32F2F;background:#fff5f5;padding:4px 8px;border-radius:4px;margin-top:4px">📝 ${o.scheduleNote}</div>` : '';
       return `<div class="order-card" onclick="closeDayDetail();openOrderDetail('${o.orderId}')"><div class="order-card-header"><span class="order-card-id">#${idShort}</span><span style="display:flex;gap:6px;align-items:center">${shipTag}${confirmedTag}</span></div><div class="order-card-name">${o.name}${o.pickupPeriod ? '　' + o.pickupPeriod : ''}</div><div class="order-card-items">${o.items.split('\n').join('｜')}</div>${noteBadge}</div>`;
     }).join('');
@@ -952,30 +968,48 @@ function openOrderDetail(orderId) {
   lines.push(`<b>運送：</b>${o.shipping}`);
   if (o.address) lines.push(`<b>地址：</b>${o.address}`);
   lines.push(`<b>付款方式：</b>${o.payment}`);
-  lines.push(`<b>總額：</b>${o.total} 元`);
-  lines.push(`<b>商品：</b><br>${o.items.split('\\n').join('<br>')}`);
-  if (o.addons) lines.push(`<b>贈品/加購：</b><br>${o.addons.split('\\n').join('<br>')}`);
+  lines.push(`<b>總額：</b>${fmtMoney(o.total)} 元`);
+  lines.push(`<b>商品：</b>${buildItemListHtml(o.items)}`);
+  if (o.addons) lines.push(`<b>贈品/加購：</b><br>${splitItemLines(o.addons).filter(x => x.trim()).join('<br>')}`);
   if (o.note) lines.push(`<b>備註：</b>${o.note}`);
-  document.getElementById('detailInfo').innerHTML = lines.join('<br>');
+  document.getElementById('detailInfo').innerHTML = lines.join('<br>').replace(/<\/div><br>/g, '</div>');
   document.getElementById('editItemsSection').style.display = 'none';
   const pickupHtml = o.pickupDate
     ? `<div class="pickup-display">📅 <b>${o.pickupDate}</b> ${o.pickupPeriod || ''}<div style="margin-top:6px;display:flex;gap:6px"><button class="small outline" onclick="reschedule()">改日期</button><button class="small gray" onclick="cancelSchedule()">取消排定</button></div></div>`
     : `<div class="pickup-display" style="background:#fafafa;color:#888">尚未排定取貨日期</div>`;
   document.getElementById('detailPickup').innerHTML = pickupHtml;
   renderStatusControls(o);
-  renderMessageTemplates(o);
   document.getElementById('detailMsg').textContent = '';
   document.getElementById('orderDetailModal').classList.add('show');
 }
 
+function fmtMoney(n) {
+  const num = Number(n);
+  return isNaN(num) ? n : num.toLocaleString('en-US');
+}
+
+// 商品列：口味色塊｜盒型｜× 數量｜金額。對不到商品資料的行就原樣顯示
+function buildItemListHtml(itemsStr) {
+  const prodMap = {};
+  productsData.forEach(p => { prodMap[p.name] = p; });
+  const rows = splitItemLines(itemsStr).map(line => line.trim()).filter(x => x).map(line => {
+    const m = line.match(/^(.+?)\s+x(\d+)(?:\s*[（(]\s*(\d+)\s*元\s*[)）])?/);
+    if (!m) return `<div class="item-row"><span class="item-box">${line}</span></div>`;
+    const prodName = m[1].trim();
+    const p = prodMap[prodName];
+    const amt = m[3] ? `<span class="item-amt">${fmtMoney(m[3])} 元</span>` : '';
+    if (!p) return `<div class="item-row"><span class="item-box">${prodName}</span><span class="item-qty">× ${m[2]}</span>${amt}</div>`;
+    const flavor = p.flavor || '其他';
+    return `<div class="item-row"><span class="flavor-pill" style="background:${flavorColor(flavor)}">${flavor}</span><span class="item-box">${boxLabel(p)}</span><span class="item-qty">× ${m[2]}</span>${amt}</div>`;
+  });
+  return `<div class="item-list">${rows.join('')}</div>`;
+}
+
+// 自取：已匯款、訂單完成；宅配：已匯款、已出貨、訂單完成
 function renderStatusControls(o) {
   let html = [];
-  if (o.payment === '匯款') html.push(checkboxHtml('paid', '💰 已收匯款', o.paid));
-  if (o.pickupDate) html.push(checkboxHtml('pickupConfirmed', '✅ 客人已確認取貨時間', o.pickupConfirmed));
-  if (o.shipping !== '現場取貨') {
-    html.push(`<div class="status-tracking"><label style="font-size:12px;color:#666;margin-bottom:4px">📦 貨運單號</label><input type="text" id="ts_trackingNum" value="${o.trackingNum || ''}" onchange="saveStatus('trackingNum', this.value)" placeholder="（選填）"></div>`);
-  }
-  html.push(checkboxHtml('shipped', '🚚 已出貨', o.shipped));
+  html.push(checkboxHtml('paid', '💰 已匯款', o.paid));
+  if (o.shipping !== '現場取貨') html.push(checkboxHtml('shipped', '🚚 已出貨', o.shipped));
   html.push(checkboxHtml('done', '🎉 訂單完成', o.done));
   document.getElementById('statusControls').innerHTML = html.join('');
 }
@@ -995,10 +1029,7 @@ async function saveStatus(key, value) {
     const res = await callServer('updateOrderStatus', { password: PASSWORD, orderId: detailOrder.orderId, updates });
     if (res && res.success) {
       msg.className = 'success';
-      // 已收匯款特別提示
-      msg.textContent = (key === 'paid' && value === true)
-        ? '✅ 已儲存｜⚠️ 下方按鈕複製訊息給客人'
-        : '✅ 已儲存';
+      msg.textContent = '✅ 已儲存';
       const refreshed = await callServer('getScheduleData', {});
       if (refreshed && !refreshed.error) {
         scheduleData = refreshed;
@@ -1006,10 +1037,7 @@ async function saveStatus(key, value) {
         renderCalendar();
         renderUnscheduled();
         const updated = findOrder(detailOrder.orderId);
-        if (updated) {
-          detailOrder = updated;
-          renderMessageTemplates(updated);  // 重新渲染按鈕(因為狀態變了)
-        }
+        if (updated) detailOrder = updated;
       }
       setTimeout(() => { if (document.getElementById('detailMsg').textContent.indexOf('✅ 已儲存') === 0) document.getElementById('detailMsg').textContent = ''; }, 3500);
     } else {
@@ -1124,82 +1152,6 @@ async function saveEditItems() {
   } catch (e) {
     msg.className = 'error';
     msg.textContent = '失敗：' + e.message;
-  }
-}
-
-/* ===== 訊息範本 ===== */
-const TEMPLATES = {
-  paidPickup: (o) => `您好 ${o.name}，\n\n已收到您的匯款，謝謝您 ❤️\n訂單編號：${o.orderId}\n\n我們會盡快開始準備，並與您聯絡確認取貨時間 :)\n\n和美小玉家`,
-  paidShipping: (o, date) => `您好 ${o.name}，\n\n已收到您的匯款，謝謝您 ❤️\n訂單編號：${o.orderId}\n\n預計 ${date} 出貨，\n出貨當天會傳貨運單號給您追蹤 :)\n\n和美小玉家`,
-  pickupProposal: (o) => `您好 ${o.name}，\n\n幫您安排的取貨時間：\n📅 ${o.pickupDate} ${o.pickupPeriod || ''}\n\n訂單編號：${o.orderId}\n方便嗎？如需調整請告訴我們～\n\n和美小玉家`,
-  pickupProposalAdjusted: (o) => `您好 ${o.name}，\n\n確認一下調整後的取貨時間：\n📅 ${o.pickupDate} ${o.pickupPeriod || ''}\n\n訂單編號：${o.orderId}\n這個時間 OK 嗎？\n\n和美小玉家`,
-  pickupReminder: (o) => `您好 ${o.name}，\n\n提醒您～明天就要來取貨囉！\n📅 ${o.pickupDate} ${o.pickupPeriod || ''}\n訂單編號：${o.orderId}\n\n我們會準備好等您 :)\n\n和美小玉家`,
-};
-
-function renderMessageTemplates(o) {
-  const box = document.getElementById('messageTemplateBtns');
-  let html = '';
-
-  // 1. 已收匯款 (現場取貨)
-  if (o.payment === '匯款' && o.paid && o.shipping === '現場取貨' && !o.pickupDate) {
-    html += `<button class="outline msg-tpl-btn" onclick="copyByKey('paidPickup')">📋 已收匯款訊息</button>`;
-  }
-
-  // 2. 已收匯款 + 預計出貨 (宅配,需選日期)
-  if (o.payment === '匯款' && o.paid && o.shipping !== '現場取貨' && !o.shipped) {
-    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
-    html += `
-      <div class="msg-tpl-with-date">
-        <div class="label">📋 已收匯款 + 預計出貨（請選日期）</div>
-        <div class="row-flex">
-          <input type="date" id="shippingDateInput" value="${tomorrow}">
-          <button class="small" onclick="copyShippingByDate()">複製</button>
-        </div>
-      </div>
-    `;
-  }
-
-  // 3. 取貨時間提案 (現場取貨,已排定但未確認)
-  if (o.shipping === '現場取貨' && o.pickupDate && !o.pickupConfirmed) {
-    html += `<button class="outline msg-tpl-btn" onclick="copyByKey('pickupProposal')">📋 取貨時間提案（首次）</button>`;
-    html += `<button class="outline msg-tpl-btn" onclick="copyByKey('pickupProposalAdjusted')">📋 取貨時間提案（調整版）</button>`;
-  }
-
-  // 4. 取貨前提醒 (現場取貨,已確認)
-  if (o.shipping === '現場取貨' && o.pickupConfirmed && o.pickupDate) {
-    html += `<button class="outline msg-tpl-btn" onclick="copyByKey('pickupReminder')">📋 取貨前提醒</button>`;
-  }
-
-  if (!html) {
-    html = '<div class="hint" style="padding:6px 0">目前狀態暫無可發送的訊息範本</div>';
-  }
-  box.innerHTML = html;
-}
-
-function copyByKey(key) {
-  if (!detailOrder || !TEMPLATES[key]) return;
-  const text = TEMPLATES[key](detailOrder);
-  copyToClipboard(text);
-}
-
-function copyShippingByDate() {
-  if (!detailOrder) return;
-  const dateInput = document.getElementById('shippingDateInput');
-  if (!dateInput || !dateInput.value) { alert('請選擇預計出貨日期'); return; }
-  const text = TEMPLATES.paidShipping(detailOrder, dateInput.value);
-  copyToClipboard(text);
-}
-
-async function copyToClipboard(text) {
-  const msg = document.getElementById('detailMsg');
-  try {
-    await navigator.clipboard.writeText(text);
-    msg.className = 'success';
-    msg.textContent = '✅ 已複製，請貼到 LINE 給客人';
-    setTimeout(() => { if (msg.textContent === '✅ 已複製，請貼到 LINE 給客人') msg.textContent = ''; }, 3000);
-  } catch (e) {
-    // fallback：跳出視窗讓使用者手動複製
-    prompt('請手動複製訊息（Ctrl+C）：', text);
   }
 }
 
