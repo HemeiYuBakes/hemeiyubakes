@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#E8732A">
-<!-- internal.html v9：月曆可自訂工作日與休假日（預設隱藏六日）｜v8.1：手機版月曆名字條顯示姓名｜v8：介面改為 LIFF 暖色風格與 LINE Seed 字型、客人色塊依取貨方式分色｜v7：狀態管理簡化、移除訊息範本、口味底色、商品列格式｜v6：移除 LIFF 相關欄位與商品圖片、新增「未提供」電話、當日明細改為口味×盒型盒數 -->
+<!-- internal.html v10：排單畫面隱藏訂單編號、宅配郵寄資料個別複製、刪除未排定訂單｜v9：月曆可自訂工作日與休假日（預設隱藏六日）｜v8.1：手機版月曆名字條顯示姓名｜v8：介面改為 LIFF 暖色風格與 LINE Seed 字型、客人色塊依取貨方式分色｜v7：狀態管理簡化、移除訊息範本、口味底色、商品列格式｜v6：移除 LIFF 相關欄位與商品圖片、新增「未提供」電話、當日明細改為口味×盒型盒數 -->
 
 <style>
   @font-face { font-family: 'LINE Seed Sans TW'; src: url('https://cdn.jsdelivr.net/gh/line/LineSeed@main/build/web/LINESeedSansTW_W_Rg.woff2') format('woff2'); font-weight: 400; font-display: swap; }
@@ -154,13 +154,15 @@
   .order-card { background: var(--bg); border: 1.5px solid transparent; border-radius: 14px; padding: 12px 14px; cursor: pointer; transition: all 0.15s; }
   .order-card.selected { border-color: var(--orange); background: #FFF6EE; }
   .order-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 12px; }
-  .order-card-id { color: var(--orange); font-weight: 700; letter-spacing: 0.5px; }
   .order-card-tag { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: var(--surface); color: var(--muted); }
   .order-card-tag.ship { background: var(--chip-ship); color: #2F6CA3; }
   .order-card-tag.pickup { background: var(--chip-pickup); color: #8A6327; }
   .order-card-tag.tag-paid { background: #E1F0DB; color: var(--ok); }
   .order-card-tag.tag-unpaid { background: var(--orange-soft); color: var(--orange); }
-  .order-card-name { font-weight: 700; font-size: 15px; color: var(--text); }
+  .order-card-name { font-weight: 700; font-size: 15px; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .order-card-period { font-weight: 500; font-size: 13px; color: var(--muted); margin-left: 8px; }
+  .order-card-tags { display: flex; gap: 6px; align-items: center; flex: 0 0 auto; }
+  .order-card-header { gap: 8px; }
   .order-card-items { font-size: 12px; color: var(--muted); margin-top: 3px; white-space: pre-line; line-height: 1.5; }
   .note-badge { font-size: 11px; color: var(--orange); background: var(--orange-soft); padding: 5px 9px; border-radius: 8px; margin-top: 6px; }
   .info-btn-sm { width: 22px; height: 22px; line-height: 22px; border-radius: 50%; background: var(--white); color: var(--muted); text-align: center; font-size: 12px; cursor: pointer; display: inline-block; }
@@ -184,6 +186,18 @@
   .pickup-display button.outline { background: var(--white); }
   .pickup-display button.gray { background: var(--white); }
   .pickup-display.empty { background: var(--bg); color: var(--muted); font-size: 13px; }
+  .ship-box { background: var(--chip-ship); border-radius: 14px; padding: 12px 12px 6px; margin: 4px 0 10px; }
+  .ship-box h3 { color: #2F6CA3; margin-bottom: 8px; }
+  .ship-row { display: flex; align-items: center; gap: 10px; background: var(--white); border-radius: 10px; padding: 8px 8px 8px 12px; margin-bottom: 6px; }
+  .ship-label { flex: 0 0 auto; width: 42px; font-size: 12px; font-weight: 700; color: var(--muted); }
+  .ship-val { flex: 1; min-width: 0; font-size: 15px; font-weight: 500; color: var(--text); word-break: break-all; line-height: 1.4; }
+  .ship-val.empty { color: #B9B0A4; font-weight: 400; }
+  .ship-copy { flex: 0 0 auto; background: #2F6CA3; min-width: 72px; }
+  .ship-copy.copied { background: var(--ok); }
+  .ship-copy:disabled { background: var(--surface); color: var(--muted); }
+  .danger-zone { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--faint); }
+  .danger-btn { width: 100%; background: #FBE3DF; color: var(--danger); }
+  .detail-order-id { margin-top: 12px; font-size: 11px; color: #B9B0A4; text-align: center; letter-spacing: 0.5px; }
   .status-section { border-top: 1px solid var(--faint); margin-top: 16px; padding-top: 14px; }
   .status-checkbox { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 6px; cursor: pointer; font-size: 15px; font-weight: 500; letter-spacing: 0; color: var(--text); background: var(--bg); border-radius: 12px; }
   .status-checkbox input { width: 20px; height: 20px; flex: 0 0 auto; margin: 0; padding: 0; cursor: pointer; accent-color: var(--orange); }
@@ -225,7 +239,6 @@
     .calendar-grid, .calendar-weekdays { gap: 2px; }
     .day-cell { padding: 4px 2px; border-radius: 8px; min-height: 92px; }
     .day-number { padding-left: 3px; }
-    .chip-id { display: none; }
     .day-order-chip { padding: 3px 1px 3px 3px; border-left-width: 3px; border-radius: 4px; font-size: 11px; letter-spacing: -0.3px; text-overflow: clip; }
     #tab-schedule h2, #tab-schedule .hint, #tab-schedule .order-list, #tab-schedule .calendar-header, #tab-schedule .workday-bar, #tab-schedule .card > button { margin-left: 6px; margin-right: 6px; }
   }
@@ -366,6 +379,7 @@
   <div class="modal-box" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeOrderDetail()">✕</button>
     <h2 id="detailTitle" style="margin-bottom:8px"></h2>
+    <div id="detailShip"></div>
     <div id="detailInfo" class="detail-section"></div>
     <div style="margin:8px 0"><button class="small outline" onclick="toggleEditItems()">✏️ 編輯商品/數量/備註</button></div>
     <div id="editItemsSection" class="edit-section" style="display:none">
@@ -385,6 +399,8 @@
       <div id="statusControls"></div>
     </div>
     <div id="detailMsg" class="hint" style="margin-top:8px;min-height:18px"></div>
+    <div id="detailDelete"></div>
+    <div id="detailOrderId" class="detail-order-id"></div>
   </div>
 </div>
 
@@ -1006,10 +1022,9 @@ function renderCalendar() {
       if (selectedOrderId && !workdayEditMode) classes.push('target-mode');
       let chips = '';
       c.orders.forEach(o => {
-        const idShort = o.orderId.slice(-3);
         const kind = orderDotKind(o);
         const chipCls = (kind === 'unpaid' ? '' : ' ' + kind) + (o.shipping !== '現場取貨' ? ' is-ship' : '');
-        chips += `<div class="day-order-chip${chipCls}" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}"><span class="chip-id">${idShort} </span>${o.name}</div>`;
+        chips += `<div class="day-order-chip${chipCls}" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')" title="${o.name}｜${o.shipping}">${o.name}</div>`;
       });
       // 產量 -> 百分比決定淡色背景（休假日不上色）
       if (c.work) {
@@ -1051,7 +1066,7 @@ function onDayClick(dateStr, dow) {
     if (!order) return;
     pendingDate = dateStr;
     const offWarn = isWorkday(dateStr, dow) ? '' : '<div class="off-warn">⚠️ 這天設定為休假日，仍可排定</div>';
-    document.getElementById('periodModalInfo').innerHTML = `將「${order.name}」（${order.orderId.slice(-3)}）<br>排定到 <b>${dateStr}</b>${offWarn}`;
+    document.getElementById('periodModalInfo').innerHTML = `將「${order.name}」<br>排定到 <b>${dateStr}</b>${offWarn}`;
     document.getElementById('periodModalMsg').textContent = '';
     document.getElementById('periodModal').classList.add('show');
     return;
@@ -1156,13 +1171,12 @@ function openDayDetail(dateStr) {
   } else {
     summaryBox.innerHTML = buildDaySummaryHtml(dateStr, orders);
     const html = orders.map(o => {
-      const idShort = o.orderId.slice(-3);
       const shipTag = o.shipping === '現場取貨' ? `<span class="order-card-tag pickup">${o.shipping}</span>` : `<span class="order-card-tag ship">${o.shipping}</span>`;
       const confirmedTag = o.done
         ? `<span class="order-card-tag">已完成</span>`
         : (o.paid ? `<span class="order-card-tag tag-paid">已匯款</span>` : `<span class="order-card-tag tag-unpaid">未匯款</span>`);
       const noteBadge = o.scheduleNote ? `<div class="note-badge">📝 ${o.scheduleNote}</div>` : '';
-      return `<div class="order-card" onclick="closeDayDetail();openOrderDetail('${o.orderId}')"><div class="order-card-header"><span class="order-card-id">#${idShort}</span><span style="display:flex;gap:6px;align-items:center">${shipTag}${confirmedTag}</span></div><div class="order-card-name">${o.name}${o.pickupPeriod ? '　' + o.pickupPeriod : ''}</div><div class="order-card-items">${o.items.split('\n').join('｜')}</div>${noteBadge}</div>`;
+      return `<div class="order-card" onclick="closeDayDetail();openOrderDetail('${o.orderId}')"><div class="order-card-header"><span class="order-card-name">${o.name}${o.pickupPeriod ? '<span class="order-card-period">' + o.pickupPeriod + '</span>' : ''}</span><span class="order-card-tags">${shipTag}${confirmedTag}</span></div><div class="order-card-items">${o.items.split('\n').join('｜')}</div>${noteBadge}</div>`;
     }).join('');
     document.getElementById('dayDetailList').innerHTML = html;
   }
@@ -1183,11 +1197,10 @@ function renderUnscheduled() {
   const box = document.getElementById('unscheduledList');
   if (list.length === 0) { box.innerHTML = '<div class="hint">目前沒有待排定的訂單 ✨</div>'; return; }
   box.innerHTML = list.map(o => {
-    const idShort = o.orderId.slice(-3);
     const shipTag = o.shipping === '現場取貨' ? `<span class="order-card-tag pickup">${o.shipping}</span>` : `<span class="order-card-tag ship">${o.shipping}</span>`;
     const sel = (selectedOrderId === o.orderId) ? ' selected' : '';
     const noteBadge = o.scheduleNote ? `<div class="note-badge">📝 ${o.scheduleNote}</div>` : '';
-    return `<div class="order-card${sel}" onclick="selectOrder('${o.orderId}')"><div class="order-card-header"><span class="order-card-id">#${idShort}</span><span style="display:flex;gap:6px;align-items:center">${shipTag}<span class="info-btn-sm" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')">ⓘ</span></span></div><div class="order-card-name">${o.name}</div><div class="order-card-items">${o.items.split('\\n').slice(0, 2).join('｜')}</div>${noteBadge}</div>`;
+    return `<div class="order-card${sel}" onclick="selectOrder('${o.orderId}')"><div class="order-card-header"><span class="order-card-name">${o.name}</span><span class="order-card-tags">${shipTag}<span class="info-btn-sm" onclick="event.stopPropagation();openOrderDetail('${o.orderId}')">ⓘ</span></span></div><div class="order-card-items">${o.items.split('\\n').slice(0, 2).join('｜')}</div>${noteBadge}</div>`;
   }).join('');
 }
 function selectOrder(orderId) {
@@ -1220,12 +1233,13 @@ function openOrderDetail(orderId) {
   const o = findOrder(orderId);
   if (!o) return;
   detailOrder = o;
-  document.getElementById('detailTitle').innerText = `#${o.orderId.slice(-3)}｜${o.name}`;
+  const isShip = o.shipping !== '現場取貨';
+  document.getElementById('detailTitle').innerText = o.name;
+  document.getElementById('detailShip').innerHTML = isShip ? buildShipCopyHtml(o) : '';
   const lines = [];
-  lines.push(`<b>訂單編號：</b>${o.orderId}`);
-  lines.push(`<b>電話：</b>${o.tel}`);
+  if (!isShip) lines.push(`<b>電話：</b>${o.tel || '—'}`);
   lines.push(`<b>運送：</b>${o.shipping}`);
-  if (o.address) lines.push(`<b>地址：</b>${o.address}`);
+  if (!isShip && o.address) lines.push(`<b>地址：</b>${o.address}`);
   lines.push(`<b>付款方式：</b>${o.payment}`);
   lines.push(`<b>總額：</b>${fmtMoney(o.total)} 元`);
   lines.push(`<b>商品：</b>${buildItemListHtml(o.items)}`);
@@ -1238,8 +1252,77 @@ function openOrderDetail(orderId) {
     : `<div class="pickup-display empty">尚未排定取貨日期</div>`;
   document.getElementById('detailPickup').innerHTML = pickupHtml;
   renderStatusControls(o);
+  document.getElementById('detailDelete').innerHTML = o.pickupDate
+    ? ''
+    : `<div class="danger-zone"><button class="danger-btn" id="deleteOrderBtn" onclick="deleteCurrentOrder()">🗑 刪除這筆訂單</button><div class="hint">只有尚未排定日期的訂單可以刪除，刪除的訂單會移到「已刪除訂單」工作表。</div></div>`;
+  document.getElementById('detailOrderId').innerText = '訂單編號 ' + o.orderId;
   document.getElementById('detailMsg').textContent = '';
   document.getElementById('orderDetailModal').classList.add('show');
+}
+
+/* ===== 宅配：姓名、電話、地址個別複製（Key 郵局系統用） ===== */
+let shipCopyValues = [];
+function buildShipCopyHtml(o) {
+  const tel = String(o.tel || '').trim();
+  const hasTel = tel && PHONE_TAGS.indexOf(tel) < 0;
+  shipCopyValues = [
+    String(o.name || '').trim(),
+    hasTel ? tel.replace(/[\s\-()（）]/g, '') : '',  // 電話複製時去掉空白與連字號
+    String(o.address || '').trim()
+  ];
+  const shows = [shipCopyValues[0], hasTel ? tel : (tel || ''), shipCopyValues[2]];
+  const labels = ['收件人', '電話', '地址'];
+  const rows = labels.map((label, i) => {
+    const ok = !!shipCopyValues[i];
+    const shown = shows[i] || '未填寫';
+    return `<div class="ship-row"><span class="ship-label">${label}</span><span class="ship-val${ok ? '' : ' empty'}">${shown}</span><button class="small ship-copy" ${ok ? '' : 'disabled'} onclick="copyShipField(${i}, this)">複製</button></div>`;
+  }).join('');
+  return `<div class="ship-box"><h3>📦 郵寄資料</h3>${rows}</div>`;
+}
+async function copyShipField(i, btn) {
+  const text = shipCopyValues[i];
+  if (!text) return;
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {
+    // 舊瀏覽器的備用做法
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { ok = document.execCommand('copy'); } catch (e2) { ok = false; }
+    document.body.removeChild(ta);
+  }
+  if (!ok) { prompt('請手動複製：', text); return; }
+  document.querySelectorAll('.ship-copy.copied').forEach(b => { b.classList.remove('copied'); b.innerText = '複製'; });
+  btn.classList.add('copied');
+  btn.innerText = '已複製 ✓';
+}
+
+/* ===== 刪除未排定訂單 ===== */
+async function deleteCurrentOrder() {
+  const o = detailOrder;
+  if (!o || o.pickupDate) return;
+  const items = splitItemLines(o.items).map(x => x.trim()).filter(x => x).join('\n');
+  if (!confirm(`確定要刪除這筆訂單嗎？\n\n${o.name}\n${items}\n總額 ${fmtMoney(o.total)} 元\n\n刪除後會移到「已刪除訂單」工作表。`)) return;
+  const btn = document.getElementById('deleteOrderBtn');
+  const msg = document.getElementById('detailMsg');
+  btn.disabled = true;
+  msg.className = 'hint'; msg.textContent = '刪除中...';
+  try {
+    const res = await callServer('deleteOrder', { password: PASSWORD, orderId: o.orderId });
+    if (res && res.success) {
+      closeOrderDetail();
+      if (selectedOrderId === o.orderId) selectedOrderId = null;
+      await loadSchedule();
+    } else {
+      msg.className = 'error';
+      msg.textContent = '刪除失敗：' + ((res && res.error) || '請確認 Code.gs 已加入刪除功能並重新部署');
+      btn.disabled = false;
+    }
+  } catch (e) {
+    msg.className = 'error';
+    msg.textContent = '刪除失敗：' + e.message;
+    btn.disabled = false;
+  }
 }
 
 function fmtMoney(n) {
